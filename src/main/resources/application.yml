@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: Vocabulary API
+  datasource:
+    url: jdbc:postgresql://localhost:25432/vocabulary_api
+    username: enrico
+    password: enrico
+

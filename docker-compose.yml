@@ -1,1 +1,27 @@
-version: '3.8'
+services:
+  yrs-db:
+    image: 'postgres:15'
+    volumes:
+      - vocabulary-db:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_DB=vocabulary_api'
+      - 'POSTGRES_PASSWORD=enrico'
+      - 'POSTGRES_USER=enrico'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U your_rents_api" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+        - 25432:5432
+    networks:
+      - vocabulary-network
+
+networks:
+  vocabulary-network:
+    driver: bridge
+
+volumes:
+  vocabulary-db:
+    driver: local
