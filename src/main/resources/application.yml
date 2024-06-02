@@ -6,3 +6,7 @@ spring:
     username: enrico
     password: enrico
 
+# Database Flyway migrations
+  flyway:
+    locations: classpath:/db/migration
+    schemas: vocabulary

@@ -8,7 +8,7 @@ services:
       - 'POSTGRES_PASSWORD=enrico'
       - 'POSTGRES_USER=enrico'
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U your_rents_api" ]
+      test: [ "CMD-SHELL", "pg_isready -U vocabulary_api" ]
       interval: 10s
       timeout: 5s
       retries: 5
