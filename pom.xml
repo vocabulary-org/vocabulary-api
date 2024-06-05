@@ -61,12 +61,13 @@
     <spring-boot.version>3.2.1</spring-boot.version>
     <springdoc-openapi-ui.version>2.3.0</springdoc-openapi-ui.version>
     <testcontainers-jooq-codegen-maven-plugin.version>0.0.3</testcontainers-jooq-codegen-maven-plugin.version>
+    <yourrents-services.version>0.0.4</yourrents-services.version>
     <plugins.testcontainers.version>1.19.3</plugins.testcontainers.version>
     <plugins.postgresql.version>42.7.1</plugins.postgresql.version>
 
 	</properties>
 	<dependencies>
-
+		<!-- spring dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -80,11 +81,6 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
@@ -97,11 +93,6 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
@@ -112,6 +103,34 @@
 			<version>${springdoc-openapi-ui.version}</version>
 			<optional>true</optional>
 		</dependency>
+
+		<!-- other dependencies -->
+		<dependency>
+			<groupId>com.your-rents.services</groupId>
+			<artifactId>your-rents-services-common-searchable</artifactId>
+			<version>${yourrents-services.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.your-rents.services</groupId>
+			<artifactId>your-rents-services-common-util</artifactId>
+			<version>${yourrents-services.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- test dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -228,10 +247,10 @@
               <flyway>
                 <createSchemas>true</createSchemas>
                 <schemas>
-									vocabulary_api
+									vocabulary
                 </schemas>
                 <locations>
-                  filesystem:${project.basedir}/src/main/resources/vocabulary-api/db/migration
+                  filesystem:${project.basedir}/src/main/resources/db/migration
                 </locations>
               </flyway>
               <jooq>
