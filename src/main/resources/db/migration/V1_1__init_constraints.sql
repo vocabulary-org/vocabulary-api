@@ -20,4 +20,4 @@
 
 
 ALTER TABLE ONLY vocabulary.word
-    ADD CONSTRAINT property_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT vocabulary_pkey PRIMARY KEY (id);

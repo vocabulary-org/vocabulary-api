@@ -21,9 +21,14 @@ package org.enricogiurin.vocabulary.api.repository;
  */
 
 
+import static org.enricogiurin.vocabulary.jooq.tables.Word.WORD;
+
 import com.yourrents.services.common.util.jooq.JooqUtils;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
+import org.jooq.Record3;
+import org.jooq.SelectJoinStep;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +39,16 @@ public class WordRepository {
 
   private final DSLContext dsl;
   private final JooqUtils jooqUtils;
+
+  private SelectJoinStep<Record3<UUID, String, String>> getSelect() {
+    return dsl.select(
+            WORD.EXTERNAL_ID.as("uuid"),
+            WORD.SENTENCE.as("sentence"),
+            WORD.TRANSLATION.as("translation"))
+        .from(WORD);
+
+
+  }
 
 
 }
