@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.repository;
+package org.enricogiurin.vocabulary.api.util;
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package org.enricogiurin.vocabulary.api.repository;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,6 @@ package org.enricogiurin.vocabulary.api.repository;
  * limitations under the License.
  * #L%
  */
-
 
 import static org.enricogiurin.vocabulary.api.mapper.WordMapper.SENTENCE_ALIAS;
 import static org.enricogiurin.vocabulary.api.mapper.WordMapper.TRANSLATION_ALIAS;
@@ -30,10 +29,9 @@ import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.jooq.JooqUtils;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.enricogiurin.vocabulary.api.mapper.WordMapper;
+import org.enricogiurin.vocabulary.api.mapper.AMapper;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -43,24 +41,16 @@ import org.jooq.SelectJoinStep;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
-@Repository
-@Transactional(readOnly = true)
+@Component
 @RequiredArgsConstructor
-public class WordRepository {
-
-  private final DSLContext dsl;
+public class FindPageable<R extends Record> {
   private final JooqUtils jooqUtils;
-  private final WordMapper wordMapper;
+  private final AMapper<Word> wordMapper;
+  private final DSLContext dsl;
 
-  public Optional<Word> findByExternalId(UUID externalId) {
-    return getSelect()
-        .where(WORD.EXTERNAL_ID.eq(externalId))
-        .fetchOptional()
-        .map(wordMapper::map);
-  }
+  //TODO - work in progress trying to have a "generic" component
 
   public Page<Word> find(Searchable filter, Pageable pageable) {
     Select<?> result = jooqUtils.paginate(
@@ -76,14 +66,6 @@ public class WordRepository {
     return new PageImpl<>(words, pageable, totalRows);
   }
 
-  private SelectJoinStep<Record3<UUID, String, String>> getSelect() {
-    return dsl.select(
-            WORD.EXTERNAL_ID.as(UUID_ALIAS),
-            WORD.SENTENCE.as(SENTENCE_ALIAS),
-            WORD.TRANSLATION.as(TRANSLATION_ALIAS))
-        .from(WORD);
-  }
-
   private Field<?> getSupportedField(String field) {
     return switch (field) {
       case UUID_ALIAS -> WORD.EXTERNAL_ID;
@@ -91,6 +73,14 @@ public class WordRepository {
       default -> throw new IllegalArgumentException(
           "Unexpected value for filter/sort field: " + field);
     };
+  }
+
+  private SelectJoinStep<Record3<UUID, String, String>> getSelect() {
+    return dsl.select(
+            WORD.EXTERNAL_ID.as(UUID_ALIAS),
+            WORD.SENTENCE.as(SENTENCE_ALIAS),
+            WORD.TRANSLATION.as(TRANSLATION_ALIAS))
+        .from(WORD);
   }
 
 }
