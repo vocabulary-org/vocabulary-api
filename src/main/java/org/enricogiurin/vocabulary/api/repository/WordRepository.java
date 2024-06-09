@@ -35,6 +35,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.enricogiurin.vocabulary.api.mapper.WordMapper;
 import org.enricogiurin.vocabulary.api.model.Word;
+import org.enricogiurin.vocabulary.jooq.tables.records.WordRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record3;
@@ -62,6 +63,13 @@ public class WordRepository {
         .map(wordMapper::map);
   }
 
+  public Optional<Word> findById(Integer id) {
+    return getSelect()
+        .where(WORD.ID.eq(id))
+        .fetchOptional()
+        .map(wordMapper::map);
+  }
+
   public Page<Word> find(Searchable filter, Pageable pageable) {
     Select<?> result = jooqUtils.paginate(
         dsl,
@@ -74,6 +82,20 @@ public class WordRepository {
     int totalRows = Objects.requireNonNullElse(
         result.fetchAny("total_rows", Integer.class), 0);
     return new PageImpl<>(words, pageable, totalRows);
+  }
+
+  /**
+   * Create a new Word.
+   *
+   * @return the new created Word
+   */
+  @Transactional(readOnly = false)
+  public Word create(Word word) {
+    WordRecord wordRecord = dsl.newRecord(WORD);
+    wordRecord.setTranslation(word.translation());
+    wordRecord.setSentence(word.sentence());
+    wordRecord.insert();
+    return findById(wordRecord.getId()).orElseThrow();
   }
 
   private SelectJoinStep<Record3<UUID, String, String>> getSelect() {
