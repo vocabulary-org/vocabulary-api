@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.iterableWithSize;
 import static org.hamcrest.Matchers.notNullValue;
 
+import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.model.Word;
@@ -34,6 +35,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -42,23 +46,45 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class WordRepositoryTest {
 
+  static final UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+  static final int HELLO_ID = 1000000;
+
   @Autowired
   WordRepository wordRepository;
 
   @Test
   void findByExternalId() {
     Word word = wordRepository.findByExternalId(
-        UUID.fromString("00000000-0000-0000-0000-000000000001")).orElseThrow();
+        HELLO_UUID).orElseThrow();
     assertThat(word, notNullValue());
     assertThat(word.sentence(), equalTo("Hello"));
     assertThat(word.translation(), equalTo("Salve, Ciao"));
   }
 
   @Test
+  void findById() {
+    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    assertThat(word, notNullValue());
+    assertThat(word.uuid(), equalTo(HELLO_UUID));
+  }
+
+  @Test
   void findAll() {
     Page<Word> result = wordRepository.find(FilterCriteria.of(),
         PageRequest.ofSize(Integer.MAX_VALUE));
-    assertThat(result, iterableWithSize(3));
+    assertThat(result, iterableWithSize(4));
+  }
+
+  @Test
+  void findByNameContaining() {
+    Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("sentence")));
+    FilterCriteria filter = FilterCriteria.of(
+        FilterCondition.of("sentence", "containsIgnoreCase", "cat"));
+    Page<Word> page = wordRepository.find(filter, pageable);
+    assertThat(page, iterableWithSize(2));
+    Word word = page.getContent().getFirst();
+    assertThat(word, notNullValue());
+    assertThat(word.sentence(), equalTo("cat"));
   }
 
 

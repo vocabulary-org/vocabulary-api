@@ -86,7 +86,6 @@ public class WordRepository {
 
   /**
    * Create a new Word.
-   *
    * @return the new created Word
    */
   @Transactional(readOnly = false)
