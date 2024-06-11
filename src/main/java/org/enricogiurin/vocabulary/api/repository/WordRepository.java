@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.mapper.WordMapper;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.jooq.tables.records.WordRecord;
@@ -88,16 +89,24 @@ public class WordRepository {
   /**
    * Create a new Word.
    * @return the new created Word
+   * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
   public Word create(Word word) {
     WordRecord wordRecord = dsl.newRecord(WORD);
-    wordRecord.setTranslation(word.translation());
     wordRecord.setSentence(word.sentence());
+    wordRecord.setTranslation(word.translation());
     wordRecord.insert();
-    return findById(wordRecord.getId()).orElseThrow();
+    return findById(wordRecord.getId()).orElseThrow(
+        () -> new DataExecutionException("failed to create word[sentence]: " + word.sentence()));
   }
 
+  /**
+   * Delete a word
+   *
+   * @return true if the word has been deleted, false otherwise
+   * @throws DataNotFoundException if the city does not exist
+   */
   @Transactional(readOnly = false)
   public boolean delete(UUID uuid) {
     Integer propertyId = dsl.select(WORD.ID)
@@ -108,6 +117,36 @@ public class WordRepository {
     return dsl.deleteFrom(WORD)
         .where(WORD.ID.eq(propertyId))
         .execute() > 0;
+  }
+
+  /**
+   * Update a word.
+   * <p>
+   * You can update the sentence, the translation. You can't update the word uuid.
+   * <p>
+   * Only not null fields are used to update the word.
+   *
+   * @param uuid the uuid of the word to update
+   * @param word the data of word to update.
+   * @return the updated word
+   * @throws DataNotFoundException  if the word does not exist
+   * @throws DataExecutionException if something unexpected happens
+   */
+  @Transactional(readOnly = false)
+  public Word update(UUID uuid, Word word) {
+    WordRecord wordRecord = dsl.selectFrom(WORD)
+        .where(WORD.EXTERNAL_ID.eq(uuid))
+        .fetchOptional()
+        .orElseThrow(() -> new DataNotFoundException("Word not found: " + uuid));
+    if (word.sentence() != null) {
+      wordRecord.setSentence(word.sentence());
+    }
+    if (word.translation() != null) {
+      wordRecord.setTranslation(word.translation());
+    }
+    wordRecord.update();
+    return findById(wordRecord.getId()).orElseThrow(
+        () -> new DataExecutionException("failed to update word: " + uuid));
   }
 
   private SelectJoinStep<Record3<UUID, String, String>> getSelect() {

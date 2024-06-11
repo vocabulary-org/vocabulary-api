@@ -68,7 +68,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   }
 
   /*
-  javadoc: public static UUID randomUUID()
+   javadoc: public static UUID randomUUID()
    Static factory to retrieve a type 4 (pseudo randomly generated) UUID.
    The UUID is generated using a cryptographically strong pseudo random number generator.
   */
@@ -77,6 +77,26 @@ class WordRepositoryCreateUpdateDeleteTest {
     UUID randomUUID = UUID.randomUUID();
     DataNotFoundException ex = assertThrows(DataNotFoundException.class,
         () -> wordRepository.delete(randomUUID));
+    assertThat(ex.getMessage(), equalTo("Word not found: " + randomUUID));
+  }
+
+  @Test
+  void updateAnExistingWord() {
+    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    Word updateWord = new Word(null, "new sentence", null);
+    Word result = wordRepository.update(word.uuid(), updateWord);
+    assertThat(result, notNullValue());
+    assertThat(result.uuid(), notNullValue());
+    assertThat(result.sentence(), equalTo("new sentence"));
+    assertThat(result.translation(), equalTo(word.translation()));
+  }
+
+  @Test
+  void updateANotExistingWord() {
+    UUID randomUUID = UUID.randomUUID();
+    Word updateWord = new Word(null, "new sentence", "new translation");
+    DataNotFoundException ex = assertThrows(DataNotFoundException.class,
+        () -> wordRepository.update(randomUUID, updateWord));
     assertThat(ex.getMessage(), equalTo("Word not found: " + randomUUID));
   }
 }
