@@ -27,6 +27,7 @@ import static org.enricogiurin.vocabulary.api.mapper.WordMapper.UUID_ALIAS;
 import static org.enricogiurin.vocabulary.jooq.tables.Word.WORD;
 
 import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.common.util.jooq.JooqUtils;
 import java.util.List;
 import java.util.Objects;
@@ -95,6 +96,18 @@ public class WordRepository {
     wordRecord.setSentence(word.sentence());
     wordRecord.insert();
     return findById(wordRecord.getId()).orElseThrow();
+  }
+
+  @Transactional(readOnly = false)
+  public boolean delete(UUID uuid) {
+    Integer propertyId = dsl.select(WORD.ID)
+        .from(WORD)
+        .where(WORD.EXTERNAL_ID.eq(uuid))
+        .fetchOptional(WORD.ID).orElseThrow(
+            () -> new DataNotFoundException("Word not found: " + uuid));
+    return dsl.deleteFrom(WORD)
+        .where(WORD.ID.eq(propertyId))
+        .execute() > 0;
   }
 
   private SelectJoinStep<Record3<UUID, String, String>> getSelect() {

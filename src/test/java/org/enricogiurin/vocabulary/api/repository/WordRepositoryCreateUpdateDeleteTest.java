@@ -24,7 +24,11 @@ package org.enricogiurin.vocabulary.api.repository;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThrows;
 
+import com.yourrents.services.common.util.exception.DataNotFoundException;
+import java.util.Optional;
+import java.util.UUID;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +42,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class WordRepositoryCreateUpdateDeleteTest {
 
+  static final int HELLO_ID = 1000000;
+
+
   @Autowired
   WordRepository wordRepository;
 
@@ -49,5 +56,27 @@ class WordRepositoryCreateUpdateDeleteTest {
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("dog"));
     assertThat(result.translation(), equalTo("cane"));
+  }
+
+  @Test
+  void deleteAnExistingWord() {
+    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    boolean delete = wordRepository.delete(word.uuid());
+    assertThat(delete, equalTo(true));
+    Optional<Word> wordOptional = wordRepository.findById(HELLO_ID);
+    assertThat(wordOptional.isEmpty(), equalTo(true));
+  }
+
+  /*
+  javadoc: public static UUID randomUUID()
+   Static factory to retrieve a type 4 (pseudo randomly generated) UUID.
+   The UUID is generated using a cryptographically strong pseudo random number generator.
+  */
+  @Test
+  void deleteANotExistingWord() {
+    UUID randomUUID = UUID.randomUUID();
+    DataNotFoundException ex = assertThrows(DataNotFoundException.class,
+        () -> wordRepository.delete(randomUUID));
+    assertThat(ex.getMessage(), equalTo("Word not found: " + randomUUID));
   }
 }
