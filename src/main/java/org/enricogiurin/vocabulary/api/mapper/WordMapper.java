@@ -30,15 +30,15 @@ import org.springframework.stereotype.Component;
 public class WordMapper implements AMapper<Word>{
   public static final String UUID_ALIAS = "uuid";
   public static final String SENTENCE_ALIAS = "sentence";
-  public static final String TRANSLATION_ALIAS = "translation";
+  public static final String LANGUAGE_ALIAS = "language";
+
 
   @Override
   public Word map(Record record) {
 
     return new Word(
         record.get(UUID_ALIAS, UUID.class),
-        record.get(SENTENCE_ALIAS, String.class),
-        record.get(TRANSLATION_ALIAS, String.class)
+        record.get(SENTENCE_ALIAS, String.class)
         );
   }
 }

@@ -22,7 +22,6 @@ package org.enricogiurin.vocabulary.api.repository;
 
 
 import static org.enricogiurin.vocabulary.api.mapper.WordMapper.SENTENCE_ALIAS;
-import static org.enricogiurin.vocabulary.api.mapper.WordMapper.TRANSLATION_ALIAS;
 import static org.enricogiurin.vocabulary.api.mapper.WordMapper.UUID_ALIAS;
 import static org.enricogiurin.vocabulary.jooq.tables.Word.WORD;
 
@@ -40,7 +39,7 @@ import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.jooq.tables.records.WordRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record3;
+import org.jooq.Record2;
 import org.jooq.Select;
 import org.jooq.SelectJoinStep;
 import org.springframework.data.domain.Page;
@@ -54,9 +53,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WordRepository {
 
+  //TODO - fix this, we just use language by default
+  static Integer DEFAULT_LANGUAGE_ID = 1;
+
+
   private final DSLContext dsl;
   private final JooqUtils jooqUtils;
   private final WordMapper wordMapper;
+  private final LanguageRepository languageRepository;
 
   public Optional<Word> findByExternalId(UUID externalId) {
     return getSelect()
@@ -95,7 +99,8 @@ public class WordRepository {
   public Word create(Word word) {
     WordRecord wordRecord = dsl.newRecord(WORD);
     wordRecord.setSentence(word.sentence());
-    wordRecord.setTranslation(word.translation());
+    //TODO  - to fix this
+    wordRecord.setLanguageId(DEFAULT_LANGUAGE_ID);
     wordRecord.insert();
     return findById(wordRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to create word[sentence]: " + word.sentence()));
@@ -141,19 +146,16 @@ public class WordRepository {
     if (word.sentence() != null) {
       wordRecord.setSentence(word.sentence());
     }
-    if (word.translation() != null) {
-      wordRecord.setTranslation(word.translation());
-    }
     wordRecord.update();
     return findById(wordRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to update word: " + uuid));
   }
 
-  private SelectJoinStep<Record3<UUID, String, String>> getSelect() {
+  private SelectJoinStep<Record2<UUID, String>> getSelect() {
     return dsl.select(
             WORD.EXTERNAL_ID.as(UUID_ALIAS),
-            WORD.SENTENCE.as(SENTENCE_ALIAS),
-            WORD.TRANSLATION.as(TRANSLATION_ALIAS))
+            WORD.SENTENCE.as(SENTENCE_ALIAS))
+        //WORD.TRANSLATION.as(TRANSLATION_ALIAS))
         .from(WORD);
   }
 

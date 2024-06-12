@@ -19,9 +19,28 @@
 ---
 
 
---test data for word
-INSERT INTO vocabulary.word (id, sentence, language_id, external_id)
-VALUES (1000000, 'Hello', 1, '00000000-0000-0000-0000-000000000001'),
-       (1000001, 'my house', 1, '00000000-0000-0000-0000-000000000002'),
-       (1000002, 'cat', 1, '00000000-0000-0000-0000-000000000003'),
-       (1000003, 'tomcat', 1, '00000000-0000-0000-0000-000000000004');
+COPY vocabulary.language (id, code, name, native_name) FROM stdin;
+1	en	English	English
+2	zh	Chinese	中文
+3	hi	Hindi	हिन्दी
+4	es	Spanish	Español
+5	fr	French	Français
+6	ar	Arabic	العربية
+7	bn	Bengali	বাংলা
+8	ru	Russian	Русский
+9	pt	Portuguese	Português
+10	ur	Urdu	اردو
+11	de	German	Deutsch
+12	ja	Japanese	日本語
+13	sw	Swahili	Kiswahili
+14	mr	Marathi	मराठी
+15	te	Telugu	తెలుగు
+16	tr	Turkish	Türkçe
+17	ta	Tamil	தமிழ்
+18	vi	Vietnamese	Tiếng Việt
+19	ko	Korean	한국어
+20	it	Italian	Italiano
+\.
+
+
+

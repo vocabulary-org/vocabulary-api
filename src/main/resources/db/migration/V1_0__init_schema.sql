@@ -31,7 +31,8 @@ CREATE TABLE vocabulary.word (
 CREATE TABLE vocabulary.language (
    id SERIAL,
    name VARCHAR(100) NOT NULL,
-   code VARCHAR(10) NOT NULL UNIQUE,-- e.g., 'en' for English, 'es' for Spanish,
+   code VARCHAR(10) NOT NULL UNIQUE,
+   native_name VARCHAR(100) NOT NULL,
    external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 

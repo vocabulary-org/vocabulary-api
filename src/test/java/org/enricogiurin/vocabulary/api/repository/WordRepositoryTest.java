@@ -58,7 +58,6 @@ class WordRepositoryTest {
         HELLO_UUID).orElseThrow();
     assertThat(word, notNullValue());
     assertThat(word.sentence(), equalTo("Hello"));
-    assertThat(word.translation(), equalTo("Salve, Ciao"));
   }
 
   @Test
