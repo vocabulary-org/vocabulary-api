@@ -22,6 +22,29 @@
 CREATE TABLE vocabulary.word (
     id SERIAL,
     sentence character varying(256) NOT NULL,
-    translation character varying(256),
+    language_id integer NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
+
+CREATE TABLE vocabulary.language (
+   id SERIAL,
+   name VARCHAR(100) NOT NULL,
+   code VARCHAR(10) NOT NULL UNIQUE,-- e.g., 'en' for English, 'es' for Spanish,
+   external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);
+
+CREATE TABLE translation (
+  id SERIAL,
+  translation_content TEXT NOT NULL,
+  language_id integer NOT NULL,
+  word_id integer NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);
+
+
+
+
