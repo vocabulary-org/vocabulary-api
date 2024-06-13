@@ -21,7 +21,7 @@ package org.enricogiurin.vocabulary.api.model;
  */
 
 import java.util.UUID;
-
-public record Word(UUID uuid, String sentence) {
+//TODO - replace languageUuid with Language
+public record Word(UUID uuid, String sentence, UUID languageUuid) {
 
 }

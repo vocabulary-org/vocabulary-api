@@ -29,6 +29,7 @@ import static org.junit.Assert.assertThrows;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import java.util.Optional;
 import java.util.UUID;
+import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,14 +44,19 @@ import org.springframework.transaction.annotation.Transactional;
 class WordRepositoryCreateUpdateDeleteTest {
 
   static final int HELLO_ID = 1000000;
+  static final int LANGUAGE_ENGLISH_ID = 1;
 
 
   @Autowired
   WordRepository wordRepository;
 
+  @Autowired
+  LanguageRepository languageRepository;
+
   @Test
   void create() {
-    Word newWord = new Word(null, "dog");
+    Language en = languageRepository.findById(LANGUAGE_ENGLISH_ID).orElseThrow();
+    Word newWord = new Word(null, "dog", en.uuid());
     Word result = wordRepository.create(newWord);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
@@ -82,7 +88,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   @Test
   void updateAnExistingWord() {
     Word word = wordRepository.findById(HELLO_ID).orElseThrow();
-    Word updateWord = new Word(null, "new sentence");
+    Word updateWord = new Word(null, "new sentence", null);
     Word result = wordRepository.update(word.uuid(), updateWord);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
@@ -92,7 +98,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   @Test
   void updateANotExistingWord() {
     UUID randomUUID = UUID.randomUUID();
-    Word updateWord = new Word(null, "new sentence");
+    Word updateWord = new Word(null, "new sentence", null);
     DataNotFoundException ex = assertThrows(DataNotFoundException.class,
         () -> wordRepository.update(randomUUID, updateWord));
     assertThat(ex.getMessage(), equalTo("Word not found: " + randomUUID));

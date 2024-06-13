@@ -21,16 +21,26 @@ package org.enricogiurin.vocabulary.api.repository;
  */
 
 
-import static org.enricogiurin.vocabulary.api.mapper.WordMapper.UUID_ALIAS;
 import static org.enricogiurin.vocabulary.jooq.Tables.LANGUAGE;
-import static org.enricogiurin.vocabulary.jooq.tables.Word.WORD;
 
+import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
+import com.yourrents.services.common.util.jooq.JooqUtils;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.enricogiurin.vocabulary.api.model.Language;
 import org.jooq.DSLContext;
-import org.jooq.Record1;
+import org.jooq.Field;
+import org.jooq.Record;
+import org.jooq.Record4;
+import org.jooq.Select;
 import org.jooq.SelectJoinStep;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,20 +49,78 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LanguageRepository {
 
-  private final DSLContext dsl;
+  public static final String UUID_ALIAS = "uuid";
+  public static final String NAME_ALIAS = "name";
+  public static final String CODE_ALIAS = "code";
+  public static final String NATIVE_NAME_ALIAS = "nativeName";
 
-  //TODO - temporary implementation - fix it
-  public Optional<UUID> findById(Integer id) {
+  private final DSLContext dsl;
+  private final JooqUtils jooqUtils;
+
+  public Optional<Language> findByExternalId(UUID externalId) {
     return getSelect()
-        .where(WORD.ID.eq(id))
+        .where(LANGUAGE.EXTERNAL_ID.eq(externalId))
         .fetchOptional()
-        .map(Record1::value1);
+        .map(this::map);
   }
 
-  private SelectJoinStep<Record1<UUID>> getSelect() {
+  public Optional<Language> findById(Integer id) {
+    return getSelect()
+        .where(LANGUAGE.ID.eq(id))
+        .fetchOptional()
+        .map(this::map);
+  }
+
+  public Integer findLanguageIdByUuid(UUID languageUuid) {
+    return dsl.select(LANGUAGE.ID)
+        .from(LANGUAGE)
+        .where(LANGUAGE.EXTERNAL_ID.eq(languageUuid))
+        .fetchOptional(LANGUAGE.ID).orElseThrow(
+            () -> new DataNotFoundException("Language not found: "
+                + languageUuid));
+  }
+
+  public Page<Language> find(Searchable filter, Pageable pageable) {
+    Select<?> result = jooqUtils.paginate(
+        dsl,
+        jooqUtils.getQueryWithConditionsAndSorts(getSelect(),
+            filter, this::getSupportedField,
+            pageable, this::getSupportedField),
+        pageable.getPageSize(), pageable.getOffset());
+
+    List<Language> words = result.fetch(this::map);
+    int totalRows = Objects.requireNonNullElse(
+        result.fetchAny("total_rows", Integer.class), 0);
+    return new PageImpl<>(words, pageable, totalRows);
+  }
+
+  private SelectJoinStep<Record4<UUID, String, String, String>> getSelect() {
     return dsl.select(
-            LANGUAGE.EXTERNAL_ID.as(UUID_ALIAS))
+            LANGUAGE.EXTERNAL_ID.as(UUID_ALIAS),
+            LANGUAGE.NAME.as(NAME_ALIAS),
+            LANGUAGE.CODE.as(CODE_ALIAS),
+            LANGUAGE.NATIVE_NAME.as(NATIVE_NAME_ALIAS)
+        )
         .from(LANGUAGE);
+  }
+
+  private Field<?> getSupportedField(String field) {
+    return switch (field) {
+      case UUID_ALIAS -> LANGUAGE.EXTERNAL_ID;
+      case CODE_ALIAS -> LANGUAGE.CODE;
+      case NAME_ALIAS -> LANGUAGE.NAME;
+      default -> throw new IllegalArgumentException(
+          "Unexpected value for filter/sort field: " + field);
+    };
+  }
+
+  private Language map(Record record) {
+    return new Language(
+        record.get(UUID_ALIAS, UUID.class),
+        record.get(NAME_ALIAS, String.class),
+        record.get(CODE_ALIAS, String.class),
+        record.get(NATIVE_NAME_ALIAS, String.class)
+    );
   }
 
 
