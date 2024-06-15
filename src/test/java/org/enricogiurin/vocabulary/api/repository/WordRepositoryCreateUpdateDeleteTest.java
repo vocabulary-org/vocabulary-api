@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
+import org.enricogiurin.vocabulary.api.model.response.WordResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,18 +58,19 @@ class WordRepositoryCreateUpdateDeleteTest {
   void create() {
     Language en = languageRepository.findById(LANGUAGE_ENGLISH_ID).orElseThrow();
     Word newWord = new Word(null, "dog", en.uuid());
-    Word result = wordRepository.create(newWord);
+    WordResponse result = wordRepository.create(newWord);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("dog"));
+    assertThat(result.language().name(), equalTo("English"));
   }
 
   @Test
   void deleteAnExistingWord() {
-    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    WordResponse word = wordRepository.findById(HELLO_ID).orElseThrow();
     boolean delete = wordRepository.delete(word.uuid());
     assertThat(delete, equalTo(true));
-    Optional<Word> wordOptional = wordRepository.findById(HELLO_ID);
+    Optional<WordResponse> wordOptional = wordRepository.findById(HELLO_ID);
     assertThat(wordOptional.isEmpty(), equalTo(true));
   }
 
@@ -87,9 +89,9 @@ class WordRepositoryCreateUpdateDeleteTest {
 
   @Test
   void updateAnExistingWord() {
-    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    WordResponse word = wordRepository.findById(HELLO_ID).orElseThrow();
     Word updateWord = new Word(null, "new sentence", null);
-    Word result = wordRepository.update(word.uuid(), updateWord);
+    WordResponse result = wordRepository.update(word.uuid(), updateWord);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("new sentence"));

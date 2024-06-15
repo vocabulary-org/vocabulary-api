@@ -37,4 +37,4 @@ ALTER TABLE ONLY vocabulary.translation
     ADD CONSTRAINT fk_translation_language FOREIGN KEY (language_id) REFERENCES vocabulary.language(id);
 
 ALTER TABLE ONLY vocabulary.translation
-    ADD CONSTRAINT fk_translation_word FOREIGN KEY (word_id) REFERENCES vocabulary.word(id);
+    ADD CONSTRAINT fk_translation_word FOREIGN KEY (word_id) REFERENCES vocabulary.word(id) ON DELETE CASCADE;

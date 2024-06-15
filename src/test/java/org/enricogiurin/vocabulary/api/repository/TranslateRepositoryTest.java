@@ -28,7 +28,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import java.util.UUID;
-import org.enricogiurin.vocabulary.api.model.response.WordResponse;
+import org.enricogiurin.vocabulary.api.model.response.TranslationResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,50 +44,40 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Import(VocabularyTestConfiguration.class)
 @Transactional
-class WordRepositoryTest {
+class TranslateRepositoryTest {
 
-  static final UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
-  static final int HELLO_ID = 1000000;
+  static final UUID HALLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000002");
+  static final int HALLO_ID = 1000001;
 
   @Autowired
-  WordRepository wordRepository;
-
-  @Test
-  void findByExternalId() {
-    WordResponse word = wordRepository.findByExternalId(
-        HELLO_UUID).orElseThrow();
-    assertThat(word, notNullValue());
-    assertThat(word.sentence(), equalTo("Hello"));
-    assertThat(word.language().name(), equalTo("English"));
-
-  }
+  TranslateRepository translateRepository;
 
   @Test
   void findById() {
-    WordResponse word = wordRepository.findById(HELLO_ID).orElseThrow();
-    assertThat(word, notNullValue());
-    assertThat(word.uuid(), equalTo(HELLO_UUID));
-    assertThat(word.language().name(), equalTo("English"));
+    TranslationResponse result = translateRepository.findById(HALLO_ID).orElseThrow();
+    assertThat(result, notNullValue());
+    assertThat(result.uuid(), equalTo(HALLO_UUID));
+    assertThat(result.language().name(), equalTo("German"));
+    assertThat(result.word().sentence(), equalTo("Hello"));
+    assertThat(result.word().language().nativeName(), equalTo("English"));
   }
 
   @Test
-  void findAll() {
-    Page<WordResponse> result = wordRepository.find(FilterCriteria.of(),
-        PageRequest.ofSize(Integer.MAX_VALUE));
-    assertThat(result, iterableWithSize(4));
+  void findByExternalId() {
+    TranslationResponse result = translateRepository.findByExternalId(HALLO_UUID).orElseThrow();
+    assertThat(result, notNullValue());
+    assertThat(result.uuid(), equalTo(HALLO_UUID));
+    assertThat(result.language().nativeName(), equalTo("Deutsch"));
   }
 
   @Test
-  void findByNameContaining() {
-    Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("sentence")));
+  void findFilteredByContentsContainsIgnoreCaseWithOrderByLanguageAsc() {
+    Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE,
+        Sort.by(Order.asc(TranslateRepository.LANGUAGE_ALIAS)));
     FilterCriteria filter = FilterCriteria.of(
-        FilterCondition.of("sentence", "containsIgnoreCase", "cat"));
-    Page<WordResponse> page = wordRepository.find(filter, pageable);
-    assertThat(page, iterableWithSize(2));
-    WordResponse word = page.getContent().getFirst();
-    assertThat(word, notNullValue());
-    assertThat(word.sentence(), equalTo("cat"));
+        FilterCondition.of(TranslateRepository.CONTENT_ALIAS, "containsIgnoreCase", "al"));
+    Page<TranslationResponse> result = translateRepository.find(filter, pageable);
+    assertThat(result, iterableWithSize(2));
+    assertThat(result.getContent().getFirst().content(), equalTo("Hallo"));
   }
-
-
 }
