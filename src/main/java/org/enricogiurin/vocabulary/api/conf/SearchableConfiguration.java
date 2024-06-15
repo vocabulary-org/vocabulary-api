@@ -22,19 +22,28 @@ package org.enricogiurin.vocabulary.api.conf;
 
 
 
-import com.yourrents.services.common.util.jooq.JooqUtils;
+import com.yourrents.services.common.searchable.config.SearchableArgumentResolverConfigurer;
+import com.yourrents.services.common.searchable.springdoc.SearchableOpenAPIConverter;
+import com.yourrents.services.common.searchable.springdoc.customizer.SearchableOperationCustomizer;
+import org.springdoc.core.providers.ObjectMapperProvider;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = {
-    "com.yourrents.services.common.util.exception"})
-public class YourRentsServiceGeodataConfiguration {
+class SearchableConfiguration {
 
   @Bean
-  JooqUtils jooqUtils() {
-    return new JooqUtils();
+  SearchableArgumentResolverConfigurer searchableArgumentResolverConfigurer() {
+    return new SearchableArgumentResolverConfigurer();
   }
 
+  @Bean
+  SearchableOpenAPIConverter searchableOpenAPIConverter(ObjectMapperProvider objectMapperProvider) {
+    return new SearchableOpenAPIConverter(objectMapperProvider);
+  }
+
+  @Bean
+  SearchableOperationCustomizer searchableOperationCustomizer() {
+    return new SearchableOperationCustomizer();
+  }
 }

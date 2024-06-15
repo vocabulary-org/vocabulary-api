@@ -27,7 +27,7 @@ VALUES (1000000, 'Hello', 1, '00000000-0000-0000-0000-000000000001'),
        (1000003, 'tomcat', 1, '00000000-0000-0000-0000-000000000004')
 ;
 
---test data for transltion
+--test data for translation
 INSERT INTO vocabulary.translation (id, translation_content, language_id, word_id, external_id)
 VALUES (1000000, 'Salve', 20, 1000000, '00000000-0000-0000-0000-000000000001'),
        (1000001, 'Hallo', 11, 1000000, '00000000-0000-0000-0000-000000000002'),

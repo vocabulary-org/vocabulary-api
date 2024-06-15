@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.4</version>
+		<version>3.3.0</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.enricogiurin.vocabulary</groupId>
@@ -61,13 +61,20 @@
     <spring-boot.version>3.2.1</spring-boot.version>
     <springdoc-openapi-ui.version>2.3.0</springdoc-openapi-ui.version>
     <testcontainers-jooq-codegen-maven-plugin.version>0.0.3</testcontainers-jooq-codegen-maven-plugin.version>
-    <yourrents-services.version>0.0.4</yourrents-services.version>
+    <your-rents-services-geodata.version>0.0.4</your-rents-services-geodata.version>
     <plugins.testcontainers.version>1.19.3</plugins.testcontainers.version>
     <plugins.postgresql.version>42.7.1</plugins.postgresql.version>
 
 	</properties>
 	<dependencies>
+		<!-- your-rents dependency -->
+		<dependency>
+			<groupId>com.your-rents.services</groupId>
+			<artifactId>your-rents-services-geodata</artifactId>
+			<version>${your-rents-services-geodata.version}</version>
+		</dependency>
 		<!-- spring dependencies -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -103,29 +110,15 @@
 			<version>${springdoc-openapi-ui.version}</version>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-commons</artifactId>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-
-
 
 		<!-- other dependencies -->
 		<dependency>
-			<groupId>com.your-rents.services</groupId>
-			<artifactId>your-rents-services-common-searchable</artifactId>
-			<version>${yourrents-services.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.your-rents.services</groupId>
-			<artifactId>your-rents-services-common-util</artifactId>
-			<version>${yourrents-services.version}</version>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
+			<artifactId>flyway-database-postgresql</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -160,6 +153,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
 
 	<build>
 		<plugins>

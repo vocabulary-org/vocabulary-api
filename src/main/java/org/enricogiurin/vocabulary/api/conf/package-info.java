@@ -1,5 +1,4 @@
-package org.enricogiurin.vocabulary.api;
-
+package org.enricogiurin.vocabulary.api.conf;
 /*-
  * #%L
  * Vocabulary API
@@ -19,18 +18,3 @@ package org.enricogiurin.vocabulary.api;
  * limitations under the License.
  * #L%
  */
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
-
-
-@SpringBootApplication
-@EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
-public class VocabularyApiApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(VocabularyApiApplication.class, args);
-  }
-
-}

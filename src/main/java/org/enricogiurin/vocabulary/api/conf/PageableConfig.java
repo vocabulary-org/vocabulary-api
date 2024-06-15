@@ -21,20 +21,23 @@ package org.enricogiurin.vocabulary.api.conf;
  */
 
 
-
-import com.yourrents.services.common.util.jooq.JooqUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.config.PageableHandlerMethodArgumentResolverCustomizer;
 
 @Configuration
-@ComponentScan(basePackages = {
-    "com.yourrents.services.common.util.exception"})
-public class YourRentsServiceGeodataConfiguration {
+public class PageableConfig {
 
   @Bean
-  JooqUtils jooqUtils() {
-    return new JooqUtils();
+  PageableHandlerMethodArgumentResolverCustomizer pageableResolverCustomizer(
+      @Value("${spring.data.web.pageable.max-page-size:2000}") int maxPageSize,
+      @Value("${spring.data.web.pageable.default-page-size:20}") int defaultPageSize) {
+    return pageableResolver -> {
+      pageableResolver.setMaxPageSize(maxPageSize);
+      pageableResolver.setFallbackPageable(PageRequest.ofSize(defaultPageSize));
+    };
   }
 
 }

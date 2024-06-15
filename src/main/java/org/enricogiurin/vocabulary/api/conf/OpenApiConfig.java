@@ -20,21 +20,25 @@ package org.enricogiurin.vocabulary.api.conf;
  * #L%
  */
 
-
-
-import com.yourrents.services.common.util.jooq.JooqUtils;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = {
-    "com.yourrents.services.common.util.exception"})
-public class YourRentsServiceGeodataConfiguration {
+class OpenApiConfig {
 
   @Bean
-  JooqUtils jooqUtils() {
-    return new JooqUtils();
+  OpenAPI configOpenApi(@Value("${spring.application.name}") String name,
+      @Value("${application.api.version}") String version,
+      @Value("${application.api.description}") String description) {
+    return new OpenAPI().info(new Info().title(name).version(version).description(description)
+        .termsOfService("https://github.com/egch/vocabulary")
+        .license(new License().name("Apache License, Version 2.0").identifier("Apache-2.0")
+            .url("https://opensource.org/license/apache-2-0/")));
+
   }
 
 }
