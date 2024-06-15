@@ -28,7 +28,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import java.util.UUID;
-import org.enricogiurin.vocabulary.api.model.response.WordResponse;
+import org.enricogiurin.vocabulary.api.model.view.WordView;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,7 +54,7 @@ class WordRepositoryTest {
 
   @Test
   void findByExternalId() {
-    WordResponse word = wordRepository.findByExternalId(
+    WordView word = wordRepository.findByExternalId(
         HELLO_UUID).orElseThrow();
     assertThat(word, notNullValue());
     assertThat(word.sentence(), equalTo("Hello"));
@@ -64,7 +64,7 @@ class WordRepositoryTest {
 
   @Test
   void findById() {
-    WordResponse word = wordRepository.findById(HELLO_ID).orElseThrow();
+    WordView word = wordRepository.findById(HELLO_ID).orElseThrow();
     assertThat(word, notNullValue());
     assertThat(word.uuid(), equalTo(HELLO_UUID));
     assertThat(word.language().name(), equalTo("English"));
@@ -72,7 +72,7 @@ class WordRepositoryTest {
 
   @Test
   void findAll() {
-    Page<WordResponse> result = wordRepository.find(FilterCriteria.of(),
+    Page<WordView> result = wordRepository.find(FilterCriteria.of(),
         PageRequest.ofSize(Integer.MAX_VALUE));
     assertThat(result, iterableWithSize(4));
   }
@@ -82,9 +82,9 @@ class WordRepositoryTest {
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("sentence")));
     FilterCriteria filter = FilterCriteria.of(
         FilterCondition.of("sentence", "containsIgnoreCase", "cat"));
-    Page<WordResponse> page = wordRepository.find(filter, pageable);
+    Page<WordView> page = wordRepository.find(filter, pageable);
     assertThat(page, iterableWithSize(2));
-    WordResponse word = page.getContent().getFirst();
+    WordView word = page.getContent().getFirst();
     assertThat(word, notNullValue());
     assertThat(word.sentence(), equalTo("cat"));
   }

@@ -36,9 +36,9 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
-import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
-import org.enricogiurin.vocabulary.api.model.response.WordResponse;
+import org.enricogiurin.vocabulary.api.model.view.LanguageView;
+import org.enricogiurin.vocabulary.api.model.view.WordView;
 import org.enricogiurin.vocabulary.jooq.tables.records.WordRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -67,21 +67,21 @@ public class WordRepository {
   private final JooqUtils jooqUtils;
   private final LanguageRepository languageRepository;
 
-  public Optional<WordResponse> findByExternalId(UUID externalId) {
+  public Optional<WordView> findByExternalId(UUID externalId) {
     return getSelect()
         .where(WORD.EXTERNAL_ID.eq(externalId))
         .fetchOptional()
         .map(this::map);
   }
 
-  public Optional<WordResponse> findById(Integer id) {
+  public Optional<WordView> findById(Integer id) {
     return getSelect()
         .where(WORD.ID.eq(id))
         .fetchOptional()
         .map(this::map);
   }
 
-  public Page<WordResponse> find(Searchable filter, Pageable pageable) {
+  public Page<WordView> find(Searchable filter, Pageable pageable) {
     Select<?> result = jooqUtils.paginate(
         dsl,
         jooqUtils.getQueryWithConditionsAndSorts(getSelect(),
@@ -89,7 +89,7 @@ public class WordRepository {
             pageable, this::getSupportedField),
         pageable.getPageSize(), pageable.getOffset());
 
-    List<WordResponse> words = result.fetch(this::map);
+    List<WordView> words = result.fetch(this::map);
     int totalRows = Objects.requireNonNullElse(
         result.fetchAny("total_rows", Integer.class), 0);
     return new PageImpl<>(words, pageable, totalRows);
@@ -102,7 +102,7 @@ public class WordRepository {
    * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
-  public WordResponse create(Word word) {
+  public WordView create(Word word) {
     WordRecord wordRecord = dsl.newRecord(WORD);
     Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(word.languageUuid());
     wordRecord.setLanguageId(languageIdByUuid);
@@ -146,7 +146,7 @@ public class WordRepository {
    * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
-  public WordResponse update(UUID uuid, Word word) {
+  public WordView update(UUID uuid, Word word) {
     WordRecord wordRecord = dsl.selectFrom(WORD)
         .where(WORD.EXTERNAL_ID.eq(uuid))
         .fetchOptional()
@@ -164,13 +164,12 @@ public class WordRepository {
         () -> new DataExecutionException("failed to update word: " + uuid));
   }
 
-  private SelectOnConditionStep<Record3<UUID, String, Language>> getSelect() {
+  private SelectOnConditionStep<Record3<UUID, String, LanguageView>> getSelect() {
     return dsl.select(
             WORD.EXTERNAL_ID.as(UUID_ALIAS),
             WORD.SENTENCE.as(SENTENCE_ALIAS),
-            row(WORD.language().EXTERNAL_ID, WORD.language().NAME, WORD.language().CODE,
-                WORD.language().NATIVE_NAME)
-                .mapping(nullOnAllNull(Language::new)).as(LANGUAGE_ALIAS)
+            row(WORD.language().NAME, WORD.language().NATIVE_NAME)
+                .mapping(nullOnAllNull(LanguageView::new)).as(LANGUAGE_ALIAS)
         )
         .from(WORD)
         .leftJoin(LANGUAGE).on(WORD.LANGUAGE_ID.eq(LANGUAGE.ID));
@@ -186,11 +185,11 @@ public class WordRepository {
     };
   }
 
-  private WordResponse map(Record record) {
-    return new WordResponse(
+  private WordView map(Record record) {
+    return new WordView(
         record.get(UUID_ALIAS, UUID.class),
         record.get(SENTENCE_ALIAS, String.class),
-        record.get(LANGUAGE_ALIAS, Language.class)
+        record.get(LANGUAGE_ALIAS, LanguageView.class)
     );
   }
 

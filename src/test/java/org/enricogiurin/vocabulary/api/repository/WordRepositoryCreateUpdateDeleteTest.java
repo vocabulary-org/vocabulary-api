@@ -31,7 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
-import org.enricogiurin.vocabulary.api.model.response.WordResponse;
+import org.enricogiurin.vocabulary.api.model.view.WordView;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,7 +58,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   void create() {
     Language en = languageRepository.findById(LANGUAGE_ENGLISH_ID).orElseThrow();
     Word newWord = new Word(null, "dog", en.uuid());
-    WordResponse result = wordRepository.create(newWord);
+    WordView result = wordRepository.create(newWord);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("dog"));
@@ -67,10 +67,10 @@ class WordRepositoryCreateUpdateDeleteTest {
 
   @Test
   void deleteAnExistingWord() {
-    WordResponse word = wordRepository.findById(HELLO_ID).orElseThrow();
+    WordView word = wordRepository.findById(HELLO_ID).orElseThrow();
     boolean delete = wordRepository.delete(word.uuid());
     assertThat(delete, equalTo(true));
-    Optional<WordResponse> wordOptional = wordRepository.findById(HELLO_ID);
+    Optional<WordView> wordOptional = wordRepository.findById(HELLO_ID);
     assertThat(wordOptional.isEmpty(), equalTo(true));
   }
 
@@ -89,9 +89,9 @@ class WordRepositoryCreateUpdateDeleteTest {
 
   @Test
   void updateAnExistingWord() {
-    WordResponse word = wordRepository.findById(HELLO_ID).orElseThrow();
+    WordView word = wordRepository.findById(HELLO_ID).orElseThrow();
     Word updateWord = new Word(null, "new sentence", null);
-    WordResponse result = wordRepository.update(word.uuid(), updateWord);
+    WordView result = wordRepository.update(word.uuid(), updateWord);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("new sentence"));

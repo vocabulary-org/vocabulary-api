@@ -28,7 +28,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import java.util.UUID;
-import org.enricogiurin.vocabulary.api.model.response.TranslationResponse;
+import org.enricogiurin.vocabulary.api.model.view.TranslationView;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,7 +54,7 @@ class TranslateRepositoryTest {
 
   @Test
   void findById() {
-    TranslationResponse result = translateRepository.findById(HALLO_ID).orElseThrow();
+    TranslationView result = translateRepository.findById(HALLO_ID).orElseThrow();
     assertThat(result, notNullValue());
     assertThat(result.uuid(), equalTo(HALLO_UUID));
     assertThat(result.language().name(), equalTo("German"));
@@ -64,7 +64,7 @@ class TranslateRepositoryTest {
 
   @Test
   void findByExternalId() {
-    TranslationResponse result = translateRepository.findByExternalId(HALLO_UUID).orElseThrow();
+    TranslationView result = translateRepository.findByExternalId(HALLO_UUID).orElseThrow();
     assertThat(result, notNullValue());
     assertThat(result.uuid(), equalTo(HALLO_UUID));
     assertThat(result.language().nativeName(), equalTo("Deutsch"));
@@ -76,7 +76,7 @@ class TranslateRepositoryTest {
         Sort.by(Order.asc(TranslateRepository.LANGUAGE_ALIAS)));
     FilterCriteria filter = FilterCriteria.of(
         FilterCondition.of(TranslateRepository.CONTENT_ALIAS, "containsIgnoreCase", "al"));
-    Page<TranslationResponse> result = translateRepository.find(filter, pageable);
+    Page<TranslationView> result = translateRepository.find(filter, pageable);
     assertThat(result, iterableWithSize(2));
     assertThat(result.getContent().getFirst().content(), equalTo("Hallo"));
   }

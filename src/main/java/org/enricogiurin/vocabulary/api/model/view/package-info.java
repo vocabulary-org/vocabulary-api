@@ -1,5 +1,4 @@
-package org.enricogiurin.vocabulary.api.model.response;
-
+package org.enricogiurin.vocabulary.api.model.view;
 /*-
  * #%L
  * Vocabulary API
@@ -19,10 +18,3 @@ package org.enricogiurin.vocabulary.api.model.response;
  * limitations under the License.
  * #L%
  */
-
-import java.util.UUID;
-import org.enricogiurin.vocabulary.api.model.Language;
-
-public record TranslationResponse(UUID uuid, String content, Language language, WordResponse word) {
-
-}

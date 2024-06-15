@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.model.response;
+package org.enricogiurin.vocabulary.api.model.view;
 
 /*-
  * #%L
@@ -21,8 +21,7 @@ package org.enricogiurin.vocabulary.api.model.response;
  */
 
 import java.util.UUID;
-import org.enricogiurin.vocabulary.api.model.Language;
 
-public record WordResponse(UUID uuid, String sentence, Language language) {
+public record WordView(UUID uuid, String sentence, LanguageView language) {
 
 }

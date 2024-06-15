@@ -34,9 +34,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.enricogiurin.vocabulary.api.model.Language;
-import org.enricogiurin.vocabulary.api.model.response.TranslationResponse;
-import org.enricogiurin.vocabulary.api.model.response.WordResponse;
+import org.enricogiurin.vocabulary.api.model.view.LanguageView;
+import org.enricogiurin.vocabulary.api.model.view.TranslationView;
+import org.enricogiurin.vocabulary.api.model.view.WordView;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -64,21 +64,21 @@ public class TranslateRepository {
   private final JooqUtils jooqUtils;
 
 
-  public Optional<TranslationResponse> findById(Integer id) {
+  public Optional<TranslationView> findById(Integer id) {
     return getSelect()
         .where(TRANSLATION.ID.eq(id))
         .fetchOptional()
         .map(this::map);
   }
 
-  public Optional<TranslationResponse> findByExternalId(UUID externalId) {
+  public Optional<TranslationView> findByExternalId(UUID externalId) {
     return getSelect()
         .where(TRANSLATION.EXTERNAL_ID.eq(externalId))
         .fetchOptional()
         .map(this::map);
   }
 
-  public Page<TranslationResponse> find(Searchable filter, Pageable pageable) {
+  public Page<TranslationView> find(Searchable filter, Pageable pageable) {
     Select<?> result = jooqUtils.paginate(
         dsl,
         jooqUtils.getQueryWithConditionsAndSorts(getSelect(),
@@ -86,26 +86,24 @@ public class TranslateRepository {
             pageable, this::getSupportedField),
         pageable.getPageSize(), pageable.getOffset());
 
-    List<TranslationResponse> translations = result.fetch(this::map);
+    List<TranslationView> translations = result.fetch(this::map);
     int totalRows = Objects.requireNonNullElse(
         result.fetchAny("total_rows", Integer.class), 0);
     return new PageImpl<>(translations, pageable, totalRows);
   }
 
-  private SelectOnConditionStep<Record4<UUID, String, Language, WordResponse>> getSelect() {
+  private SelectOnConditionStep<Record4<UUID, String, LanguageView, WordView>> getSelect() {
     return dsl.select(
             TRANSLATION.EXTERNAL_ID.as(UUID_ALIAS),
             TRANSLATION.TRANSLATION_CONTENT.as(CONTENT_ALIAS),
-            row(TRANSLATION.language().EXTERNAL_ID, TRANSLATION.language().NAME,
-                TRANSLATION.language().CODE,
+            row(TRANSLATION.language().NAME,
                 TRANSLATION.language().NATIVE_NAME)
-                .mapping(nullOnAllNull(Language::new)).as(LANGUAGE_ALIAS),
+                .mapping(nullOnAllNull(LanguageView::new)).as(LANGUAGE_ALIAS),
             row(TRANSLATION.word().EXTERNAL_ID, TRANSLATION.word().SENTENCE,
-                row(TRANSLATION.word().language().EXTERNAL_ID, TRANSLATION.word().language().NAME,
-                    TRANSLATION.word().language().CODE,
+                row(TRANSLATION.word().language().NAME,
                     TRANSLATION.word().language().NATIVE_NAME)
-                    .mapping(nullOnAllNull(Language::new)).as(LANGUAGE_ALIAS))
-                .mapping(nullOnAllNull(WordResponse::new)).as(WORD_ALIAS)
+                    .mapping(nullOnAllNull(LanguageView::new)).as(LANGUAGE_ALIAS))
+                .mapping(nullOnAllNull(WordView::new)).as(WORD_ALIAS)
 
         )
         .from(TRANSLATION)
@@ -125,12 +123,12 @@ public class TranslateRepository {
     };
   }
 
-  private TranslationResponse map(Record record) {
-    return new TranslationResponse(
+  private TranslationView map(Record record) {
+    return new TranslationView(
         record.get(UUID_ALIAS, UUID.class),
         record.get(CONTENT_ALIAS, String.class),
-        record.get(LANGUAGE_ALIAS, Language.class),
-        record.get(WORD_ALIAS, WordResponse.class)
+        record.get(LANGUAGE_ALIAS, LanguageView.class),
+        record.get(WORD_ALIAS, WordView.class)
     );
   }
 
