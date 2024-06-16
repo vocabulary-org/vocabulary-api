@@ -70,11 +70,16 @@
 		<!-- your-rents dependency -->
 		<dependency>
 			<groupId>com.your-rents.services</groupId>
-			<artifactId>your-rents-services-geodata</artifactId>
+			<artifactId>your-rents-services-common-searchable</artifactId>
 			<version>${your-rents-services-geodata.version}</version>
 		</dependency>
-		<!-- spring dependencies -->
+		<dependency>
+			<groupId>com.your-rents.services</groupId>
+			<artifactId>your-rents-services-common-util</artifactId>
+			<version>${your-rents-services-geodata.version}</version>
+		</dependency>
 
+		<!-- spring dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -109,6 +114,10 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc-openapi-ui.version}</version>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
 		</dependency>
 
 		<!-- other dependencies -->

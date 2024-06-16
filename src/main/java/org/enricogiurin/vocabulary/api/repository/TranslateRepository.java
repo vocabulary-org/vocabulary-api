@@ -28,15 +28,20 @@ import static org.jooq.Functions.nullOnAllNull;
 import static org.jooq.impl.DSL.row;
 
 import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.common.util.jooq.JooqUtils;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
+import org.enricogiurin.vocabulary.api.model.Translation;
 import org.enricogiurin.vocabulary.api.model.view.LanguageView;
 import org.enricogiurin.vocabulary.api.model.view.TranslationView;
 import org.enricogiurin.vocabulary.api.model.view.WordView;
+import org.enricogiurin.vocabulary.jooq.tables.records.TranslationRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -58,10 +63,13 @@ public class TranslateRepository {
   static final String CONTENT_ALIAS = "content";
   static final String LANGUAGE_ALIAS = "language";
   static final String WORD_ALIAS = "word";
-
+  static final String SEARCH_WORD_UUID = "word.uuid";
+  static final String SEARCH_LANGUAGE_NAME = "language.name";
 
   private final DSLContext dsl;
   private final JooqUtils jooqUtils;
+  private final LanguageRepository languageRepository;
+  private final WordRepository wordRepository;
 
 
   public Optional<TranslationView> findById(Integer id) {
@@ -92,6 +100,81 @@ public class TranslateRepository {
     return new PageImpl<>(translations, pageable, totalRows);
   }
 
+  /**
+   * Create a new Translation.
+   *
+   * @return the new created Translation
+   * @throws DataExecutionException if something unexpected happens
+   */
+  @Transactional(readOnly = false)
+  public TranslationView create(Translation translation) {
+
+    Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(translation.languageUuid());
+    Integer wordIdByUuid = wordRepository.findLanguageIdByUuid(translation.wordUuid());
+    TranslationRecord translationRecord = dsl.newRecord(TRANSLATION);
+    translationRecord.setCreatedAt(LocalDateTime.now());
+    translationRecord.setTranslationContent(translation.content());
+    translationRecord.setLanguageId(languageIdByUuid);
+    translationRecord.setWordId(wordIdByUuid);
+    translationRecord.insert();
+    return findById(translationRecord.getId()).orElseThrow(
+        () -> new DataExecutionException(
+            "failed to create translation[content]: " + translation.content()));
+  }
+
+  /**
+   * Delete a translation
+   *
+   * @return true if the translation has been deleted, false otherwise
+   * @throws DataNotFoundException if the translation does not exist
+   */
+  @Transactional(readOnly = false)
+  public boolean delete(UUID uuid) {
+    Integer translationId = dsl.select(TRANSLATION.ID)
+        .from(TRANSLATION)
+        .where(TRANSLATION.EXTERNAL_ID.eq(uuid))
+        .fetchOptional(TRANSLATION.ID).orElseThrow(
+            () -> new DataNotFoundException("Translation not found: " + uuid));
+    return dsl.deleteFrom(TRANSLATION)
+        .where(TRANSLATION.ID.eq(translationId))
+        .execute() > 0;
+  }
+
+  /**
+   * Update a translation.
+   * <p>
+   * You can update the content, the language. You can't update the translation uuid. You can't
+   * update the word uuid.
+   * <p>
+   * Only not null fields are used to update the translation.
+   *
+   * @param uuid        the uuid of the translation to update
+   * @param translation the data of translation to update.
+   * @return the updated translation
+   * @throws DataNotFoundException  if the word does not exist
+   * @throws DataNotFoundException  if not null language, uuid does not exist
+   * @throws DataExecutionException if something unexpected happens
+   */
+  @Transactional(readOnly = false)
+  public TranslationView update(UUID uuid, Translation translation) {
+    TranslationRecord translationRecord = dsl.selectFrom(TRANSLATION)
+        .where(TRANSLATION.EXTERNAL_ID.eq(uuid))
+        .fetchOptional()
+        .orElseThrow(() -> new DataNotFoundException("Translation not found: " + uuid));
+    if (translation.languageUuid() != null) {
+      Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(
+          translation.languageUuid());
+      translationRecord.setLanguageId(languageIdByUuid);
+    }
+    if (translation.content() != null) {
+      translationRecord.setTranslationContent(translation.content());
+    }
+    translationRecord.setUpdatedAt(LocalDateTime.now());
+    translationRecord.update();
+    return findById(translationRecord.getId())
+        .orElseThrow(() -> new DataExecutionException("failed to update translation: " + uuid));
+  }
+
   private SelectOnConditionStep<Record4<UUID, String, LanguageView, WordView>> getSelect() {
     return dsl.select(
             TRANSLATION.EXTERNAL_ID.as(UUID_ALIAS),
@@ -109,7 +192,6 @@ public class TranslateRepository {
         .from(TRANSLATION)
         .leftJoin(LANGUAGE).on(TRANSLATION.LANGUAGE_ID.eq(LANGUAGE.ID))
         .leftJoin(WORD).on(TRANSLATION.WORD_ID.eq(WORD.ID));
-
   }
 
 
@@ -117,7 +199,8 @@ public class TranslateRepository {
     return switch (field) {
       case UUID_ALIAS -> TRANSLATION.EXTERNAL_ID;
       case CONTENT_ALIAS -> TRANSLATION.TRANSLATION_CONTENT;
-      case LANGUAGE_ALIAS -> TRANSLATION.language().NAME;
+      case SEARCH_LANGUAGE_NAME -> TRANSLATION.language().NAME;
+      case SEARCH_WORD_UUID -> TRANSLATION.word().EXTERNAL_ID;
       default -> throw new IllegalArgumentException(
           "Unexpected value for filter/sort field: " + field);
     };

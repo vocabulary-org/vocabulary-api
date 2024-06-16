@@ -109,6 +109,7 @@ public class LanguageRepository {
       case UUID_ALIAS -> LANGUAGE.EXTERNAL_ID;
       case CODE_ALIAS -> LANGUAGE.CODE;
       case NAME_ALIAS -> LANGUAGE.NAME;
+      case NATIVE_NAME_ALIAS -> LANGUAGE.NATIVE_NAME;
       default -> throw new IllegalArgumentException(
           "Unexpected value for filter/sort field: " + field);
     };

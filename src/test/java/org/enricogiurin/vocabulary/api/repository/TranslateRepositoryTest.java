@@ -47,10 +47,14 @@ import org.springframework.transaction.annotation.Transactional;
 class TranslateRepositoryTest {
 
   static final UUID HALLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000002");
+  static final UUID WORD_HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
   static final int HALLO_ID = 1000001;
 
   @Autowired
   TranslateRepository translateRepository;
+
+  @Autowired
+  WordRepository wordRepository;
 
   @Test
   void findById() {
@@ -73,11 +77,24 @@ class TranslateRepositoryTest {
   @Test
   void findFilteredByContentsContainsIgnoreCaseWithOrderByLanguageAsc() {
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE,
-        Sort.by(Order.asc(TranslateRepository.LANGUAGE_ALIAS)));
+        Sort.by(Order.asc(TranslateRepository.SEARCH_LANGUAGE_NAME)));
     FilterCriteria filter = FilterCriteria.of(
         FilterCondition.of(TranslateRepository.CONTENT_ALIAS, "containsIgnoreCase", "al"));
     Page<TranslationView> result = translateRepository.find(filter, pageable);
     assertThat(result, iterableWithSize(2));
     assertThat(result.getContent().getFirst().content(), equalTo("Hallo"));
   }
+
+  @Test
+  void findAllTranslationOfWord() {
+    Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE,
+        Sort.by(Order.asc(TranslateRepository.CONTENT_ALIAS)));
+    FilterCriteria filter = FilterCriteria.of(
+        FilterCondition.of(TranslateRepository.SEARCH_WORD_UUID, "eq", WORD_HELLO_UUID));
+    Page<TranslationView> result = translateRepository.find(filter, pageable);
+    assertThat(result, iterableWithSize(2));
+    assertThat(result.getContent().getFirst().content(), equalTo("Hallo"));
+  }
+
+
 }
