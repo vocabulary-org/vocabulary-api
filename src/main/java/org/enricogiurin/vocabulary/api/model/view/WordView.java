@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.model.view;
 
 import java.util.UUID;
 
-public record WordView(UUID uuid, String sentence, LanguageView language) {
+public record WordView(UUID uuid, String sentence, String translation, String description,
+                       LanguageView language, LanguageView languageTo) {
 
 }

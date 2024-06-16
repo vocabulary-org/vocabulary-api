@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.repository;
+package org.enricogiurin.vocabulary.api;
 
 /*-
  * #%L
@@ -20,7 +20,6 @@ package org.enricogiurin.vocabulary.api.repository;
  * #L%
  */
 
-import org.enricogiurin.vocabulary.api.VocabularyApiApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

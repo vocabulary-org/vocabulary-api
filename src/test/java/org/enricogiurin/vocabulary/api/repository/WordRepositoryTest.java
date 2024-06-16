@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import java.util.UUID;
+import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.view.WordView;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,7 @@ class WordRepositoryTest {
   void findAll() {
     Page<WordView> result = wordRepository.find(FilterCriteria.of(),
         PageRequest.ofSize(Integer.MAX_VALUE));
-    assertThat(result, iterableWithSize(4));
+    assertThat(result, iterableWithSize(5));
   }
 
   @Test
@@ -87,6 +88,18 @@ class WordRepositoryTest {
     WordView word = page.getContent().getFirst();
     assertThat(word, notNullValue());
     assertThat(word.sentence(), equalTo("cat"));
+  }
+
+  @Test
+  void findByLanguageEq() {
+    Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("sentence")));
+    FilterCriteria filter = FilterCriteria.of(
+        FilterCondition.of(WordRepository.SEARCH_LANGUAGE_TO_NAME, "eq", "German"));
+    Page<WordView> page = wordRepository.find(filter, pageable);
+    assertThat(page, iterableWithSize(1));
+    WordView word = page.getContent().getFirst();
+    assertThat(word, notNullValue());
+    assertThat(word.sentence(), equalTo("Latte"));
   }
 
 
