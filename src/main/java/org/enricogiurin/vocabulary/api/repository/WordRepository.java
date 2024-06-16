@@ -43,7 +43,7 @@ import org.enricogiurin.vocabulary.jooq.tables.records.WordRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
-import org.jooq.Record3;
+import org.jooq.Record6;
 import org.jooq.Select;
 import org.jooq.SelectOnConditionStep;
 import org.springframework.data.domain.Page;
@@ -59,9 +59,12 @@ public class WordRepository {
 
   static final String UUID_ALIAS = "uuid";
   static final String SENTENCE_ALIAS = "sentence";
+  static final String TRANSLATION_ALIAS = "translation";
   static final String LANGUAGE_ALIAS = "language";
+  static final String LANGUAGE_TO_ALIAS = "languageTo";
+  static final String DESCRIPTION_ALIAS = "description";
   static final String SEARCH_LANGUAGE_NAME = "language.name";
-  static final String SEARCH_LANGUAGE_NATIVE_NAME = "language.nativeName";
+  static final String SEARCH_LANGUAGE_TO_NAME = "language.nameTo";
 
 
   private final DSLContext dsl;
@@ -115,30 +118,16 @@ public class WordRepository {
   public WordView create(Word word) {
     WordRecord wordRecord = dsl.newRecord(WORD);
     Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(word.languageUuid());
+    Integer languageToIdByUuid = languageRepository.findLanguageIdByUuid(word.languageToUuid());
     wordRecord.setLanguageId(languageIdByUuid);
+    wordRecord.setLanguageToId(languageToIdByUuid);
     wordRecord.setSentence(word.sentence());
+    wordRecord.setTranslation(word.translation());
+    wordRecord.setDescription(word.description());
     wordRecord.setCreatedAt(LocalDateTime.now());
     wordRecord.insert();
     return findById(wordRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to create word[sentence]: " + word.sentence()));
-  }
-
-  /**
-   * Delete a word
-   *
-   * @return true if the word has been deleted, false otherwise
-   * @throws DataNotFoundException if the city does not exist
-   */
-  @Transactional(readOnly = false)
-  public boolean delete(UUID uuid) {
-    Integer propertyId = dsl.select(WORD.ID)
-        .from(WORD)
-        .where(WORD.EXTERNAL_ID.eq(uuid))
-        .fetchOptional(WORD.ID).orElseThrow(
-            () -> new DataNotFoundException("Word not found: " + uuid));
-    return dsl.deleteFrom(WORD)
-        .where(WORD.ID.eq(propertyId))
-        .execute() > 0;
   }
 
   /**
@@ -165,8 +154,18 @@ public class WordRepository {
       Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(word.languageUuid());
       wordRecord.setLanguageId(languageIdByUuid);
     }
+    if (word.languageToUuid() != null) {
+      Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(word.languageToUuid());
+      wordRecord.setLanguageToId(languageIdByUuid);
+    }
     if (word.sentence() != null) {
       wordRecord.setSentence(word.sentence());
+    }
+    if (word.translation() != null) {
+      wordRecord.setTranslation(word.translation());
+    }
+    if (word.description() != null) {
+      wordRecord.setDescription(word.description());
     }
     wordRecord.setUpdatedAt(LocalDateTime.now());
     wordRecord.update();
@@ -174,12 +173,35 @@ public class WordRepository {
         () -> new DataExecutionException("failed to update word: " + uuid));
   }
 
-  private SelectOnConditionStep<Record3<UUID, String, LanguageView>> getSelect() {
+  /**
+   * Delete a word
+   *
+   * @return true if the word has been deleted, false otherwise
+   * @throws DataNotFoundException if the city does not exist
+   */
+  @Transactional(readOnly = false)
+  public boolean delete(UUID uuid) {
+    Integer propertyId = dsl.select(WORD.ID)
+        .from(WORD)
+        .where(WORD.EXTERNAL_ID.eq(uuid))
+        .fetchOptional(WORD.ID).orElseThrow(
+            () -> new DataNotFoundException("Word not found: " + uuid));
+    return dsl.deleteFrom(WORD)
+        .where(WORD.ID.eq(propertyId))
+        .execute() > 0;
+  }
+
+
+  private SelectOnConditionStep<Record6<UUID, String, String, String, LanguageView, LanguageView>> getSelect() {
     return dsl.select(
             WORD.EXTERNAL_ID.as(UUID_ALIAS),
             WORD.SENTENCE.as(SENTENCE_ALIAS),
-            row(WORD.language().NAME, WORD.language().NATIVE_NAME)
-                .mapping(nullOnAllNull(LanguageView::new)).as(LANGUAGE_ALIAS)
+            WORD.TRANSLATION.as(TRANSLATION_ALIAS),
+            WORD.DESCRIPTION.as(DESCRIPTION_ALIAS),
+            row(WORD.fkWordLanguage().NAME, WORD.fkWordLanguage().NATIVE_NAME)
+                .mapping(nullOnAllNull(LanguageView::new)).as(LANGUAGE_ALIAS),
+            row(WORD.fkWordLanguageTo().NAME, WORD.fkWordLanguageTo().NATIVE_NAME)
+                .mapping(nullOnAllNull(LanguageView::new)).as(LANGUAGE_TO_ALIAS)
         )
         .from(WORD)
         .leftJoin(LANGUAGE).on(WORD.LANGUAGE_ID.eq(LANGUAGE.ID));
@@ -189,8 +211,9 @@ public class WordRepository {
     return switch (field) {
       case UUID_ALIAS -> WORD.EXTERNAL_ID;
       case SENTENCE_ALIAS -> WORD.SENTENCE;
-      case SEARCH_LANGUAGE_NAME -> WORD.language().NAME;
-      case SEARCH_LANGUAGE_NATIVE_NAME -> WORD.language().NATIVE_NAME;
+      case TRANSLATION_ALIAS -> WORD.TRANSLATION;
+      case SEARCH_LANGUAGE_NAME -> WORD.fkWordLanguage().NAME;
+      case SEARCH_LANGUAGE_TO_NAME -> WORD.fkWordLanguageTo().NAME;
       default -> throw new IllegalArgumentException(
           "Unexpected value for filter/sort field: " + field);
     };
@@ -200,7 +223,10 @@ public class WordRepository {
     return new WordView(
         record.get(UUID_ALIAS, UUID.class),
         record.get(SENTENCE_ALIAS, String.class),
-        record.get(LANGUAGE_ALIAS, LanguageView.class)
+        record.get(TRANSLATION_ALIAS, String.class),
+        record.get(DESCRIPTION_ALIAS, String.class),
+        record.get(LANGUAGE_ALIAS, LanguageView.class),
+        record.get(LANGUAGE_TO_ALIAS, LanguageView.class)
     );
   }
 

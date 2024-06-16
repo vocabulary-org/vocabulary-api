@@ -25,16 +25,12 @@ ALTER TABLE ONLY vocabulary.word
 ALTER TABLE ONLY vocabulary.language
     ADD CONSTRAINT language_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY vocabulary.translation
-    ADD CONSTRAINT translation_pkey PRIMARY KEY (id);
-
 -- fk constraints
 
 ALTER TABLE ONLY vocabulary.word
     ADD CONSTRAINT fk_word_language FOREIGN KEY (language_id) REFERENCES vocabulary.language(id);
 
-ALTER TABLE ONLY vocabulary.translation
-    ADD CONSTRAINT fk_translation_language FOREIGN KEY (language_id) REFERENCES vocabulary.language(id);
+ALTER TABLE ONLY vocabulary.word
+    ADD CONSTRAINT fk_word_language_to FOREIGN KEY (language_to_id) REFERENCES vocabulary.language(id);
 
-ALTER TABLE ONLY vocabulary.translation
-    ADD CONSTRAINT fk_translation_word FOREIGN KEY (word_id) REFERENCES vocabulary.word(id) ON DELETE CASCADE;
+
