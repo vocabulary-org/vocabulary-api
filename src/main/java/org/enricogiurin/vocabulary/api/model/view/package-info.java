@@ -1,10 +1,9 @@
-package org.enricogiurin.vocabulary.api.conf;
-
+package org.enricogiurin.vocabulary.api.model.view;
 /*-
  * #%L
- * YourRents API
+ * Vocabulary API
  * %%
- * Copyright (C) 2023 Your Rents Team
+ * Copyright (C) 2024 Vocabulary Team
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +18,3 @@ package org.enricogiurin.vocabulary.api.conf;
  * limitations under the License.
  * #L%
  */
-
-import com.yourrents.services.common.util.jooq.JooqUtils;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-@ComponentScan(basePackages = {
-    "com.yourrents.services.common.util.exception"})
-public class YourRentsServiceGeodataConfiguration {
-
-  @Bean
-  JooqUtils jooqUtils() {
-    return new JooqUtils();
-  }
-
-}

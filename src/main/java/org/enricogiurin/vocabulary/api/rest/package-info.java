@@ -1,5 +1,4 @@
-package org.enricogiurin.vocabulary.api.mapper;
-
+package org.enricogiurin.vocabulary.api.rest;
 /*-
  * #%L
  * Vocabulary API
@@ -19,11 +18,3 @@ package org.enricogiurin.vocabulary.api.mapper;
  * limitations under the License.
  * #L%
  */
-
-import org.enricogiurin.vocabulary.api.model.Word;
-import org.jooq.Record;
-
-public interface AMapper<T extends java.lang.Record> {
-   T map(Record record);
-
-}

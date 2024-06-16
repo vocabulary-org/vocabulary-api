@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api;
+package org.enricogiurin.vocabulary.api.model.view;
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package org.enricogiurin.vocabulary.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,7 @@ package org.enricogiurin.vocabulary.api;
  * #L%
  */
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
 
-
-@SpringBootApplication
-@EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
-public class VocabularyApiApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(VocabularyApiApplication.class, args);
-  }
+public record LanguageView(String name, String nativeName) {
 
 }

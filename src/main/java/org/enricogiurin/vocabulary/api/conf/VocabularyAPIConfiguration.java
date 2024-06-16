@@ -1,4 +1,5 @@
-package org.enricogiurin.vocabulary.api.mapper;
+package org.enricogiurin.vocabulary.api.conf;
+
 /*-
  * #%L
  * Vocabulary API
@@ -18,3 +19,21 @@ package org.enricogiurin.vocabulary.api.mapper;
  * limitations under the License.
  * #L%
  */
+
+
+import com.yourrents.services.common.util.jooq.JooqUtils;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@ComponentScan(basePackages = {
+    "com.yourrents.services.common.util.exception"})
+public class VocabularyAPIConfiguration {
+
+  @Bean
+  JooqUtils jooqUtils() {
+    return new JooqUtils();
+  }
+
+}
