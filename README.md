@@ -23,6 +23,8 @@ Run the following command:
 ```shell
 ./mvnw spring-boot:run
 ```
+### Accessing Swagger
+[Swagger-localhost](http://localhost:8080/swagger-ui/index.html#/)
 
 ## Credits
 Developed with the [YourRents Geodata](https://github.com/your-rents) technology stack.
