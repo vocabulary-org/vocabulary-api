@@ -1,5 +1,7 @@
 # Vocabulary API
-Vocabulary Builder: Embrace the essence of traditional paper vocabularies in a digital format. Effortlessly organize, learn, and reinforce new words with the added power of interactive flashcards.
+Vocabulary Builder: Embrace the essence of traditional paper vocabularies in a digital format.    
+
+Effortlessly organize, learn, and reinforce new words with the added power of interactive flashcards.
 
 [![Build](https://github.com/egch/vocabulary/actions/workflows/maven.yml/badge.svg)](https://github.com/egch/vocabulary/actions/workflows/maven.yml)
 
