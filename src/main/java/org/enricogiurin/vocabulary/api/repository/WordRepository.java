@@ -57,14 +57,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WordRepository {
 
-  static final String UUID_ALIAS = "uuid";
-  static final String SENTENCE_ALIAS = "sentence";
-  static final String TRANSLATION_ALIAS = "translation";
-  static final String LANGUAGE_ALIAS = "language";
-  static final String LANGUAGE_TO_ALIAS = "languageTo";
-  static final String DESCRIPTION_ALIAS = "description";
-  static final String SEARCH_LANGUAGE_NAME = "language.name";
-  static final String SEARCH_LANGUAGE_TO_NAME = "language.nameTo";
+  public static final String UUID_ALIAS = "uuid";
+  public static final String SENTENCE_ALIAS = "sentence";
+  public static final String TRANSLATION_ALIAS = "translation";
+  public static final String LANGUAGE_ALIAS = "language";
+  public static final String LANGUAGE_TO_ALIAS = "languageTo";
+  public static final String DESCRIPTION_ALIAS = "description";
+  public static final String SEARCH_LANGUAGE_NAME = "language.name";
+  public static final String SEARCH_LANGUAGE_TO_NAME = "language.nameTo";
 
 
   private final DSLContext dsl;

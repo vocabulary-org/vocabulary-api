@@ -22,6 +22,8 @@ package org.enricogiurin.vocabulary.api.rest;
 
 
 import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
@@ -32,6 +34,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,6 +51,14 @@ public class LanguageController {
       @ParameterObject @SortDefault(sort = LanguageRepository.NAME_ALIAS, direction = Direction.ASC) Pageable pagination) {
     Page<Language> page = languageRepository.find(filter, pagination);
     return ResponseEntity.ok(page);
+  }
+
+  @GetMapping("/{uuid}")
+  ResponseEntity<Language> findByUuid(@PathVariable UUID uuid) {
+    Language property = languageRepository.findByExternalId(uuid)
+        .orElseThrow(
+            () -> new DataNotFoundException("can't find Language having uuid: " + uuid));
+    return ResponseEntity.ok(property);
   }
 
 }
