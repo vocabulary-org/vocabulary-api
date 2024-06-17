@@ -20,18 +20,72 @@ package org.enricogiurin.vocabulary.api.rest;
  * #L%
  */
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-//TODO - to complete
-@Disabled
+import java.util.UUID;
+import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.model.Language;
+import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+@SpringBootTest
+@Import(VocabularyTestConfiguration.class)
+@AutoConfigureMockMvc(addFilters = false)
+@Transactional
 class LanguageControllerTest {
 
+  static final int NUM_LANGUAGES = 20;
+
+  @Autowired
+  MockMvc mvc;
+  @Autowired
+  LanguageRepository languageRepository;
+
+  @Value("${application.api.basepath}/language")
+  String basePath;
+
   @Test
-  void getLanguages() {
+  void findAllWithPageSize5() throws Exception {
+    mvc.perform(get(basePath)
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("page", "0")
+            .param("size", "5"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content", hasSize(5)))
+        .andExpect(jsonPath("$.content[0].name", is("Arabic")))
+        .andExpect(jsonPath("$.content[0].nativeName", is("العربية")))
+        .andExpect(jsonPath("$.content[1].name", is("Bengali")))
+        .andExpect(jsonPath("$.content[1].nativeName", is("বাংলা")))
+        .andExpect(jsonPath("$.page.totalPages", is(4)))
+        .andExpect(jsonPath("$.page.totalElements", is(NUM_LANGUAGES)))
+        .andExpect(jsonPath("$.page.size", is(5)))
+        .andExpect(jsonPath("$.page.number", is(0)));
   }
 
   @Test
-  void findByUuid() {
+  void findByUuid() throws Exception {
+    UUID es = languageRepository.findById(4).map(Language::uuid).orElseThrow();
+    mvc.perform(get(basePath + "/" + es).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.uuid").isNotEmpty())
+        .andExpect(jsonPath("$.code", is("es")))
+        .andExpect(jsonPath("$.name", is("Spanish")))
+        .andExpect(jsonPath("$.nativeName", is("Español")));
   }
 }

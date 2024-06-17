@@ -5,8 +5,12 @@ spring:
     url: jdbc:postgresql://localhost:25432/vocabulary_api
     username: enrico
     password: enrico
+  data:
+    web:
+      pageable:
+        max-page-size: 2147483647
 
-# Database Flyway migrations
+  # Database Flyway migrations
   flyway:
     locations: classpath:/db/migration
     schemas: vocabulary

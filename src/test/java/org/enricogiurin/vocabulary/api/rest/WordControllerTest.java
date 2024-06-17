@@ -27,10 +27,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,12 +39,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Import(VocabularyTestConfiguration.class)
 @AutoConfigureMockMvc(addFilters = false)
+@Transactional
 class WordControllerTest {
   static final int NUM_WORDS = 5;
+  static UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
   @Autowired
   MockMvc mvc;
@@ -69,25 +72,22 @@ class WordControllerTest {
         .andExpect(jsonPath("$.content[4].sentence", is("tomcat")))
         .andExpect(jsonPath("$.page.totalPages", is(1)))
         .andExpect(jsonPath("$.page.totalElements", is(NUM_WORDS)))
-        //TODO - fix this
-        //.andExpect(jsonPath("$.page.size", is(2147483647)))
+        .andExpect(jsonPath("$.page.size", is(Integer.MAX_VALUE)))
         .andExpect(jsonPath("$.page.number", is(0)));
   }
 
 
   @Test
-  void findByUuid() {
+  void findByUuid() throws Exception {
+    mvc.perform(get(basePath + "/" + HELLO_UUID).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.sentence", is("Hello")))
+        .andExpect(jsonPath("$.translation", is("Salve")))
+        .andExpect(jsonPath("$.language.name", is("English")))
+        .andExpect(jsonPath("$.language.nativeName", is("English")))
+        .andExpect(jsonPath("$.languageTo.name", is("Italian")))
+        .andExpect(jsonPath("$.languageTo.nativeName", is("Italiano")));
   }
 
-  @Test
-  void add() {
-  }
-
-  @Test
-  void update() {
-  }
-
-  @Test
-  void delete() {
-  }
 }
