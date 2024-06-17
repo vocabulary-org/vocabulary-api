@@ -1,4 +1,4 @@
-# vocabulary API
+# Vocabulary API
 Vocabulary Builder: Embrace the essence of traditional paper vocabularies in a digital format. Effortlessly organize, learn, and reinforce new words with the added power of interactive flashcards.
 
 [![Build](https://github.com/egch/vocabulary/actions/workflows/maven.yml/badge.svg)](https://github.com/egch/vocabulary/actions/workflows/maven.yml)
@@ -25,4 +25,4 @@ Run the following command:
 ```
 
 ## Credits
-Developed with the [YourRents Geodata](https://github.com/your-rents) technology stack
+Developed with the [YourRents Geodata](https://github.com/your-rents) technology stack.
