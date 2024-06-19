@@ -9,6 +9,14 @@ spring:
     web:
       pageable:
         max-page-size: 2147483647
+  ### oauth2 configuration ###
+  security:
+    oauth2:
+      client:
+        registration:
+          google :
+            clientId: <YOUR-CLIENT-ID>
+            clientSecret: <YOUR-CLIENT-SECRET>
 
   # Database Flyway migrations
   flyway:
@@ -19,3 +27,5 @@ application:
     version: v1
     description: ${spring.application.name}
     base-path: /api/${application.api.version}/vocabulary
+
+
