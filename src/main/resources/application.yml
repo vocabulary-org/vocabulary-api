@@ -1,3 +1,6 @@
+server:
+  port: 9090
+
 spring:
   application:
     name: Vocabulary API
@@ -15,8 +18,8 @@ spring:
       client:
         registration:
           google :
-            clientId: <YOUR-CLIENT-ID>
-            clientSecret: <YOUR-CLIENT-SECRET>
+            clientId: ${google.clientId}
+            clientSecret: ${google.clientSecret}
 
   # Database Flyway migrations
   flyway:
