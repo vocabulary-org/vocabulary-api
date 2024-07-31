@@ -35,10 +35,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.model.view.LanguageView;
 import org.enricogiurin.vocabulary.api.model.view.WordView;
+import org.enricogiurin.vocabulary.api.service.UserService;
 import org.enricogiurin.vocabulary.jooq.tables.records.WordRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -55,6 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class WordRepository {
 
   public static final String UUID_ALIAS = "uuid";
@@ -70,8 +73,11 @@ public class WordRepository {
   private final DSLContext dsl;
   private final JooqUtils jooqUtils;
   private final LanguageRepository languageRepository;
+  private final UserService userService;
 
   public Optional<WordView> findByExternalId(UUID externalId) {
+    final String authenticatedUserEmail = userService.getAuthenticatedUserEmail();
+    log.info("authenticated user: {}", authenticatedUserEmail);
     return getSelect()
         .where(WORD.EXTERNAL_ID.eq(externalId))
         .fetchOptional()

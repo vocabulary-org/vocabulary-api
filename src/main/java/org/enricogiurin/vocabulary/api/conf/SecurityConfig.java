@@ -32,9 +32,11 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.authorizeRequests()
-        .anyRequest().authenticated()
-        .and()
+    http
+        .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.requireCsrfProtectionMatcher(request -> false))
+        .authorizeRequests(authorizeRequests ->
+            authorizeRequests
+                .anyRequest().authenticated())
         .oauth2Login(Customizer.withDefaults());
     return http.build();
   }

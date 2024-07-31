@@ -57,8 +57,7 @@ public class LanguageController {
   }
 
   @GetMapping("/{uuid}")
-  ResponseEntity<Language> findByUuid(@PathVariable UUID uuid, Principal principal) {
-    log.info("authenticated user: {}", principal.getName());
+  ResponseEntity<Language> findByUuid(@PathVariable UUID uuid) {
     Language property = languageRepository.findByExternalId(uuid)
         .orElseThrow(
             () -> new DataNotFoundException("can't find Language having uuid: " + uuid));
