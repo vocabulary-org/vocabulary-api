@@ -18,13 +18,18 @@
 -- #L%
 ---
 
+INSERT INTO vocabulary.user (id, username, email, external_id)
+VALUES (1000000, 'enricogiurin', 'enricogiurin@gmail.com', '00000000-0000-0000-0000-000000000006'),
+       (1000001, 'luciobenfante', 'benfante@gmail.com', '00000000-0000-0000-0000-000000000007')
+;
 
 --test data for word
-INSERT INTO vocabulary.word (id, sentence, translation, description, language_id, language_to_id, external_id)
-VALUES (1000000, 'Hello', 'Salve', null, 1, 20, '00000000-0000-0000-0000-000000000001'),
-       (1000001, 'my house', 'La mia casa', 'my own house', 1, 20, '00000000-0000-0000-0000-000000000002'),
-       (1000002, 'cat', 'gatto', null, 1, 20, '00000000-0000-0000-0000-000000000003'),
-       (1000003, 'tomcat',  'gattone', 'my big gat', 1, 20, '00000000-0000-0000-0000-000000000004'),
-       (1000004, 'Latte',  'die Milk', 'milk', 20, 11, '00000000-0000-0000-0000-000000000005')
+INSERT INTO vocabulary.word (id, sentence, translation, description, language_id, language_to_id,
+                             user_id, external_id)
+VALUES (1000000, 'Hello', 'Salve', null, 1, 20, null, '00000000-0000-0000-0000-000000000001'),
+       (1000001, 'my house', 'La mia casa', 'my own house', 1, 20, null, '00000000-0000-0000-0000-000000000002'),
+       (1000002, 'cat', 'gatto', null, 1, 20, null, '00000000-0000-0000-0000-000000000003'),
+       (1000003, 'tomcat', 'gattone', 'my big gat', 1, 20, 1000000, '00000000-0000-0000-0000-000000000004'),
+       (1000004, 'Latte', 'die Milk', 'milk', 20, 11, 1000001, '00000000-0000-0000-0000-000000000005')
 ;
 

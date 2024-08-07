@@ -22,7 +22,5 @@ package org.enricogiurin.vocabulary.api.model;
 
 import java.util.UUID;
 
-public record Word(UUID uuid, String sentence, String translation, String description,
-                   UUID languageUuid, UUID languageToUuid, UUID userUuid) {
-
+public record User(UUID uuid, String username, String email) {
 }
