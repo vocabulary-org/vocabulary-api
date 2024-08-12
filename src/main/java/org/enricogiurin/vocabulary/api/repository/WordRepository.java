@@ -91,15 +91,6 @@ public class WordRepository {
         .map(this::map);
   }
 
-  public Integer findLanguageIdByUuid(UUID wordUuid) {
-    return dsl.select(WORD.ID)
-        .from(WORD)
-        .where(WORD.EXTERNAL_ID.eq(wordUuid))
-        .fetchOptional(WORD.ID).orElseThrow(
-            () -> new DataNotFoundException("Word not found: "
-                + wordUuid));
-  }
-
   public Page<WordView> find(Searchable filter, Pageable pageable) {
     Select<?> result = jooqUtils.paginate(
         dsl,
