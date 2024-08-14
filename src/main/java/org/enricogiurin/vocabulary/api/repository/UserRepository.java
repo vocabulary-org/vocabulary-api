@@ -69,16 +69,9 @@ public class UserRepository {
         .map(this::map);
   }
 
-  public Optional<User> findByExternalId(UUID externalId) {
-    return getSelect()
-        .where(USER.EXTERNAL_ID.eq(externalId))
-        .fetchOptional()
-        .map(this::map);
-  }
 
   public Integer findUserIdByAuthenticatedEmail() {
-    return dsl.select(USER.ID)
-        .from(USER)
+    return getSelect()
         .fetchOptional(USER.ID).orElseThrow(
             () -> new DataNotFoundException("User not found: "
                 + userService.getAuthenticatedUserEmail()));

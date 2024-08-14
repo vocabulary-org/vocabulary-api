@@ -114,7 +114,7 @@ public class WordRepository {
    */
   @Transactional(readOnly = false)
   public WordView create(Word word) {
-    String authenticatedUserEmail = userService.getAuthenticatedUserEmail();
+
     Integer userIdByAuthenticatedEmail = userRepository.findUserIdByAuthenticatedEmail();
     WordRecord wordRecord = dsl.newRecord(WORD);
     Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(word.languageUuid());
