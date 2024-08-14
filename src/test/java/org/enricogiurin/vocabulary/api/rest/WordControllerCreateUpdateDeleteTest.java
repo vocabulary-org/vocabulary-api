@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.rest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -31,15 +32,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.component.AuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.view.WordView;
 import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -62,8 +66,17 @@ class WordControllerCreateUpdateDeleteTest {
   @Value("${application.api.basepath}/word")
   String basePath;
 
+  @MockBean
+  AuthenticatedUserProvider authenticatedUserProvider;
+
+  @BeforeEach
+  void setUp() {
+    when(authenticatedUserProvider.getAuthenticatedUserEmail())
+        .thenReturn("enrico@gmail.com");
+  }
+
   @Test
-  void createNewProperty() throws Exception {
+  void createNewWord() throws Exception {
     UUID es = languageRepository.findById(4).map(Language::uuid).orElseThrow();
     UUID ru = languageRepository.findById(8).map(Language::uuid).orElseThrow();
     mvc.perform(post(basePath)
@@ -87,7 +100,7 @@ class WordControllerCreateUpdateDeleteTest {
   }
 
   @Test
-  void createNewPropertyWithANotExistingLanguage() throws Exception {
+  void createNewWordWithANotExistingLanguage() throws Exception {
     UUID es = languageRepository.findById(4).map(Language::uuid).orElseThrow();
     UUID randomUUID = UUID.randomUUID();
     mvc.perform(post(basePath)

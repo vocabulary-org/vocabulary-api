@@ -37,11 +37,11 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.enricogiurin.vocabulary.api.component.AuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.model.view.LanguageView;
 import org.enricogiurin.vocabulary.api.model.view.WordView;
-import org.enricogiurin.vocabulary.api.service.UserService;
 import org.enricogiurin.vocabulary.jooq.tables.records.WordRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -74,7 +74,7 @@ public class WordRepository {
   private final DSLContext dsl;
   private final JooqUtils jooqUtils;
   private final LanguageRepository languageRepository;
-  private final UserService userService;
+  private final AuthenticatedUserProvider authenticatedUserProvider;
   private final UserRepository userRepository;
 
   public Optional<WordView> findByExternalId(UUID externalId) {
@@ -194,7 +194,7 @@ public class WordRepository {
 
 
   private SelectConditionStep<Record6<UUID, String, String, String, LanguageView, LanguageView>> getSelect() {
-    final String authenticatedUserEmail = userService.getAuthenticatedUserEmail();
+    final String authenticatedUserEmail = authenticatedUserProvider.getAuthenticatedUserEmail();
     log.info("authenticated user: {}", authenticatedUserEmail);
     return dsl.select(
             WORD.EXTERNAL_ID.as(UUID_ALIAS),

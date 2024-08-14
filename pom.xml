@@ -66,6 +66,7 @@
 		<testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
 		<plugins.testcontainers.version>1.19.8</plugins.testcontainers.version>
 		<plugins.postgresql.version>42.7.3</plugins.postgresql.version>
+		<spring-security-test.version>6.3.1</spring-security-test.version>
 		<your-rents-services-geodata.version>0.0.4</your-rents-services-geodata.version>
 
 	</properties>
@@ -157,6 +158,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<version>${spring-security-test.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

@@ -23,7 +23,7 @@ CREATE TABLE vocabulary.user
 (
     id          SERIAL,
     username    character varying(256) NOT NULL,
-    email       character varying(256) NOT NULL,
+    email       character varying(256) NOT NULL UNIQUE,
     created_at  TIMESTAMP                              DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP                              DEFAULT CURRENT_TIMESTAMP,
     external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
@@ -37,7 +37,7 @@ CREATE TABLE vocabulary.word
     description    TEXT,
     language_id    integer                NOT NULL,
     language_to_id integer                NOT NULL,
-    user_id        integer,
+    user_id        integer                NOT NULL,
     created_at     TIMESTAMP                              DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMP                              DEFAULT CURRENT_TIMESTAMP,
     external_id    UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()

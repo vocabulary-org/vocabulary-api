@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.service;
+package org.enricogiurin.vocabulary.api.component;
 /*-
  * #%L
  * Vocabulary API

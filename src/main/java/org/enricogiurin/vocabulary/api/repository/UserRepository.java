@@ -22,29 +22,21 @@ package org.enricogiurin.vocabulary.api.repository;
 
 import static org.enricogiurin.vocabulary.jooq.Tables.USER;
 
-import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.common.util.jooq.JooqUtils;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.enricogiurin.vocabulary.api.component.AuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.model.User;
-import org.enricogiurin.vocabulary.api.service.UserService;
 import org.enricogiurin.vocabulary.jooq.tables.records.UserRecord;
 import org.jooq.DSLContext;
-import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Record3;
-import org.jooq.Select;
 import org.jooq.SelectJoinStep;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +51,7 @@ public class UserRepository {
   public static final String EMAIL_ALIAS = "email";
   private final DSLContext dsl;
   private final JooqUtils jooqUtils;
-  private final UserService userService;
+  private final AuthenticatedUserProvider authenticatedUserProvider;
 
 
   public Optional<User> findById(Integer id) {
@@ -71,24 +63,15 @@ public class UserRepository {
 
 
   public Integer findUserIdByAuthenticatedEmail() {
-    return getSelect()
+    String authenticatedUserEmail = authenticatedUserProvider.getAuthenticatedUserEmail();
+    return dsl.select(USER.ID)
+        .from(USER)
+        .where(USER.EMAIL.eq(authenticatedUserEmail))
         .fetchOptional(USER.ID).orElseThrow(
             () -> new DataNotFoundException("User not found: "
-                + userService.getAuthenticatedUserEmail()));
+                + authenticatedUserEmail));
   }
 
-  public Page<User> find(Searchable filter, Pageable pageable) {
-    Select<?> result = jooqUtils.paginate(
-        dsl,
-        jooqUtils.getQueryWithConditionsAndSorts(getSelect(),
-            filter, this::getSupportedField,
-            pageable, this::getSupportedField),
-        pageable.getPageSize(), pageable.getOffset());
-    List<User> users = result.fetch(this::map);
-    int totalRows = Objects.requireNonNullElse(
-        result.fetchAny("total_rows", Integer.class), 0);
-    return new PageImpl<>(users, pageable, totalRows);
-  }
 
   /**
    * Create a new User.
@@ -123,14 +106,5 @@ public class UserRepository {
     );
   }
 
-  private Field<?> getSupportedField(String field) {
-    return switch (field) {
-      case UUID_ALIAS -> USER.EXTERNAL_ID;
-      case USERNAME_ALIAS -> USER.USERNAME;
-      case EMAIL_ALIAS -> USER.EMAIL;
-      default -> throw new IllegalArgumentException(
-          "Unexpected value for filter/sort field: " + field);
-    };
-  }
 
 }

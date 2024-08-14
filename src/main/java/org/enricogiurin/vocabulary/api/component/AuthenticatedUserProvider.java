@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.service;
+package org.enricogiurin.vocabulary.api.component;
 
 /*-
  * #%L
@@ -24,15 +24,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class UserService {
+@Component
+public class AuthenticatedUserProvider {
 
   public String getAuthenticatedUserEmail() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication instanceof OAuth2AuthenticationToken) {
-      OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
+    if (authentication instanceof OAuth2AuthenticationToken authToken) {
       OAuth2User user = authToken.getPrincipal();
       return user.getAttribute("email");
     }
