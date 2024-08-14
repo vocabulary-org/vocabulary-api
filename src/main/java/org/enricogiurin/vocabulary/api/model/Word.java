@@ -23,6 +23,6 @@ package org.enricogiurin.vocabulary.api.model;
 import java.util.UUID;
 
 public record Word(UUID uuid, String sentence, String translation, String description,
-                   UUID languageUuid, UUID languageToUuid, UUID userUuid) {
+                   UUID languageUuid, UUID languageToUuid) {
 
 }

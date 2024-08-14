@@ -21,9 +21,9 @@ package org.enricogiurin.vocabulary.api.repository;
  */
 
 import static org.enricogiurin.vocabulary.jooq.Tables.USER;
-import static org.enricogiurin.vocabulary.jooq.tables.Word.WORD;
 
 import com.yourrents.services.common.searchable.Searchable;
+import com.yourrents.services.common.util.exception.DataNotFoundException;
 import com.yourrents.services.common.util.jooq.JooqUtils;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.model.User;
+import org.enricogiurin.vocabulary.api.service.UserService;
 import org.enricogiurin.vocabulary.jooq.tables.records.UserRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -58,20 +59,29 @@ public class UserRepository {
   public static final String EMAIL_ALIAS = "email";
   private final DSLContext dsl;
   private final JooqUtils jooqUtils;
+  private final UserService userService;
 
 
   public Optional<User> findById(Integer id) {
     return getSelect()
-        .where(WORD.ID.eq(id))
+        .where(USER.ID.eq(id))
         .fetchOptional()
         .map(this::map);
   }
 
   public Optional<User> findByExternalId(UUID externalId) {
     return getSelect()
-        .where(WORD.EXTERNAL_ID.eq(externalId))
+        .where(USER.EXTERNAL_ID.eq(externalId))
         .fetchOptional()
         .map(this::map);
+  }
+
+  public Integer findUserIdByAuthenticatedEmail() {
+    return dsl.select(USER.ID)
+        .from(USER)
+        .fetchOptional(USER.ID).orElseThrow(
+            () -> new DataNotFoundException("User not found: "
+                + userService.getAuthenticatedUserEmail()));
   }
 
   public Page<User> find(Searchable filter, Pageable pageable) {
@@ -109,7 +119,7 @@ public class UserRepository {
             USER.EXTERNAL_ID.as(UUID_ALIAS),
             USER.USERNAME.as(USERNAME_ALIAS),
             USER.EMAIL.as(EMAIL_ALIAS))
-        .from(WORD);
+        .from(USER);
   }
 
   private User map(Record record) {

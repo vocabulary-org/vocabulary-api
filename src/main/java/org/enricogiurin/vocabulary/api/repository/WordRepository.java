@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.repository;
 
 
 import static org.enricogiurin.vocabulary.jooq.Tables.LANGUAGE;
+import static org.enricogiurin.vocabulary.jooq.Tables.USER;
 import static org.enricogiurin.vocabulary.jooq.tables.Word.WORD;
 import static org.jooq.Functions.nullOnAllNull;
 import static org.jooq.impl.DSL.row;
@@ -47,7 +48,7 @@ import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Record6;
 import org.jooq.Select;
-import org.jooq.SelectOnConditionStep;
+import org.jooq.SelectConditionStep;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -74,19 +75,19 @@ public class WordRepository {
   private final JooqUtils jooqUtils;
   private final LanguageRepository languageRepository;
   private final UserService userService;
+  private final UserRepository userRepository;
 
   public Optional<WordView> findByExternalId(UUID externalId) {
-    final String authenticatedUserEmail = userService.getAuthenticatedUserEmail();
-    log.info("authenticated user: {}", authenticatedUserEmail);
+
     return getSelect()
-        .where(WORD.EXTERNAL_ID.eq(externalId))
+        .and(WORD.EXTERNAL_ID.eq(externalId))
         .fetchOptional()
         .map(this::map);
   }
 
   public Optional<WordView> findById(Integer id) {
     return getSelect()
-        .where(WORD.ID.eq(id))
+        .and(WORD.ID.eq(id))
         .fetchOptional()
         .map(this::map);
   }
@@ -113,6 +114,8 @@ public class WordRepository {
    */
   @Transactional(readOnly = false)
   public WordView create(Word word) {
+    String authenticatedUserEmail = userService.getAuthenticatedUserEmail();
+    Integer userIdByAuthenticatedEmail = userRepository.findUserIdByAuthenticatedEmail();
     WordRecord wordRecord = dsl.newRecord(WORD);
     Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(word.languageUuid());
     Integer languageToIdByUuid = languageRepository.findLanguageIdByUuid(word.languageToUuid());
@@ -121,6 +124,7 @@ public class WordRepository {
     wordRecord.setSentence(word.sentence());
     wordRecord.setTranslation(word.translation());
     wordRecord.setDescription(word.description());
+    wordRecord.setUserId(userIdByAuthenticatedEmail);
     wordRecord.setCreatedAt(LocalDateTime.now());
     wordRecord.insert();
     return findById(wordRecord.getId()).orElseThrow(
@@ -189,7 +193,9 @@ public class WordRepository {
   }
 
 
-  private SelectOnConditionStep<Record6<UUID, String, String, String, LanguageView, LanguageView>> getSelect() {
+  private SelectConditionStep<Record6<UUID, String, String, String, LanguageView, LanguageView>> getSelect() {
+    final String authenticatedUserEmail = userService.getAuthenticatedUserEmail();
+    log.info("authenticated user: {}", authenticatedUserEmail);
     return dsl.select(
             WORD.EXTERNAL_ID.as(UUID_ALIAS),
             WORD.SENTENCE.as(SENTENCE_ALIAS),
@@ -201,7 +207,11 @@ public class WordRepository {
                 .mapping(nullOnAllNull(LanguageView::new)).as(LANGUAGE_TO_ALIAS)
         )
         .from(WORD)
-        .leftJoin(LANGUAGE).on(WORD.LANGUAGE_ID.eq(LANGUAGE.ID));
+        .leftJoin(LANGUAGE).on(WORD.LANGUAGE_ID.eq(LANGUAGE.ID))
+        .join(USER).on(WORD.USER_ID.eq(USER.ID))
+        .where(USER.EMAIL.eq(authenticatedUserEmail));
+
+
   }
 
   private Field<?> getSupportedField(String field) {

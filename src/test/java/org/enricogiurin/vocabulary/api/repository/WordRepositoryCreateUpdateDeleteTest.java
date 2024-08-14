@@ -60,7 +60,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   void createANewWord() {
     Language en = languageRepository.findById(LANGUAGE_ENGLISH_ID).orElseThrow();
     Language de = languageRepository.findById(LANGUAGE_GERMAN_ID).orElseThrow();
-    Word newWord = new Word(null, "dog", "der Hund", "my dog", en.uuid(), de.uuid(), null);
+    Word newWord = new Word(null, "dog", "der Hund", "my dog", en.uuid(), de.uuid());
     WordView result = wordRepository.create(newWord);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
@@ -77,7 +77,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   void createANewWordWithANotExistingLanguage() {
     Language en = languageRepository.findById(LANGUAGE_ENGLISH_ID).orElseThrow();
     UUID randomUUID = UUID.randomUUID();
-    Word newWord = new Word(null, "dog", "der Hund", "my dog", en.uuid(), randomUUID, null);
+    Word newWord = new Word(null, "dog", "der Hund", "my dog", en.uuid(), randomUUID);
     DataNotFoundException ex = assertThrows(DataNotFoundException.class,
         () -> wordRepository.create(newWord));
     assertThat(ex.getMessage(), equalTo("Language not found: " + randomUUID));
@@ -109,7 +109,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   @Test
   void updateAnExistingWord() {
     WordView word = wordRepository.findById(HELLO_ID).orElseThrow();
-    Word updateWord = new Word(null, null, "new translation", "new description", null, null, null);
+    Word updateWord = new Word(null, null, "new translation", "new description", null, null);
     WordView result = wordRepository.update(word.uuid(), updateWord);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
@@ -121,7 +121,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   @Test
   void updateANotExistingWord() {
     UUID randomUUID = UUID.randomUUID();
-    Word updateWord = new Word(null, null, "new translation", "new description", null, null, null);
+    Word updateWord = new Word(null, null, "new translation", "new description", null, null);
     DataNotFoundException ex = assertThrows(DataNotFoundException.class,
         () -> wordRepository.update(randomUUID, updateWord));
     assertThat(ex.getMessage(), equalTo("Word not found: " + randomUUID));
