@@ -19,24 +19,37 @@
 ---
 
 
-CREATE TABLE vocabulary.word (
-    id SERIAL,
-    sentence character varying(256) NOT NULL,
-    translation TEXT NOT NULL,
-    description TEXT,
-    language_id integer NOT NULL,
-    language_to_id integer NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
+CREATE TABLE vocabulary.user
+(
+    id          SERIAL,
+    username    character varying(256) NOT NULL,
+    email       character varying(256) NOT NULL UNIQUE,
+    created_at  TIMESTAMP                              DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP                              DEFAULT CURRENT_TIMESTAMP,
+    external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
-CREATE TABLE vocabulary.language (
-   id SERIAL,
-   name VARCHAR(100) NOT NULL,
-   code VARCHAR(10) NOT NULL UNIQUE,
-   native_name VARCHAR(100) NOT NULL,
-   external_id UUID NOT NULL UNIQUE DEFAULT gen_random_uuid()
+CREATE TABLE vocabulary.word
+(
+    id             SERIAL,
+    sentence       character varying(256) NOT NULL,
+    translation    TEXT                   NOT NULL,
+    description    TEXT,
+    language_id    integer                NOT NULL,
+    language_to_id integer                NOT NULL,
+    user_id        integer                NOT NULL,
+    created_at     TIMESTAMP                              DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP                              DEFAULT CURRENT_TIMESTAMP,
+    external_id    UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);
+
+CREATE TABLE vocabulary.language
+(
+    id          SERIAL,
+    name        VARCHAR(100) NOT NULL,
+    code        VARCHAR(10)  NOT NULL UNIQUE,
+    native_name VARCHAR(100) NOT NULL,
+    external_id UUID         NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
 

@@ -66,6 +66,7 @@
 		<testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
 		<plugins.testcontainers.version>1.19.8</plugins.testcontainers.version>
 		<plugins.postgresql.version>42.7.3</plugins.postgresql.version>
+		<spring-security-test.version>6.3.1</spring-security-test.version>
 		<your-rents-services-geodata.version>0.0.4</your-rents-services-geodata.version>
 
 	</properties>
@@ -82,7 +83,7 @@
 			<version>${your-rents-services-geodata.version}</version>
 		</dependency>
 
-		<!-- spring dependencies -->
+		<!-- spring boot dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -94,6 +95,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -112,15 +121,17 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+		<!-- spring dependencies -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc-openapi-ui.version}</version>
 			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-commons</artifactId>
 		</dependency>
 
 		<!-- other dependencies -->
@@ -147,6 +158,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<version>${spring-security-test.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

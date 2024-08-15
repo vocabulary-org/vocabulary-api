@@ -23,8 +23,10 @@ package org.enricogiurin.vocabulary.api.rest;
 
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
+import java.security.Principal;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.springdoc.core.annotations.ParameterObject;
@@ -41,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${application.api.base-path}/language")
 @RequiredArgsConstructor
+@Slf4j
 public class LanguageController {
 
   private final LanguageRepository languageRepository;

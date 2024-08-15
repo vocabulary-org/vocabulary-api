@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.rest;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -29,13 +30,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.component.AuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -58,8 +62,11 @@ class WordControllerTest {
   @Value("${application.api.basepath}/word")
   String basePath;
 
+  @MockBean
+  AuthenticatedUserProvider authenticatedUserProvider;
+
   @Test
-  void findAll() throws Exception {
+  void findAllEnrico() throws Exception {
     mvc.perform(get(basePath)
             .contentType(MediaType.APPLICATION_JSON)
             .param("page", "0")
@@ -67,11 +74,12 @@ class WordControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content", hasSize(NUM_WORDS)))
+        .andExpect(jsonPath("$.content", hasSize(5)))
         .andExpect(jsonPath("$.content[0].sentence", is("cat")))
         .andExpect(jsonPath("$.content[4].sentence", is("tomcat")))
+
         .andExpect(jsonPath("$.page.totalPages", is(1)))
-        .andExpect(jsonPath("$.page.totalElements", is(NUM_WORDS)))
+        .andExpect(jsonPath("$.page.totalElements", is(5)))
         .andExpect(jsonPath("$.page.size", is(Integer.MAX_VALUE)))
         .andExpect(jsonPath("$.page.number", is(0)));
   }
@@ -90,4 +98,9 @@ class WordControllerTest {
         .andExpect(jsonPath("$.languageTo.nativeName", is("Italiano")));
   }
 
+  @BeforeEach
+  void setUp() {
+    when(authenticatedUserProvider.getAuthenticatedUserEmail())
+        .thenReturn("enrico@gmail.com");
+  }
 }

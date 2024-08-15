@@ -11,22 +11,24 @@ Effortlessly organize, learn, and reinforce new words with the added power of in
 - A Docker environment supported by Testcontainers: <https://www.testcontainers.org/supported_docker_environment/> (a recent local Docker installation is enough)
 
 ## Getting Started
-
 Clone the repository and run the following command to build the project:
 
 ```shell
 $ mvn clean verify
 ```
 
-## Running the service in development
-
-Run the following command:
+## starting the application locally
+Replace client-id and client-secret with your own.
+### from cli with maven
 
 ```shell
-$ mvn spring-boot:run
+$ mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dgoogle.clientId=<client-id> -Dgoogle.clientSecret=<client-secret>"
 ```
+
+### with intellij
+![img.png](docs/images/intellij.png)
 ### Accessing Swagger
-[Swagger-localhost](http://localhost:8080/swagger-ui/index.html#/)
+[Swagger-localhost](http://localhost:9090/swagger-ui/index.html#/)
 
 ## Credits
 Developed with the [YourRents Geodata](https://github.com/your-rents) technology stack.
