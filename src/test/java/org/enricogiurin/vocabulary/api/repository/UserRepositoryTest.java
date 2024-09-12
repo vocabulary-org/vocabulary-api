@@ -22,11 +22,13 @@ package org.enricogiurin.vocabulary.api.repository;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.component.AuthenticatedUserProvider;
-import org.junit.jupiter.api.BeforeEach;
+import org.enricogiurin.vocabulary.api.model.User;
+import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,17 +45,65 @@ class UserRepositoryTest {
   UserRepository userRepository;
 
   @MockBean
-  AuthenticatedUserProvider authenticatedUserProvider;
+  IAuthenticatedUserProvider authenticatedUserProvider;
 
-  @BeforeEach
-  void setUp() {
-    when(authenticatedUserProvider.getAuthenticatedUserEmail())
-        .thenReturn("enrico@gmail.com");
+
+  @Test
+  void findById() {
+    //when
+    User user = userRepository.findById(1000000).orElseThrow();
+    //then
+    assertThat(user).isNotNull();
+    assertThat(user.username()).isEqualTo("enrico");
+    assertThat(user.email()).isEqualTo("enrico@gmail.com");
+    assertThat(user.uuid()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000007"));
   }
 
   @Test
-  void findUserIdByAuthenticatedEmail() {
-    Integer userIdByAuthenticatedEmail = userRepository.findUserIdByAuthenticatedEmail();
+  void findIdByAuthenticatedEmail() {
+    //given
+    when(authenticatedUserProvider.getAuthenticatedUserEmail())
+        .thenReturn("enrico@gmail.com");
+    //when
+    Integer userIdByAuthenticatedEmail = userRepository.findIdByAuthenticatedEmail();
+    //then
     assertThat(userIdByAuthenticatedEmail).isEqualTo(1000000);
+  }
+
+  @Test
+  void add() {
+    //given
+    User newUser = new User(null, "john", "john@gmail.com", false);
+    //when
+    User result = userRepository.add(newUser);
+    //then
+    assertThat(result).isNotNull();
+    assertThat(result.uuid()).isNotNull();
+    assertThat(result.username()).isEqualTo("john");
+    assertThat(result.email()).isEqualTo("john@gmail.com");
+  }
+
+  @Test
+  void addAnExistingUser() {
+    //given
+    userRepository.findByEmail("enrico@gmail.com").orElseThrow();
+    User user = new User(null, "john", "enrico@gmail.com", false);
+    //when-then
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> userRepository.add(user))
+        .withMessageContaining("is already present in the User table");
+
+  }
+
+  @Test
+  void update() {
+    User oldUser = userRepository.findById(1000000).orElseThrow();
+    User user = new User(null, "John", "a@google.com", true);
+    User result = userRepository.update(oldUser.uuid(), user);
+    assertThat(result).isNotNull();
+    assertThat(result.uuid()).isNotNull();
+    assertThat(result.username()).isEqualTo("John");
+    assertThat(result.email()).isEqualTo("a@google.com");
+    assertThat(result.isAdmin()).isTrue();
   }
 }

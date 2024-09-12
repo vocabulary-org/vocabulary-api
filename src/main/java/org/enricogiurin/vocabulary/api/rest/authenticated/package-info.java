@@ -1,5 +1,4 @@
-package org.enricogiurin.vocabulary.api.model;
-
+package org.enricogiurin.vocabulary.api.rest.authenticated;
 /*-
  * #%L
  * Vocabulary API
@@ -19,8 +18,3 @@ package org.enricogiurin.vocabulary.api.model;
  * limitations under the License.
  * #L%
  */
-
-import java.util.UUID;
-
-public record User(UUID uuid, String username, String email, Boolean isAdmin) {
-}

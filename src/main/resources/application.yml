@@ -1,5 +1,6 @@
 server:
   port: 9090
+  forward-headers-strategy: framework
 
 spring:
   application:
@@ -20,6 +21,9 @@ spring:
           google :
             clientId: ${google.clientId}
             clientSecret: ${google.clientSecret}
+            scope: profile, email
+            redirect-uri: "http://localhost:9090/login/oauth2/code/google"
+            client-name: vocabulary-localhost
 
   # Database Flyway migrations
   flyway:
@@ -30,5 +34,9 @@ application:
     version: v1
     description: ${spring.application.name}
     base-path: /api/${application.api.version}/vocabulary
+    admin-path: ${application.api.base-path}/admin
+    user-path: ${application.api.base-path}/user
+    authenticated-path: ${application.api.base-path}/authenticated
+    public-path: ${application.api.base-path}/public
 
 

@@ -6,7 +6,6 @@ Effortlessly organize, learn, and reinforce new words with the added power of in
 [![Build](https://github.com/egch/vocabulary/actions/workflows/maven.yml/badge.svg)](https://github.com/egch/vocabulary/actions/workflows/maven.yml)
 
 ## Prerequisites
-
 - Java 21+
 - A Docker environment supported by Testcontainers: <https://www.testcontainers.org/supported_docker_environment/> (a recent local Docker installation is enough)
 
@@ -29,6 +28,9 @@ $ mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dgoogle.clientId=<client-
 ![img.png](docs/images/intellij.png)
 ### Accessing Swagger
 [Swagger-localhost](http://localhost:9090/swagger-ui/index.html#/)
+
+### Login Page
+![img.png](docs/images/login.png)
 
 ## Credits
 Developed with the [YourRents Geodata](https://github.com/your-rents) technology stack.

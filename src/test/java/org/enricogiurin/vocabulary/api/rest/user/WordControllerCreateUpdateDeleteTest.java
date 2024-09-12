@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest;
+package org.enricogiurin.vocabulary.api.rest.user;
 
 /*-
  * #%L
@@ -32,11 +32,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.component.AuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.view.WordView;
 import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
+import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,11 +63,11 @@ class WordControllerCreateUpdateDeleteTest {
   LanguageRepository languageRepository;
   @Autowired
   WordRepository wordRepository;
-  @Value("${application.api.basepath}/word")
+  @Value("${application.api.user-path}/word")
   String basePath;
 
   @MockBean
-  AuthenticatedUserProvider authenticatedUserProvider;
+  IAuthenticatedUserProvider authenticatedUserProvider;
 
   @BeforeEach
   void setUp() {

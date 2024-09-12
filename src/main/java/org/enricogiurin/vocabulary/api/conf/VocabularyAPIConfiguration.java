@@ -26,6 +26,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * This enables the global exception handler defined in the module
+ * <b></b>your-rents-services-common-util</b>
+ *
+ * @see <a
+ * href="https://github.com/your-rents/your-rents-services/tree/main/your-rents-services-common-util">your-rents-services-common-util</a>
+ */
 @Configuration
 @ComponentScan(basePackages = {
     "com.yourrents.services.common.util.exception"})

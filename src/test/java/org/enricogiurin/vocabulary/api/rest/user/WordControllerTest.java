@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest;
+package org.enricogiurin.vocabulary.api.rest.user;
 
 /*-
  * #%L
@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.rest;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -29,13 +30,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
+import org.enricogiurin.vocabulary.api.repository.WordRepository;
+import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,47 +49,58 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(VocabularyTestConfiguration.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
-class LanguageControllerTest {
-
-  static final int NUM_LANGUAGES = 20;
+class WordControllerTest {
+  static final int NUM_WORDS = 5;
+  static UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
   @Autowired
   MockMvc mvc;
   @Autowired
   LanguageRepository languageRepository;
-
-  @Value("${application.api.basepath}/language")
+  @Autowired
+  WordRepository wordRepository;
+  @Value("${application.api.user-path}/word")
   String basePath;
 
+  @MockBean
+  IAuthenticatedUserProvider authenticatedUserProvider;
+
   @Test
-  void findAllWithPageSize5() throws Exception {
+  void findAllEnrico() throws Exception {
     mvc.perform(get(basePath)
             .contentType(MediaType.APPLICATION_JSON)
             .param("page", "0")
-            .param("size", "5"))
+            .param("size", String.valueOf(Integer.MAX_VALUE)))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.content").isArray())
         .andExpect(jsonPath("$.content", hasSize(5)))
-        .andExpect(jsonPath("$.content[0].name", is("Arabic")))
-        .andExpect(jsonPath("$.content[0].nativeName", is("العربية")))
-        .andExpect(jsonPath("$.content[1].name", is("Bengali")))
-        .andExpect(jsonPath("$.content[1].nativeName", is("বাংলা")))
-        .andExpect(jsonPath("$.page.totalPages", is(4)))
-        .andExpect(jsonPath("$.page.totalElements", is(NUM_LANGUAGES)))
-        .andExpect(jsonPath("$.page.size", is(5)))
+        .andExpect(jsonPath("$.content[0].sentence", is("cat")))
+        .andExpect(jsonPath("$.content[4].sentence", is("tomcat")))
+
+        .andExpect(jsonPath("$.page.totalPages", is(1)))
+        .andExpect(jsonPath("$.page.totalElements", is(5)))
+        .andExpect(jsonPath("$.page.size", is(Integer.MAX_VALUE)))
         .andExpect(jsonPath("$.page.number", is(0)));
   }
 
+
   @Test
   void findByUuid() throws Exception {
-    UUID es = languageRepository.findById(4).map(Language::uuid).orElseThrow();
-    mvc.perform(get(basePath + "/" + es).contentType(MediaType.APPLICATION_JSON))
+    mvc.perform(get(basePath + "/" + HELLO_UUID).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.uuid").isNotEmpty())
-        .andExpect(jsonPath("$.code", is("es")))
-        .andExpect(jsonPath("$.name", is("Spanish")))
-        .andExpect(jsonPath("$.nativeName", is("Español")));
+        .andExpect(jsonPath("$.sentence", is("Hello")))
+        .andExpect(jsonPath("$.translation", is("Salve")))
+        .andExpect(jsonPath("$.language.name", is("English")))
+        .andExpect(jsonPath("$.language.nativeName", is("English")))
+        .andExpect(jsonPath("$.languageTo.name", is("Italian")))
+        .andExpect(jsonPath("$.languageTo.nativeName", is("Italiano")));
+  }
+
+  @BeforeEach
+  void setUp() {
+    when(authenticatedUserProvider.getAuthenticatedUserEmail())
+        .thenReturn("enrico@gmail.com");
   }
 }

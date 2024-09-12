@@ -30,8 +30,8 @@ import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.component.AuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.api.model.view.WordView;
+import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ class WordRepositoryTest {
   WordRepository wordRepository;
 
   @MockBean
-  AuthenticatedUserProvider authenticatedUserProvider;
+  IAuthenticatedUserProvider authenticatedUserProvider;
 
   @BeforeEach
   void setUp() {

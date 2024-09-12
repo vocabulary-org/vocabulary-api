@@ -23,19 +23,18 @@ package org.enricogiurin.vocabulary.api.repository;
 import static org.enricogiurin.vocabulary.jooq.Tables.USER;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import com.yourrents.services.common.util.jooq.JooqUtils;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.enricogiurin.vocabulary.api.component.AuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.model.User;
+import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.jooq.tables.records.UserRecord;
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.Record3;
+import org.jooq.Record4;
 import org.jooq.SelectJoinStep;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,9 +48,9 @@ public class UserRepository {
   public static final String UUID_ALIAS = "uuid";
   public static final String USERNAME_ALIAS = "username";
   public static final String EMAIL_ALIAS = "email";
+  public static final String IS_ADMIN_ALIAS = "isAdmin";
   private final DSLContext dsl;
-  private final JooqUtils jooqUtils;
-  private final AuthenticatedUserProvider authenticatedUserProvider;
+  private final IAuthenticatedUserProvider authenticatedUserProvider;
 
 
   public Optional<User> findById(Integer id) {
@@ -61,8 +60,21 @@ public class UserRepository {
         .map(this::map);
   }
 
+  public Optional<User> findByUuid(UUID uuid) {
+    return getSelect()
+        .where(USER.EXTERNAL_ID.eq(uuid))
+        .fetchOptional()
+        .map(this::map);
+  }
 
-  public Integer findUserIdByAuthenticatedEmail() {
+  public Optional<User> findByEmail(String email) {
+    return getSelect()
+        .where(USER.EMAIL.eq(email))
+        .fetchOptional()
+        .map(this::map);
+  }
+
+  public Integer findIdByAuthenticatedEmail() {
     String authenticatedUserEmail = authenticatedUserProvider.getAuthenticatedUserEmail();
     return dsl.select(USER.ID)
         .from(USER)
@@ -72,7 +84,6 @@ public class UserRepository {
                 + authenticatedUserEmail));
   }
 
-
   /**
    * Create a new User.
    *
@@ -80,7 +91,11 @@ public class UserRepository {
    * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
-  public User create(User user) {
+  public User add(User user) {
+    Optional<User> optionalUser = findByEmail(user.email());
+    if (optionalUser.isPresent()) {
+      throw new IllegalArgumentException(user.email() + " is already present in the User table");
+    }
     UserRecord userRecord = dsl.newRecord(USER);
     userRecord.setUsername(user.username());
     userRecord.setEmail(user.email());
@@ -90,11 +105,35 @@ public class UserRepository {
         () -> new DataExecutionException("failed to create user[username]: " + user.username()));
   }
 
-  private SelectJoinStep<Record3<UUID, String, String>> getSelect() {
+
+  /**
+   * Update an existing user
+   *
+   * @return the new created User
+   * @throws DataExecutionException if something unexpected happens
+   */
+  @Transactional(readOnly = false)
+  public User update(UUID uuid, User user) {
+    UserRecord userRecord = dsl.selectFrom(USER)
+        .where(USER.EXTERNAL_ID.eq(uuid))
+        .fetchOptional().orElseThrow(
+            () -> new DataNotFoundException("User not found: " + uuid));
+
+    userRecord.setUsername(user.username());
+    userRecord.setEmail(user.email());
+    userRecord.setIsAdmin(user.isAdmin());
+    userRecord.setUpdatedAt(LocalDateTime.now());
+    userRecord.insert();
+    return findById(userRecord.getId()).orElseThrow(
+        () -> new DataExecutionException("failed to update user[uuid]: " + uuid));
+  }
+
+  private SelectJoinStep<Record4<UUID, String, String, Boolean>> getSelect() {
     return dsl.select(
             USER.EXTERNAL_ID.as(UUID_ALIAS),
             USER.USERNAME.as(USERNAME_ALIAS),
-            USER.EMAIL.as(EMAIL_ALIAS))
+            USER.EMAIL.as(EMAIL_ALIAS),
+            USER.IS_ADMIN.as(IS_ADMIN_ALIAS))
         .from(USER);
   }
 
@@ -102,7 +141,8 @@ public class UserRepository {
     return new User(
         record.get(UUID_ALIAS, UUID.class),
         record.get(USERNAME_ALIAS, String.class),
-        record.get(USERNAME_ALIAS, String.class)
+        record.get(EMAIL_ALIAS, String.class),
+        record.get(IS_ADMIN_ALIAS, Boolean.class)
     );
   }
 
