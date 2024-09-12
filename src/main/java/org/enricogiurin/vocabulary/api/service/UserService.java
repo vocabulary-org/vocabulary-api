@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest;
+package org.enricogiurin.vocabulary.api.service;
 
 /*-
  * #%L
@@ -20,32 +20,26 @@ package org.enricogiurin.vocabulary.api.rest;
  * #L%
  */
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
+import org.springframework.stereotype.Service;
 
-@RestController
-@RequestMapping("${application.api.base-path}/user")
-@RequiredArgsConstructor
+@Service
 @Slf4j
-
-public class UserController {
+@RequiredArgsConstructor
+public class UserService {
 
   private final UserRepository userRepository;
+  private final IAuthenticatedUserProvider authenticatedUserProvider;
 
-  @PostMapping
-  ResponseEntity<User> add(@RequestBody User user) {
-    User createdUser = userRepository.create(user);
-    return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+  public User register(User user) {
+    String authenticatedUserEmail = authenticatedUserProvider.getAuthenticatedUserEmail();
+    User newUser = new User(null, user.username(), authenticatedUserEmail, false);
+    User result = userRepository.add(newUser);
+    return result;
   }
-
 
 }

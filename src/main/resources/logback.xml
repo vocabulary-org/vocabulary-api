@@ -26,11 +26,15 @@
     </encoder>
   </appender>
 
-  <logger name="org.enricogiurin.vocabulary.api" level="INFO" additivity="false" >
+  <logger name="org.enricogiurin.vocabulary.api" level="debug" additivity="false" >
     <appender-ref ref="CONSOLE" />
   </logger>
 
-  <logger name="org.springframework" level="INFO" additivity="false">
+  <logger name="com.yourrents.services.common.util.exception" level="trace" additivity="false" >
+    <appender-ref ref="CONSOLE" />
+  </logger>
+
+  <logger name="org.springframework" level="info" additivity="false">
     <appender-ref ref="CONSOLE" />
   </logger>
 

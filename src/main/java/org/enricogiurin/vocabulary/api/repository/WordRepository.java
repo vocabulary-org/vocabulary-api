@@ -37,11 +37,11 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.enricogiurin.vocabulary.api.component.AuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.model.view.LanguageView;
 import org.enricogiurin.vocabulary.api.model.view.WordView;
+import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.jooq.tables.records.WordRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -74,7 +74,7 @@ public class WordRepository {
   private final DSLContext dsl;
   private final JooqUtils jooqUtils;
   private final LanguageRepository languageRepository;
-  private final AuthenticatedUserProvider authenticatedUserProvider;
+  private final IAuthenticatedUserProvider authenticatedUserProvider;
   private final UserRepository userRepository;
 
   public Optional<WordView> findByExternalId(UUID externalId) {
@@ -115,7 +115,7 @@ public class WordRepository {
   @Transactional(readOnly = false)
   public WordView create(Word word) {
 
-    Integer userIdByAuthenticatedEmail = userRepository.findUserIdByAuthenticatedEmail();
+    Integer userIdByAuthenticatedEmail = userRepository.findIdByAuthenticatedEmail();
     WordRecord wordRecord = dsl.newRecord(WORD);
     Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(word.languageUuid());
     Integer languageToIdByUuid = languageRepository.findLanguageIdByUuid(word.languageToUuid());
@@ -210,8 +210,6 @@ public class WordRepository {
         .leftJoin(LANGUAGE).on(WORD.LANGUAGE_ID.eq(LANGUAGE.ID))
         .join(USER).on(WORD.USER_ID.eq(USER.ID))
         .where(USER.EMAIL.eq(authenticatedUserEmail));
-
-
   }
 
   private Field<?> getSupportedField(String field) {

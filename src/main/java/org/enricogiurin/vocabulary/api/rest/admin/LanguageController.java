@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest;
+package org.enricogiurin.vocabulary.api.rest.admin;
 
 /*-
  * #%L
@@ -23,7 +23,6 @@ package org.enricogiurin.vocabulary.api.rest;
 
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import java.security.Principal;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${application.api.base-path}/language")
+@RequestMapping("${application.api.admin-path}/language")
 @RequiredArgsConstructor
 @Slf4j
 public class LanguageController {

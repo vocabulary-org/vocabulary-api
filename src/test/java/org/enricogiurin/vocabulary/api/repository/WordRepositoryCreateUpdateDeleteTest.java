@@ -31,10 +31,10 @@ import com.yourrents.services.common.util.exception.DataNotFoundException;
 import java.util.Optional;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.component.AuthenticatedUserProvider;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.model.view.WordView;
+import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +61,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   LanguageRepository languageRepository;
 
   @MockBean
-  AuthenticatedUserProvider authenticatedUserProvider;
+  IAuthenticatedUserProvider authenticatedUserProvider;
 
   @BeforeEach
   void setUp() {
