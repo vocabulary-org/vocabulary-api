@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -35,6 +36,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 
 @Slf4j
+@Configuration
 public class AuthoritiesConfig {
 
   @Bean
