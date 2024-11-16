@@ -20,8 +20,11 @@ package org.enricogiurin.vocabulary.api.rest.pub;
  * #L%
  */
 
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,10 +36,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
 
   @GetMapping
-  public String home() {
-
-    //TODO - to be defined
-    return "home page";
+  ResponseEntity<Void> redirect() {
+    return ResponseEntity.status(HttpStatus.FOUND)
+        .location(URI.create("http://localhost:9090/swagger-ui/index.html"))
+        .build();
   }
 
 }
