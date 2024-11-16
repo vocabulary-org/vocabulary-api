@@ -43,14 +43,16 @@ public class SecurityConfig {
     return http
         .csrf(csrf -> csrf.disable())  // Disables CSRF protection
         .authorizeHttpRequests(registry -> {
-          registry.requestMatchers("/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll();
+          registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
           registry.requestMatchers(basePath + "/user/**").hasRole(Roles.USER.name());
           registry.requestMatchers(basePath + "/admin/**").hasRole(Roles.ADMIN.name());
           registry.requestMatchers(basePath + "/authenticated/**").authenticated();
           registry.requestMatchers(basePath + "/public/**").permitAll();
           registry.anyRequest().authenticated();
         })
-        .oauth2Login(Customizer.withDefaults())
+        .oauth2Login(oauth2 -> oauth2.defaultSuccessUrl(
+            "/")) // Redirect to the original URL after authentication
+        //.oauth2Login(Customizer.withDefaults())
         .formLogin(Customizer.withDefaults())
         .build();
   }
