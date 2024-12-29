@@ -26,7 +26,6 @@ import com.yourrents.services.common.util.exception.DataNotFoundException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.enricogiurin.vocabulary.api.model.Word;
-import org.enricogiurin.vocabulary.api.model.view.WordView;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -53,30 +52,30 @@ public class WordController {
   private final WordRepository wordRepository;
 
   @GetMapping
-  ResponseEntity<Page<WordView>> find(
+  ResponseEntity<Page<Word>> find(
       @ParameterObject Searchable filter,
       @ParameterObject @SortDefault(sort = WordRepository.SENTENCE_ALIAS, direction = Direction.ASC) Pageable pagination) {
-    Page<WordView> page = wordRepository.find(filter, pagination);
+    Page<Word> page = wordRepository.find(filter, pagination);
     return ResponseEntity.ok(page);
   }
 
   @GetMapping("/{uuid}")
-  ResponseEntity<WordView> findByUuid(@PathVariable UUID uuid) {
-    WordView result = wordRepository.findByExternalId(uuid)
+  ResponseEntity<Word> findByUuid(@PathVariable UUID uuid) {
+    Word result = wordRepository.findByExternalId(uuid)
         .orElseThrow(
             () -> new DataNotFoundException("can't find Word having uuid: " + uuid));
     return ResponseEntity.ok(result);
   }
 
   @PostMapping
-  ResponseEntity<WordView> add(@RequestBody Word word) {
-    WordView savedProperty = wordRepository.create(word);
+  ResponseEntity<Word> add(@RequestBody Word word) {
+    Word savedProperty = wordRepository.create(word);
     return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{uuid}")
-  ResponseEntity<WordView> update(@PathVariable UUID uuid, @RequestBody Word wordToUpdate) {
-    WordView updatedProperty = wordRepository.update(uuid, wordToUpdate);
+  ResponseEntity<Word> update(@PathVariable UUID uuid, @RequestBody Word wordToUpdate) {
+    Word updatedProperty = wordRepository.update(uuid, wordToUpdate);
     return ResponseEntity.ok(updatedProperty);
   }
 

@@ -24,13 +24,17 @@ VALUES (1000000, 'enrico', 'enrico@gmail.com', '00000000-0000-0000-0000-00000000
 ;
 
 --test data for word
-INSERT INTO vocabulary.word (id, sentence, translation, description, language_id, language_to_id,
+INSERT INTO vocabulary.word (id, sentence, translation, description, language, language_to,
                              user_id, external_id)
-VALUES (1000000, 'Hello', 'Salve', 'a gentle salutation', 1, 20, 1000000, '00000000-0000-0000-0000-000000000001'),
-       (1000001, 'my house', 'La mia casa', 'my own house', 1, 20, 1000000, '00000000-0000-0000-0000-000000000002'),
-       (1000002, 'cat', 'gatto', null, 1, 20, 1000000, '00000000-0000-0000-0000-000000000003'),
-       (1000003, 'tomcat', 'gattone', 'my big gat', 1, 20, 1000000, '00000000-0000-0000-0000-000000000004'),
-       (1000004, 'Latte', 'die Milk', 'milk', 20, 11, 1000000, '00000000-0000-0000-0000-000000000005'),
-       (1000005, 'Latte', 'die Milk', 'milk', 20, 11, 1000001, '00000000-0000-0000-0000-000000000006')
+                    VALUES (1000000, 'Hello', 'Salve', 'a gentle salutation', 'English', 'Italian',
+                            1000000, '00000000-0000-0000-0000-000000000001'),
+                           (1000001, 'my house', 'La mia casa', 'my own house', 'English', 'Italian',
+                            1000000, '00000000-0000-0000-0000-000000000002'),
+                           (1000002, 'cat', 'gatto', null, 'English', 'Italian',
+                            1000000, '00000000-0000-0000-0000-000000000003'),
+                           (1000003, 'tomcat', 'gattone', 'my big gat', 'English', 'Italian',
+                            1000000, '00000000-0000-0000-0000-000000000004'),
+                           (1000004, 'Latte', 'die Milk', 'milk', 'English', 'German',
+                            1000000, '00000000-0000-0000-0000-000000000005')
 ;
 
