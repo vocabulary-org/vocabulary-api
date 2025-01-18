@@ -21,15 +21,11 @@ package org.enricogiurin.vocabulary.api.repository;
  */
 
 
-import static org.enricogiurin.vocabulary.jooq.Tables.LANGUAGE;
-import static org.enricogiurin.vocabulary.jooq.Tables.USER;
-import static org.enricogiurin.vocabulary.jooq.tables.Word.WORD;
-import static org.jooq.Functions.nullOnAllNull;
-import static org.jooq.impl.DSL.row;
+import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.USER;
+import static org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.Word.WORD;
 
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import com.yourrents.services.common.util.jooq.JooqUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -38,11 +34,11 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
+import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
+import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordRecord;
+import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
-import org.enricogiurin.vocabulary.api.model.view.LanguageView;
-import org.enricogiurin.vocabulary.api.model.view.WordView;
 import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
-import org.enricogiurin.vocabulary.jooq.tables.records.WordRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -67,17 +63,15 @@ public class WordRepository {
   public static final String LANGUAGE_ALIAS = "language";
   public static final String LANGUAGE_TO_ALIAS = "languageTo";
   public static final String DESCRIPTION_ALIAS = "description";
-  public static final String SEARCH_LANGUAGE_NAME = "language.name";
-  public static final String SEARCH_LANGUAGE_TO_NAME = "language.nameTo";
 
 
   private final DSLContext dsl;
-  private final JooqUtils jooqUtils;
-  private final LanguageRepository languageRepository;
+  private final CustomJooqUtils jooqUtils;
+
   private final IAuthenticatedUserProvider authenticatedUserProvider;
   private final UserRepository userRepository;
 
-  public Optional<WordView> findByExternalId(UUID externalId) {
+  public Optional<Word> findByExternalId(UUID externalId) {
 
     return getSelect()
         .and(WORD.EXTERNAL_ID.eq(externalId))
@@ -85,14 +79,14 @@ public class WordRepository {
         .map(this::map);
   }
 
-  public Optional<WordView> findById(Integer id) {
+  public Optional<Word> findById(Integer id) {
     return getSelect()
         .and(WORD.ID.eq(id))
         .fetchOptional()
         .map(this::map);
   }
 
-  public Page<WordView> find(Searchable filter, Pageable pageable) {
+  public Page<Word> find(Searchable filter, Pageable pageable) {
     Select<?> result = jooqUtils.paginate(
         dsl,
         jooqUtils.getQueryWithConditionsAndSorts(getSelect(),
@@ -100,7 +94,9 @@ public class WordRepository {
             pageable, this::getSupportedField),
         pageable.getPageSize(), pageable.getOffset());
 
-    List<WordView> words = result.fetch(this::map);
+    List<Word> words = result.fetch(record -> {
+      return map(record);
+    });
     int totalRows = Objects.requireNonNullElse(
         result.fetchAny("total_rows", Integer.class), 0);
     return new PageImpl<>(words, pageable, totalRows);
@@ -113,14 +109,13 @@ public class WordRepository {
    * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
-  public WordView create(Word word) {
+  public Word create(Word word) {
 
     Integer userIdByAuthenticatedEmail = userRepository.findIdByAuthenticatedEmail();
     WordRecord wordRecord = dsl.newRecord(WORD);
-    Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(word.languageUuid());
-    Integer languageToIdByUuid = languageRepository.findLanguageIdByUuid(word.languageToUuid());
-    wordRecord.setLanguageId(languageIdByUuid);
-    wordRecord.setLanguageToId(languageToIdByUuid);
+
+    wordRecord.setLanguage(word.language());
+    wordRecord.setLanguageTo(word.languageTo());
     wordRecord.setSentence(word.sentence());
     wordRecord.setTranslation(word.translation());
     wordRecord.setDescription(word.description());
@@ -146,18 +141,16 @@ public class WordRepository {
    * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
-  public WordView update(UUID uuid, Word word) {
+  public Word update(UUID uuid, Word word) {
     WordRecord wordRecord = dsl.selectFrom(WORD)
         .where(WORD.EXTERNAL_ID.eq(uuid))
         .fetchOptional()
         .orElseThrow(() -> new DataNotFoundException("Word not found: " + uuid));
-    if (word.languageUuid() != null) {
-      Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(word.languageUuid());
-      wordRecord.setLanguageId(languageIdByUuid);
+    if (word.language() != null) {
+      wordRecord.setLanguage(word.language());
     }
-    if (word.languageToUuid() != null) {
-      Integer languageIdByUuid = languageRepository.findLanguageIdByUuid(word.languageToUuid());
-      wordRecord.setLanguageToId(languageIdByUuid);
+    if (word.languageTo() != null) {
+      wordRecord.setLanguageTo(word.languageTo());
     }
     if (word.sentence() != null) {
       wordRecord.setSentence(word.sentence());
@@ -193,7 +186,7 @@ public class WordRepository {
   }
 
 
-  private SelectConditionStep<Record6<UUID, String, String, String, LanguageView, LanguageView>> getSelect() {
+  private SelectConditionStep<Record6<UUID, String, String, String, Language, Language>> getSelect() {
     final String authenticatedUserEmail = authenticatedUserProvider.getAuthenticatedUserEmail();
     log.info("authenticated user: {}", authenticatedUserEmail);
     return dsl.select(
@@ -201,13 +194,10 @@ public class WordRepository {
             WORD.SENTENCE.as(SENTENCE_ALIAS),
             WORD.TRANSLATION.as(TRANSLATION_ALIAS),
             WORD.DESCRIPTION.as(DESCRIPTION_ALIAS),
-            row(WORD.fkWordLanguage().NAME, WORD.fkWordLanguage().NATIVE_NAME)
-                .mapping(nullOnAllNull(LanguageView::new)).as(LANGUAGE_ALIAS),
-            row(WORD.fkWordLanguageTo().NAME, WORD.fkWordLanguageTo().NATIVE_NAME)
-                .mapping(nullOnAllNull(LanguageView::new)).as(LANGUAGE_TO_ALIAS)
+            WORD.LANGUAGE.as(LANGUAGE_ALIAS),
+            WORD.LANGUAGE_TO.as(LANGUAGE_TO_ALIAS)
         )
         .from(WORD)
-        .leftJoin(LANGUAGE).on(WORD.LANGUAGE_ID.eq(LANGUAGE.ID))
         .join(USER).on(WORD.USER_ID.eq(USER.ID))
         .where(USER.EMAIL.eq(authenticatedUserEmail));
   }
@@ -217,21 +207,22 @@ public class WordRepository {
       case UUID_ALIAS -> WORD.EXTERNAL_ID;
       case SENTENCE_ALIAS -> WORD.SENTENCE;
       case TRANSLATION_ALIAS -> WORD.TRANSLATION;
-      case SEARCH_LANGUAGE_NAME -> WORD.fkWordLanguage().NAME;
-      case SEARCH_LANGUAGE_TO_NAME -> WORD.fkWordLanguageTo().NAME;
+      case LANGUAGE_ALIAS -> WORD.LANGUAGE;
+      case LANGUAGE_TO_ALIAS -> WORD.LANGUAGE_TO;
+
       default -> throw new IllegalArgumentException(
           "Unexpected value for filter/sort field: " + field);
     };
   }
 
-  private WordView map(Record record) {
-    return new WordView(
+  private Word map(Record record) {
+    return new Word(
         record.get(UUID_ALIAS, UUID.class),
         record.get(SENTENCE_ALIAS, String.class),
         record.get(TRANSLATION_ALIAS, String.class),
         record.get(DESCRIPTION_ALIAS, String.class),
-        record.get(LANGUAGE_ALIAS, LanguageView.class),
-        record.get(LANGUAGE_TO_ALIAS, LanguageView.class)
+        record.get(LANGUAGE_ALIAS, Language.class),
+        record.get(LANGUAGE_TO_ALIAS, Language.class)
     );
   }
 

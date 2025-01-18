@@ -20,8 +20,24 @@ package org.enricogiurin.vocabulary.api.model;
  * #L%
  */
 
-import java.util.UUID;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public record Language(UUID uuid, String name, String code, String nativeName) {
+@RequiredArgsConstructor
+@Getter
+public enum Language {
+  ENGLISH("English", "Language spoken in English-speaking countries"),
+  SPANISH("Spanish", "Language spoken in Spanish-speaking countries"),
+  FRENCH("French", "Language spoken in French-speaking countries"),
+  GERMAN("German", "Language spoken in German-speaking countries"),
+  ITALIAN("Italian", "Language spoken in Italian-speaking countries"),
+  RUSSIAN("Russian", "Language spoken in Russian-speaking countries");
 
+  private final String language;
+  private final String description;
+
+  @Override
+  public String toString() {
+    return language;
+  }
 }

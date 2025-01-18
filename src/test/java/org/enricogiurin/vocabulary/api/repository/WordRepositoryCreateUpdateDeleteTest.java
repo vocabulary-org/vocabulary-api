@@ -33,7 +33,6 @@ import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
-import org.enricogiurin.vocabulary.api.model.view.WordView;
 import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,15 +49,9 @@ import org.springframework.transaction.annotation.Transactional;
 class WordRepositoryCreateUpdateDeleteTest {
 
   static final int HELLO_ID = 1000000;
-  static final int LANGUAGE_ENGLISH_ID = 1;
-  static final int LANGUAGE_GERMAN_ID = 11;
-
 
   @Autowired
   WordRepository wordRepository;
-
-  @Autowired
-  LanguageRepository languageRepository;
 
   @MockBean
   IAuthenticatedUserProvider authenticatedUserProvider;
@@ -71,38 +64,25 @@ class WordRepositoryCreateUpdateDeleteTest {
 
   @Test
   void createANewWord() {
-    Language en = languageRepository.findById(LANGUAGE_ENGLISH_ID).orElseThrow();
-    Language de = languageRepository.findById(LANGUAGE_GERMAN_ID).orElseThrow();
-    Word newWord = new Word(null, "dog", "der Hund", "my dog", en.uuid(), de.uuid());
-    WordView result = wordRepository.create(newWord);
+
+    Word newWord = new Word(null, "dog", "der Hund", "my dog", Language.ENGLISH, Language.GERMAN);
+    Word result = wordRepository.create(newWord);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("dog"));
     assertThat(result.translation(), equalTo("der Hund"));
     assertThat(result.description(), equalTo("my dog"));
-    assertThat(result.language().name(), equalTo("English"));
-    assertThat(result.language().nativeName(), equalTo("English"));
-    assertThat(result.languageTo().name(), equalTo("German"));
-    assertThat(result.languageTo().nativeName(), equalTo("Deutsch"));
-  }
+    assertThat(result.language().getLanguage(), equalTo("English"));
+    assertThat(result.languageTo().getLanguage(), equalTo("German"));
 
-  @Test
-  void createANewWordWithANotExistingLanguage() {
-    Language en = languageRepository.findById(LANGUAGE_ENGLISH_ID).orElseThrow();
-    UUID randomUUID = UUID.randomUUID();
-    Word newWord = new Word(null, "dog", "der Hund", "my dog", en.uuid(), randomUUID);
-    DataNotFoundException ex = assertThrows(DataNotFoundException.class,
-        () -> wordRepository.create(newWord));
-    assertThat(ex.getMessage(), equalTo("Language not found: " + randomUUID));
   }
-
 
   @Test
   void deleteAnExistingWord() {
-    WordView word = wordRepository.findById(HELLO_ID).orElseThrow();
+    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
     boolean delete = wordRepository.delete(word.uuid());
     assertThat(delete, equalTo(true));
-    Optional<WordView> wordOptional = wordRepository.findById(HELLO_ID);
+    Optional<Word> wordOptional = wordRepository.findById(HELLO_ID);
     assertThat(wordOptional.isEmpty(), equalTo(true));
   }
 
@@ -121,9 +101,9 @@ class WordRepositoryCreateUpdateDeleteTest {
 
   @Test
   void updateAnExistingWord() {
-    WordView word = wordRepository.findById(HELLO_ID).orElseThrow();
+    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
     Word updateWord = new Word(null, null, "new translation", "new description", null, null);
-    WordView result = wordRepository.update(word.uuid(), updateWord);
+    Word result = wordRepository.update(word.uuid(), updateWord);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("Hello"));

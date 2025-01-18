@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,8 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.Language;
-import org.enricogiurin.vocabulary.api.model.view.WordView;
-import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
+import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
 import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,8 +59,7 @@ class WordControllerCreateUpdateDeleteTest {
 
   @Autowired
   MockMvc mvc;
-  @Autowired
-  LanguageRepository languageRepository;
+
   @Autowired
   WordRepository wordRepository;
   @Value("${application.api.user-path}/word")
@@ -77,8 +76,7 @@ class WordControllerCreateUpdateDeleteTest {
 
   @Test
   void createNewWord() throws Exception {
-    UUID es = languageRepository.findById(4).map(Language::uuid).orElseThrow();
-    UUID ru = languageRepository.findById(8).map(Language::uuid).orElseThrow();
+
     mvc.perform(post(basePath)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -86,62 +84,45 @@ class WordControllerCreateUpdateDeleteTest {
                    "sentence": "Hola",
                    "translation": "Привет",
                    "description": "Hola in RU",
-                   "languageUuid": "%s",
-                   "languageToUuid": "%s"
+                   "language": "%s",
+                   "languageTo": "%s"
                 }
-                """.formatted(es, ru)))
+                """.formatted(Language.SPANISH.name(), Language.RUSSIAN.name())))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.sentence", is("Hola")))
         .andExpect(jsonPath("$.translation", is("Привет")))
-        .andExpect(jsonPath("$.language.nativeName", is("Español")))
-        .andExpect(jsonPath("$.languageTo.nativeName", is("Русский")))
+        .andExpect(jsonPath("$.language", is(Language.SPANISH.name())))
+        .andExpect(jsonPath("$.languageTo", is(Language.RUSSIAN.name())))
         .andExpect(jsonPath("$.uuid").isNotEmpty())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
-  @Test
-  void createNewWordWithANotExistingLanguage() throws Exception {
-    UUID es = languageRepository.findById(4).map(Language::uuid).orElseThrow();
-    UUID randomUUID = UUID.randomUUID();
-    mvc.perform(post(basePath)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                   "sentence": "Hola",
-                   "translation": "random translation",
-                   "description": "Hola in RU",
-                   "languageUuid": "%s",
-                   "languageToUuid": "%s"
-                }
-                """.formatted(es, randomUUID)))
-        .andExpect(status().is4xxClientError())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
-  }
 
   @Test
   void updateAnExistingWord() throws Exception {
-    UUID es = languageRepository.findById(4).map(Language::uuid).orElseThrow();
-    WordView word = wordRepository.findById(HELLO_ID).orElseThrow();
+
+    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
     mvc.perform(patch(basePath + "/" + word.uuid())
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
-                   "languageToUuid": "%s",
+                   "languageTo": "%s",
                    "translation": "Hola"
                 }
-                """.formatted(es)))
+                """.formatted(Language.SPANISH.name())))
         .andExpect(status().isOk())
+        .andDo(print())
         .andExpect(jsonPath("$.sentence", is("Hello")))
         .andExpect(jsonPath("$.translation", is("Hola")))
-        .andExpect(jsonPath("$.language.nativeName", is("English")))
-        .andExpect(jsonPath("$.languageTo.nativeName", is("Español")))
+        .andExpect(jsonPath("$.language", is(Language.ENGLISH.name())))
+        .andExpect(jsonPath("$.languageTo", is(Language.SPANISH.name())))
         .andExpect(jsonPath("$.uuid", is(word.uuid().toString())))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
   @Test
   void deleteAnExistingWord() throws Exception {
-    WordView word = wordRepository.findById(HELLO_ID).orElseThrow();
+    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
     mvc.perform(delete(basePath + "/" + word.uuid()).contentType(
             MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());

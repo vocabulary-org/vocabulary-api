@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
+import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
 import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,8 +55,7 @@ class WordControllerTest {
 
   @Autowired
   MockMvc mvc;
-  @Autowired
-  LanguageRepository languageRepository;
+
   @Autowired
   WordRepository wordRepository;
   @Value("${application.api.user-path}/word")
@@ -92,10 +91,8 @@ class WordControllerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.sentence", is("Hello")))
         .andExpect(jsonPath("$.translation", is("Salve")))
-        .andExpect(jsonPath("$.language.name", is("English")))
-        .andExpect(jsonPath("$.language.nativeName", is("English")))
-        .andExpect(jsonPath("$.languageTo.name", is("Italian")))
-        .andExpect(jsonPath("$.languageTo.nativeName", is("Italiano")));
+        .andExpect(jsonPath("$.language", is(Language.ENGLISH.name())))
+        .andExpect(jsonPath("$.languageTo", is(Language.ITALIAN.name())));
   }
 
   @BeforeEach

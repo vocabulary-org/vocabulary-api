@@ -20,7 +20,8 @@ package org.enricogiurin.vocabulary.api.repository;
  * #L%
  */
 
-import static org.enricogiurin.vocabulary.jooq.Tables.USER;
+
+import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.USER;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import java.time.LocalDateTime;
@@ -29,9 +30,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
+import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.UserRecord;
 import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
-import org.enricogiurin.vocabulary.jooq.tables.records.UserRecord;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record4;
@@ -145,6 +146,5 @@ public class UserRepository {
         record.get(IS_ADMIN_ALIAS, Boolean.class)
     );
   }
-
 
 }

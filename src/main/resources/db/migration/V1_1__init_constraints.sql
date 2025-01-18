@@ -24,16 +24,8 @@ ALTER TABLE ONLY vocabulary.user
 ALTER TABLE ONLY vocabulary.word
     ADD CONSTRAINT word_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY vocabulary.language
-    ADD CONSTRAINT language_pkey PRIMARY KEY (id);
 
 -- fk constraints
-
-ALTER TABLE ONLY vocabulary.word
-    ADD CONSTRAINT fk_word_language FOREIGN KEY (language_id) REFERENCES vocabulary.language(id);
-
-ALTER TABLE ONLY vocabulary.word
-    ADD CONSTRAINT fk_word_language_to FOREIGN KEY (language_to_id) REFERENCES vocabulary.language(id);
 
 ALTER TABLE ONLY vocabulary.word
     ADD CONSTRAINT fk_word_user FOREIGN KEY (user_id) REFERENCES vocabulary.user(id);

@@ -1,4 +1,5 @@
-package org.enricogiurin.vocabulary.api.model.view;
+package org.enricogiurin.vocabulary.api.model;
+
 /*-
  * #%L
  * Vocabulary API
@@ -18,3 +19,19 @@ package org.enricogiurin.vocabulary.api.model.view;
  * limitations under the License.
  * #L%
  */
+
+import org.jooq.impl.EnumConverter;
+
+public class LanguageConverter extends
+    EnumConverter<org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.Language, Language> {
+
+  public LanguageConverter() {
+    super(org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.Language.class, Language.class);
+  }
+
+  @Override
+  public org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.Language to(Language language) {
+    return org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.Language.valueOf(
+        language.getLanguage());
+  }
+}

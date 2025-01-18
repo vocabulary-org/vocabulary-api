@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.0</version>
+		<version>3.4.1</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.enricogiurin.vocabulary</groupId>
@@ -59,74 +59,74 @@
 		<springdoc-openapi-ui.version>2.2.0</springdoc-openapi-ui.version>
 		<maven.compiler.release>${java.version}</maven.compiler.release>
 		<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-		<license-maven-plugin.version>2.4.0</license-maven-plugin.version>
+		<license-maven-plugin.version>2.5.0</license-maven-plugin.version>
 		<maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
-		<spring-boot.version>3.3.0</spring-boot.version>
-		<springdoc-openapi-ui.version>2.5.0</springdoc-openapi-ui.version>
+		<spring-boot.version>3.4.0</spring-boot.version>
+		<springdoc-openapi-ui.version>2.7.0</springdoc-openapi-ui.version>
 		<testcontainers-jooq-codegen-maven-plugin.version>0.0.4</testcontainers-jooq-codegen-maven-plugin.version>
-		<plugins.testcontainers.version>1.19.8</plugins.testcontainers.version>
-		<plugins.postgresql.version>42.7.3</plugins.postgresql.version>
+		<plugins.testcontainers.version>1.20.4</plugins.testcontainers.version>
+		<plugins.postgresql.version>42.7.4</plugins.postgresql.version>
 		<spring-security-test.version>6.3.1</spring-security-test.version>
 		<your-rents-services-geodata.version>0.0.4</your-rents-services-geodata.version>
+		<building.db.username>vocabulary</building.db.username>
+		<building.db.password>vocabulary</building.db.password>
 
 	</properties>
+
 	<dependencies>
-		<!-- your-rents dependency -->
+		<!-- your-rents dependencies -->
 		<dependency>
 			<groupId>com.your-rents.services</groupId>
-			<artifactId>your-rents-services-common-searchable</artifactId>
-			<version>${your-rents-services-geodata.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.your-rents.services</groupId>
-			<artifactId>your-rents-services-common-util</artifactId>
+			<artifactId>your-rents-services-geodata</artifactId>
 			<version>${your-rents-services-geodata.version}</version>
 		</dependency>
 
-		<!-- spring boot dependencies -->
+		<!-- spring dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jooq</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-oauth2-client</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-docker-compose</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
 
-		<!-- spring dependencies -->
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-commons</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -134,20 +134,33 @@
 			<optional>true</optional>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
+
 		<!-- other dependencies -->
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-database-postgresql</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -160,22 +173,25 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
-			<version>${spring-security-test.version}</version>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-testcontainers</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>postgresql</artifactId>
@@ -246,62 +262,120 @@
 				</executions>
 			</plugin>
 
-      <plugin>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers-jooq-codegen-maven-plugin</artifactId>
-        <version>${testcontainers-jooq-codegen-maven-plugin.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${plugins.testcontainers.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${plugins.postgresql.version}</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <?m2e execute onConfiguration?>
-            <id>generate-jooq-sources</id>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <phase>generate-sources</phase>
-            <configuration>
-              <database>
-                <type>POSTGRES</type>
-                <containerImage>postgres:15-alpine</containerImage>
-              </database>
-              <flyway>
-                <createSchemas>true</createSchemas>
-                <schemas>
-									vocabulary
-                </schemas>
-                <locations>
-                  filesystem:${project.basedir}/src/main/resources/db/migration
-                </locations>
-              </flyway>
-              <jooq>
-                <generator>
-                  <database>
-                    <name>org.jooq.meta.postgres.PostgresDatabase</name>
-                    <includes>.*</includes>
-                    <excludes>flyway_schema_history</excludes>
-                    <inputSchema>vocabulary</inputSchema>
-                  </database>
-                  <target>
-                    <packageName>org.enricogiurin.vocabulary.jooq</packageName>
-                    <directory>target/generated-sources/jooq</directory>
-                  </target>
-                </generator>
-              </jooq>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+			<plugin>
+				<groupId>org.codehaus.gmaven</groupId>
+				<artifactId>groovy-maven-plugin</artifactId>
+				<version>2.1.1</version>
+				<executions>
+					<execution>
+						<?m2e execute onConfiguration?>
+						<id>start-db</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<source>
+								db = new org.testcontainers.containers.PostgreSQLContainer("postgres:15-alpine")
+									.withUsername("${building.db.username}")
+									.withDatabaseName("postgres")
+									.withPassword("${building.db.password}");
+								db.start();
+								project.properties.setProperty('building.db.url', db.getJdbcUrl());
+							</source>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.testcontainers</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>${plugins.testcontainers.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<?m2e execute onConfiguration?>
+						<id>db-migration-global</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>migrate</goal>
+						</goals>
+						<configuration>
+							<url>${building.db.url}</url>
+							<user>${building.db.username}</user>
+							<password>${building.db.password}</password>
+							<createSchemas>true</createSchemas>
+							<schemas>
+								vocabulary
+							</schemas>
+							<locations>
+								<location>
+									filesystem:${project.basedir}/src/main/resources/db/migration
+								</location>
+							</locations>
+						</configuration>
+					</execution>
+
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.jooq</groupId>
+				<artifactId>jooq-codegen-maven</artifactId>
+				<executions>
+					<execution>
+						<?m2e execute onConfiguration?>
+						<id>java-generator-global</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<jdbc>
+								<url>${building.db.url}</url>
+								<user>${building.db.username}</user>
+								<password>${building.db.password}</password>
+							</jdbc>
+							<generator>
+								<database>
+									<name>org.jooq.meta.postgres.PostgresDatabase</name>
+									<includes>.*</includes>
+									<excludes>flyway_schema_history</excludes>
+									<inputSchema>vocabulary</inputSchema>
+									<outputSchema>vocabulary</outputSchema>
+
+									<forcedTypes>
+										<forcedType>
+											<userType>org.enricogiurin.vocabulary.api.model.Language</userType>
+											<converter>org.enricogiurin.vocabulary.api.model.LanguageConverter</converter>
+										<!--	<enumConverter>true</enumConverter>-->
+											<includeExpression>.*\.language</includeExpression>
+										</forcedType>
+										<forcedType>
+											<userType>org.enricogiurin.vocabulary.api.model.Language</userType>
+											<converter>org.enricogiurin.vocabulary.api.model.LanguageConverter</converter>
+										<!--	<enumConverter>true</enumConverter>-->
+											<includeExpression>.*\.language_to</includeExpression>
+										</forcedType>
+									</forcedTypes>
+
+
+								</database>
+								<target>
+									<packageName>org.enricogiurin.vocabulary.api.jooq.vocabulary</packageName>
+									<directory>target/generated-sources/jooq</directory>
+								</target>
+							</generator>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
