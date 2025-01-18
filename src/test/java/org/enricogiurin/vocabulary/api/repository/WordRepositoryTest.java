@@ -30,10 +30,10 @@ import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -96,7 +96,7 @@ class WordRepositoryTest {
   void findByNameContaining() {
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("sentence")));
     FilterCriteria filter = FilterCriteria.of(
-        FilterCondition.of("sentence", "containsIgnoreCase", "cat"));
+        FilterCondition.of("sentence", CustomJooqUtils.CONTAINS_IGNORE_CASE, "cat"));
     Page<Word> page = wordRepository.find(filter, pageable);
     assertThat(page, iterableWithSize(2));
     Word word = page.getContent().getFirst();
@@ -104,13 +104,11 @@ class WordRepositoryTest {
     assertThat(word.sentence(), equalTo("cat"));
   }
 
-  //TODO - fix me
-  @Disabled
   @Test
   void findByLanguageEq() {
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("sentence")));
     FilterCriteria filter = FilterCriteria.of(
-        FilterCondition.of(WordRepository.LANGUAGE_TO_ALIAS, "eq", "German"));
+        FilterCondition.of(WordRepository.LANGUAGE_TO_ALIAS, CustomJooqUtils.EQUAL, "German"));
     Page<Word> page = wordRepository.find(filter, pageable);
     assertThat(page, iterableWithSize(1));
     Word word = page.getContent().getFirst();

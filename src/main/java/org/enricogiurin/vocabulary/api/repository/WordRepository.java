@@ -26,7 +26,6 @@ import static org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.Word.WORD;
 
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import com.yourrents.services.common.util.jooq.JooqUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +34,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
+import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordRecord;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
@@ -66,7 +66,7 @@ public class WordRepository {
 
 
   private final DSLContext dsl;
-  private final JooqUtils jooqUtils;
+  private final CustomJooqUtils jooqUtils;
 
   private final IAuthenticatedUserProvider authenticatedUserProvider;
   private final UserRepository userRepository;
@@ -94,7 +94,9 @@ public class WordRepository {
             pageable, this::getSupportedField),
         pageable.getPageSize(), pageable.getOffset());
 
-    List<Word> words = result.fetch(this::map);
+    List<Word> words = result.fetch(record -> {
+      return map(record);
+    });
     int totalRows = Objects.requireNonNullElse(
         result.fetchAny("total_rows", Integer.class), 0);
     return new PageImpl<>(words, pageable, totalRows);
