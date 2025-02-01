@@ -21,6 +21,7 @@ package org.enricogiurin.vocabulary.api.security;
  */
 
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,9 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -41,6 +45,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http,
       final @Value("${application.api.base-path}") String basePath) throws Exception {
     return http
+        .cors(Customizer.withDefaults()) // Enable CORS
         .csrf(csrf -> csrf.disable())  // Disables CSRF protection
         .authorizeHttpRequests(registry -> {
           registry.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
@@ -56,4 +61,22 @@ public class SecurityConfig {
         .formLogin(Customizer.withDefaults())
         .build();
   }
+
+
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of("http://localhost:4200")); // Allow Angular frontend
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+    configuration.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
 }
+
+
+
+
