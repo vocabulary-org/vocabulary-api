@@ -32,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.UserRecord;
 import org.enricogiurin.vocabulary.api.model.User;
-import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record4;
@@ -51,7 +50,6 @@ public class UserRepository {
   public static final String EMAIL_ALIAS = "email";
   public static final String IS_ADMIN_ALIAS = "isAdmin";
   private final DSLContext dsl;
-  private final IAuthenticatedUserProvider authenticatedUserProvider;
 
 
   public Optional<User> findById(Integer id) {
@@ -76,7 +74,8 @@ public class UserRepository {
   }
 
   public Integer findIdByAuthenticatedEmail() {
-    String authenticatedUserEmail = authenticatedUserProvider.getAuthenticatedUserEmail();
+    //TODO - fix this
+    String authenticatedUserEmail = "a@a.com";
     return dsl.select(USER.ID)
         .from(USER)
         .where(USER.EMAIL.eq(authenticatedUserEmail))

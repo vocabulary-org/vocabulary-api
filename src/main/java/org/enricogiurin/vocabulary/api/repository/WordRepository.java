@@ -38,7 +38,6 @@ import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordRecord;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
-import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -68,7 +67,6 @@ public class WordRepository {
   private final DSLContext dsl;
   private final CustomJooqUtils jooqUtils;
 
-  private final IAuthenticatedUserProvider authenticatedUserProvider;
   private final UserRepository userRepository;
 
   public Optional<Word> findByExternalId(UUID externalId) {
@@ -187,7 +185,7 @@ public class WordRepository {
 
 
   private SelectConditionStep<Record6<UUID, String, String, String, Language, Language>> getSelect() {
-    final String authenticatedUserEmail = authenticatedUserProvider.getAuthenticatedUserEmail();
+    final String authenticatedUserEmail = "a@a.com";
     log.info("authenticated user: {}", authenticatedUserEmail);
     return dsl.select(
             WORD.EXTERNAL_ID.as(UUID_ALIAS),

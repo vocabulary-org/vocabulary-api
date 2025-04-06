@@ -22,7 +22,6 @@ package org.enricogiurin.vocabulary.api.rest.user;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,14 +35,12 @@ import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
-import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -65,13 +62,10 @@ class WordControllerCreateUpdateDeleteTest {
   @Value("${application.api.user-path}/word")
   String basePath;
 
-  @MockBean
-  IAuthenticatedUserProvider authenticatedUserProvider;
 
   @BeforeEach
   void setUp() {
-    when(authenticatedUserProvider.getAuthenticatedUserEmail())
-        .thenReturn("enrico@gmail.com");
+
   }
 
   @Test

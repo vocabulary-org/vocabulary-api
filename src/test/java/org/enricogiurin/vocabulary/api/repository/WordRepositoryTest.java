@@ -24,7 +24,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.iterableWithSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.Mockito.when;
 
 import com.yourrents.services.common.searchable.FilterCondition;
 import com.yourrents.services.common.searchable.FilterCriteria;
@@ -32,12 +31,10 @@ import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.model.Word;
-import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -58,13 +55,9 @@ class WordRepositoryTest {
   @Autowired
   WordRepository wordRepository;
 
-  @MockBean
-  IAuthenticatedUserProvider authenticatedUserProvider;
-
   @BeforeEach
   void setUp() {
-    when(authenticatedUserProvider.getAuthenticatedUserEmail())
-        .thenReturn("enrico@gmail.com");
+
   }
 
   @Test

@@ -23,16 +23,13 @@ package org.enricogiurin.vocabulary.api.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.User;
-import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,8 +41,6 @@ class UserRepositoryTest {
   @Autowired
   UserRepository userRepository;
 
-  @MockBean
-  IAuthenticatedUserProvider authenticatedUserProvider;
 
 
   @Test
@@ -62,8 +57,7 @@ class UserRepositoryTest {
   @Test
   void findIdByAuthenticatedEmail() {
     //given
-    when(authenticatedUserProvider.getAuthenticatedUserEmail())
-        .thenReturn("enrico@gmail.com");
+
     //when
     Integer userIdByAuthenticatedEmail = userRepository.findIdByAuthenticatedEmail();
     //then

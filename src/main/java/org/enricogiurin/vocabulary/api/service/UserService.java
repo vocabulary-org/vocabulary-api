@@ -24,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
-import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,10 +32,11 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final UserRepository userRepository;
-  private final IAuthenticatedUserProvider authenticatedUserProvider;
+
 
   public User register(User user) {
-    String authenticatedUserEmail = authenticatedUserProvider.getAuthenticatedUserEmail();
+    //TODO - fix this
+    String authenticatedUserEmail = "a@a.com";
     User newUser = new User(null, user.username(), authenticatedUserEmail, false);
     User result = userRepository.add(newUser);
     return result;

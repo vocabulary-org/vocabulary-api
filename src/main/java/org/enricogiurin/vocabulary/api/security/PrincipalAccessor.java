@@ -2,9 +2,9 @@ package org.enricogiurin.vocabulary.api.security;
 
 /*-
  * #%L
- * Vocabulary API
+ * YourRents API
  * %%
- * Copyright (C) 2024 Vocabulary Team
+ * Copyright (C) 2023 - 2024 Your Rents Team
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,16 @@ package org.enricogiurin.vocabulary.api.security;
  * #L%
  */
 
-@FunctionalInterface
-public interface IAuthenticatedUserProvider {
+/**
+ * An interface for accessing the data of the principal.
+ */
+public interface PrincipalAccessor {
 
-  String getAuthenticatedUserEmail();
+    String getUsername();
 
+    String getName();
+
+    String getSubject();
+
+    boolean isValid();
 }

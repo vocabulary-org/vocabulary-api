@@ -13,23 +13,24 @@ spring:
     web:
       pageable:
         max-page-size: 2147483647
-  ### oauth2 configuration ###
+
   security:
     oauth2:
-      client:
-        registration:
-          google :
-            clientId: ${google.clientId}
-            clientSecret: ${google.clientSecret}
-            scope: profile, email
-            redirect-uri: "http://localhost:9090/login/oauth2/code/google"
-            client-name: vocabulary-localhost
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:18080/realms/vocbulary
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+
 
   # Database Flyway migrations
   flyway:
     locations: classpath:/db/migration
     schemas: vocabulary
 application:
+
+  # CORS configuration
+  cors:
+    allowed-origins: http://localhost:4200
   api:
     version: v1
     description: ${spring.application.name}
@@ -39,4 +40,11 @@ application:
     authenticated-path: ${application.api.base-path}/authenticated
     public-path: ${application.api.base-path}/public
 
+
+
+
+token:
+  converter:
+    principal-attribute: preferred_username
+    resource-id: vocabulary-api
 
