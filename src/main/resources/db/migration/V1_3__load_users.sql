@@ -1,4 +1,3 @@
----
 -- #%L
 -- Vocabulary API
 -- %%
@@ -15,7 +14,5 @@
 -- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
--- #L%
----
-INSERT INTO vocabulary.user (username, email, is_admin)
+-- #L%INSERT INTO vocabulary.user (username, email, is_admin)
 VALUES ('enricogiurin', 'enricogiurin@gmail.com', TRUE);

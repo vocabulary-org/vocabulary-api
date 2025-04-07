@@ -1,4 +1,3 @@
----
 -- #%L
 -- Vocabulary API
 -- %%
@@ -16,8 +15,6 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- #L%
----
-
 ALTER TABLE ONLY vocabulary.user
     ADD CONSTRAINT user_pkey PRIMARY KEY (id);
 

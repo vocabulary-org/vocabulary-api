@@ -1,4 +1,3 @@
----
 -- #%L
 -- Vocabulary API
 -- %%
@@ -16,8 +15,6 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- #L%
----
-
 INSERT INTO vocabulary.user (id, username, email, external_id)
 VALUES (1000000, 'enrico', 'enrico@gmail.com', '00000000-0000-0000-0000-000000000007'),
        (1000001, 'lucio', 'lucio@gmail.com', '00000000-0000-0000-0000-000000000008')
