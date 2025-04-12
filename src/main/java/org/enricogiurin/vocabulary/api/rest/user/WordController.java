@@ -69,7 +69,7 @@ public class WordController {
 
   @PostMapping
   ResponseEntity<Word> add(@RequestBody Word word) {
-    Word savedProperty = wordRepository.create(word);
+    Word savedProperty = wordRepository.create(word, UUID.fromString("00000000-0000-0000-0000-000000000007"));
     return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
   }
 

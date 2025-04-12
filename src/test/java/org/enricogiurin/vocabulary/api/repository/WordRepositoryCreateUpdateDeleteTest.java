@@ -59,7 +59,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   void createANewWord() {
 
     Word newWord = new Word(null, "dog", "der Hund", "my dog", Language.ENGLISH, Language.GERMAN);
-    Word result = wordRepository.create(newWord);
+    Word result = wordRepository.create(newWord, UUID.fromString("00000000-0000-0000-0000-000000000007"));
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("dog"));

@@ -73,16 +73,16 @@ public class UserRepository {
         .map(this::map);
   }
 
-  public Integer findIdByAuthenticatedEmail() {
-    //TODO - fix this
-    String authenticatedUserEmail = "a@a.com";
+  public Integer findIdByUuid(UUID uuid) {
+
     return dsl.select(USER.ID)
         .from(USER)
-        .where(USER.EMAIL.eq(authenticatedUserEmail))
+        .where(USER.EXTERNAL_ID.eq(uuid))
         .fetchOptional(USER.ID).orElseThrow(
             () -> new DataNotFoundException("User not found: "
-                + authenticatedUserEmail));
+                + uuid));
   }
+
 
   /**
    * Create a new User.

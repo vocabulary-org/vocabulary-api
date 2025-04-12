@@ -23,9 +23,8 @@ CREATE TABLE vocabulary.user
     id          SERIAL,
     username    character varying(256) NOT NULL,
     email       character varying(256) NOT NULL UNIQUE,
+    keycloakId  character varying(256),
     is_admin    BOOLEAN                DEFAULT FALSE,
-    created_at  TIMESTAMP              DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP              DEFAULT CURRENT_TIMESTAMP,
     external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
@@ -38,8 +37,6 @@ CREATE TABLE vocabulary.word
     language       vocabulary.language          NOT NULL,
     language_to    vocabulary.language          NOT NULL,
     user_id        integer                      NOT NULL,
-    created_at     TIMESTAMP                    DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP                    DEFAULT CURRENT_TIMESTAMP,
     external_id    UUID                         NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 

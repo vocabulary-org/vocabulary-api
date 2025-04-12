@@ -37,6 +37,7 @@ import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordRecord;
 import org.enricogiurin.vocabulary.api.model.Language;
+import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -107,9 +108,9 @@ public class WordRepository {
    * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
-  public Word create(Word word) {
+  public Word create(Word word, UUID userUuid) {
+    Integer userId = userRepository.findIdByUuid(userUuid);
 
-    Integer userIdByAuthenticatedEmail = userRepository.findIdByAuthenticatedEmail();
     WordRecord wordRecord = dsl.newRecord(WORD);
 
     wordRecord.setLanguage(word.language());
@@ -117,7 +118,7 @@ public class WordRepository {
     wordRecord.setSentence(word.sentence());
     wordRecord.setTranslation(word.translation());
     wordRecord.setDescription(word.description());
-    wordRecord.setUserId(userIdByAuthenticatedEmail);
+    wordRecord.setUserId(userId);
     wordRecord.setCreatedAt(LocalDateTime.now());
     wordRecord.insert();
     return findById(wordRecord.getId()).orElseThrow(

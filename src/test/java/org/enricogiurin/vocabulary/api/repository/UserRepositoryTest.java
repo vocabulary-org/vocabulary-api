@@ -54,15 +54,6 @@ class UserRepositoryTest {
     assertThat(user.uuid()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000007"));
   }
 
-  @Test
-  void findIdByAuthenticatedEmail() {
-    //given
-
-    //when
-    Integer userIdByAuthenticatedEmail = userRepository.findIdByAuthenticatedEmail();
-    //then
-    assertThat(userIdByAuthenticatedEmail).isEqualTo(1000000);
-  }
 
   @Test
   void add() {
