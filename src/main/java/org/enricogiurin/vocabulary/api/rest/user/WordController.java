@@ -27,6 +27,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
+import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,12 +51,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class WordController {
 
   private final WordRepository wordRepository;
+  private final PrincipalAccessor principalAccessor;
 
   @GetMapping
   ResponseEntity<Page<Word>> find(
       @ParameterObject Searchable filter,
       @ParameterObject @SortDefault(sort = WordRepository.SENTENCE_ALIAS, direction = Direction.ASC) Pageable pagination) {
-    Page<Word> page = wordRepository.find(filter, pagination);
+    String keycloakId = principalAccessor.getSubject();
+    Page<Word> page = wordRepository.find(filter, pagination, keycloakId);
     return ResponseEntity.ok(page);
   }
 

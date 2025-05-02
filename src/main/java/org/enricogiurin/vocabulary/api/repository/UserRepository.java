@@ -99,7 +99,6 @@ public class UserRepository {
     UserRecord userRecord = dsl.newRecord(USER);
     userRecord.setUsername(user.username());
     userRecord.setEmail(user.email());
-    userRecord.setCreatedAt(LocalDateTime.now());
     userRecord.insert();
     return findById(userRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to create user[username]: " + user.username()));
@@ -122,7 +121,6 @@ public class UserRepository {
     userRecord.setUsername(user.username());
     userRecord.setEmail(user.email());
     userRecord.setIsAdmin(user.isAdmin());
-    userRecord.setUpdatedAt(LocalDateTime.now());
     userRecord.insert();
     return findById(userRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to update user[uuid]: " + uuid));

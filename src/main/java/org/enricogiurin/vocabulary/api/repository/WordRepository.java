@@ -45,6 +45,7 @@ import org.jooq.Record;
 import org.jooq.Record6;
 import org.jooq.Select;
 import org.jooq.SelectConditionStep;
+import org.jooq.SelectSelectStep;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -70,25 +71,24 @@ public class WordRepository {
 
   private final UserRepository userRepository;
 
-  public Optional<Word> findByExternalId(UUID externalId) {
+  public Optional<Word> findByExternalId(UUID externalId, String keycloakId) {
 
-    return getSelect()
+    return getSelect(keycloakId)
         .and(WORD.EXTERNAL_ID.eq(externalId))
         .fetchOptional()
         .map(this::map);
   }
 
-  public Optional<Word> findById(Integer id) {
-    return getSelect()
-        .and(WORD.ID.eq(id))
+  Optional<Word> findById(Integer wordId) {
+    return getSelect(wordId)
         .fetchOptional()
         .map(this::map);
   }
 
-  public Page<Word> find(Searchable filter, Pageable pageable) {
+  public Page<Word> find(Searchable filter, Pageable pageable, String keycloakId) {
     Select<?> result = jooqUtils.paginate(
         dsl,
-        jooqUtils.getQueryWithConditionsAndSorts(getSelect(),
+        jooqUtils.getQueryWithConditionsAndSorts(getSelect(keycloakId),
             filter, this::getSupportedField,
             pageable, this::getSupportedField),
         pageable.getPageSize(), pageable.getOffset());
@@ -119,7 +119,6 @@ public class WordRepository {
     wordRecord.setTranslation(word.translation());
     wordRecord.setDescription(word.description());
     wordRecord.setUserId(userId);
-    wordRecord.setCreatedAt(LocalDateTime.now());
     wordRecord.insert();
     return findById(wordRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to create word[sentence]: " + word.sentence()));
@@ -160,7 +159,6 @@ public class WordRepository {
     if (word.description() != null) {
       wordRecord.setDescription(word.description());
     }
-    wordRecord.setUpdatedAt(LocalDateTime.now());
     wordRecord.update();
     return findById(wordRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to update word: " + uuid));
@@ -185,20 +183,28 @@ public class WordRepository {
   }
 
 
-  private SelectConditionStep<Record6<UUID, String, String, String, Language, Language>> getSelect() {
-    final String authenticatedUserEmail = "a@a.com";
-    log.info("authenticated user: {}", authenticatedUserEmail);
-    return dsl.select(
-            WORD.EXTERNAL_ID.as(UUID_ALIAS),
-            WORD.SENTENCE.as(SENTENCE_ALIAS),
-            WORD.TRANSLATION.as(TRANSLATION_ALIAS),
-            WORD.DESCRIPTION.as(DESCRIPTION_ALIAS),
-            WORD.LANGUAGE.as(LANGUAGE_ALIAS),
-            WORD.LANGUAGE_TO.as(LANGUAGE_TO_ALIAS)
-        )
+  private SelectConditionStep<Record6<UUID, String, String, String, Language, Language>> getSelect(String keycloakId) {
+    return select()
         .from(WORD)
         .join(USER).on(WORD.USER_ID.eq(USER.ID))
-        .where(USER.EMAIL.eq(authenticatedUserEmail));
+        .where(USER.KEYCLOAKID.equalIgnoreCase(keycloakId));
+  }
+
+  private SelectConditionStep<Record6<UUID, String, String, String, Language, Language>> getSelect(Integer wordId) {
+    return select()
+        .from(WORD)
+        .where(WORD.ID.equal(wordId));
+  }
+
+  private  SelectSelectStep<Record6<UUID, String, String, String, Language, Language>> select() {
+    return dsl.select(
+        WORD.EXTERNAL_ID.as(UUID_ALIAS),
+        WORD.SENTENCE.as(SENTENCE_ALIAS),
+        WORD.TRANSLATION.as(TRANSLATION_ALIAS),
+        WORD.DESCRIPTION.as(DESCRIPTION_ALIAS),
+        WORD.LANGUAGE.as(LANGUAGE_ALIAS),
+        WORD.LANGUAGE_TO.as(LANGUAGE_TO_ALIAS)
+    );
   }
 
   private Field<?> getSupportedField(String field) {
