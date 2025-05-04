@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 class WordRepositoryCreateUpdateDeleteTest {
 
   static final int HELLO_ID = 1000000;
+  static final int USER_ENRICO_ID = 1000000;
 
   @Autowired
   WordRepository wordRepository;
@@ -59,7 +60,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   void createANewWord() {
 
     Word newWord = new Word(null, "dog", "der Hund", "my dog", Language.ENGLISH, Language.GERMAN);
-    Word result = wordRepository.create(newWord, UUID.fromString("00000000-0000-0000-0000-000000000007"));
+    Word result = wordRepository.create(newWord, USER_ENRICO_ID);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("dog"));
@@ -72,10 +73,10 @@ class WordRepositoryCreateUpdateDeleteTest {
 
   @Test
   void deleteAnExistingWord() {
-    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
-    boolean delete = wordRepository.delete(word.uuid());
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
+    boolean delete = wordRepository.delete(word.uuid(), USER_ENRICO_ID);
     assertThat(delete, equalTo(true));
-    Optional<Word> wordOptional = wordRepository.findById(HELLO_ID);
+    Optional<Word> wordOptional = wordRepository.findById(HELLO_ID, USER_ENRICO_ID);
     assertThat(wordOptional.isEmpty(), equalTo(true));
   }
 
@@ -88,15 +89,15 @@ class WordRepositoryCreateUpdateDeleteTest {
   void deleteANotExistingWord() {
     UUID randomUUID = UUID.randomUUID();
     DataNotFoundException ex = assertThrows(DataNotFoundException.class,
-        () -> wordRepository.delete(randomUUID));
+        () -> wordRepository.delete(randomUUID, USER_ENRICO_ID));
     assertThat(ex.getMessage(), equalTo("Word not found: " + randomUUID));
   }
 
   @Test
   void updateAnExistingWord() {
-    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
     Word updateWord = new Word(null, null, "new translation", "new description", null, null);
-    Word result = wordRepository.update(word.uuid(), updateWord);
+    Word result = wordRepository.update(word.uuid(), updateWord, USER_ENRICO_ID);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("Hello"));
@@ -109,7 +110,7 @@ class WordRepositoryCreateUpdateDeleteTest {
     UUID randomUUID = UUID.randomUUID();
     Word updateWord = new Word(null, null, "new translation", "new description", null, null);
     DataNotFoundException ex = assertThrows(DataNotFoundException.class,
-        () -> wordRepository.update(randomUUID, updateWord));
+        () -> wordRepository.update(randomUUID, updateWord, USER_ENRICO_ID));
     assertThat(ex.getMessage(), equalTo("Word not found: " + randomUUID));
   }
 

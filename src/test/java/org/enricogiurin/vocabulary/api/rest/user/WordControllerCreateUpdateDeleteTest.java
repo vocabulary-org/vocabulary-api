@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.rest.user;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -35,6 +36,7 @@ import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
+import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,20 +55,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class WordControllerCreateUpdateDeleteTest {
 
-  static int HELLO_ID = 1000000;
+  static final int USER_ENRICO_ID = 1000000;
+  static final int HELLO_ID = 1000000;
 
   @Autowired
   MockMvc mvc;
 
   @Autowired
   WordRepository wordRepository;
+
+  @MockitoBean
+  PrincipalAccessor accessor;
   @Value("${application.api.user-path}/word")
   String basePath;
 
 
   @BeforeEach
   void setUp() {
-
+    when(accessor.getSubject()).thenReturn("f95cb50f-5f3b-4b71-9f8b-3495d47622cf");
   }
 
   @Test
@@ -95,7 +102,7 @@ class WordControllerCreateUpdateDeleteTest {
   @Test
   void updateAnExistingWord() throws Exception {
 
-    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
     mvc.perform(patch(basePath + "/" + word.uuid())
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -116,11 +123,11 @@ class WordControllerCreateUpdateDeleteTest {
 
   @Test
   void deleteAnExistingWord() throws Exception {
-    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
     mvc.perform(delete(basePath + "/" + word.uuid()).contentType(
             MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
-    assertThat(wordRepository.findById(HELLO_ID).isPresent(), is(false));
+    assertThat(wordRepository.findById(HELLO_ID, USER_ENRICO_ID).isPresent(), is(false));
   }
 
   @Test

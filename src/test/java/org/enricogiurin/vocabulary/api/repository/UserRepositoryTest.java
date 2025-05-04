@@ -91,4 +91,12 @@ class UserRepositoryTest {
     assertThat(result.email()).isEqualTo("a@google.com");
     assertThat(result.isAdmin()).isTrue();
   }
+
+  @Test
+  void findUserIdByKeycloakId() {
+    Integer userId = userRepository.findUserIdByKeycloakId(
+        "f95cb50f-5f3b-4b71-9f8b-3495d47622cf");
+    assertThat(userId).isNotNull();
+    assertThat(userId).isEqualTo(1000000);
+  }
 }

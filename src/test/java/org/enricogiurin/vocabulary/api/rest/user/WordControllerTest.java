@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.rest.user;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.Language;
-import org.enricogiurin.vocabulary.api.repository.WordRepository;
+import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,16 +49,22 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
 class WordControllerTest {
-  static final int NUM_WORDS = 5;
+
   static UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
   @Autowired
   MockMvc mvc;
 
-  @Autowired
-  WordRepository wordRepository;
+  @MockitoBean
+  PrincipalAccessor accessor;
+
   @Value("${application.api.user-path}/word")
   String basePath;
+
+  @BeforeEach
+  void setUp() {
+    when(accessor.getSubject()).thenReturn("f95cb50f-5f3b-4b71-9f8b-3495d47622cf");
+  }
 
 
   @Test
@@ -90,7 +98,4 @@ class WordControllerTest {
         .andExpect(jsonPath("$.languageTo", is(Language.ITALIAN.name())));
   }
 
-  @BeforeEach
-  void setUp() {
-  }
 }

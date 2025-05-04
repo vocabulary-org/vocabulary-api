@@ -26,7 +26,6 @@ import static org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.Word.WORD;
 
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,7 +36,6 @@ import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordRecord;
 import org.enricogiurin.vocabulary.api.model.Language;
-import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -69,26 +67,24 @@ public class WordRepository {
   private final DSLContext dsl;
   private final CustomJooqUtils jooqUtils;
 
-  private final UserRepository userRepository;
-
-  public Optional<Word> findByExternalId(UUID externalId, String keycloakId) {
-
-    return getSelect(keycloakId)
+  public Optional<Word> findByExternalId(UUID externalId, Integer userId) {
+    return getSelect(userId)
         .and(WORD.EXTERNAL_ID.eq(externalId))
         .fetchOptional()
         .map(this::map);
   }
 
-  Optional<Word> findById(Integer wordId) {
-    return getSelect(wordId)
+  public Optional<Word> findById(Integer wordId, Integer userId) {
+    return getSelect(userId)
+        .and(WORD.ID.eq(wordId))
         .fetchOptional()
         .map(this::map);
   }
 
-  public Page<Word> find(Searchable filter, Pageable pageable, String keycloakId) {
+  public Page<Word> find(Searchable filter, Pageable pageable, Integer userId) {
     Select<?> result = jooqUtils.paginate(
         dsl,
-        jooqUtils.getQueryWithConditionsAndSorts(getSelect(keycloakId),
+        jooqUtils.getQueryWithConditionsAndSorts(getSelect(userId),
             filter, this::getSupportedField,
             pageable, this::getSupportedField),
         pageable.getPageSize(), pageable.getOffset());
@@ -108,11 +104,8 @@ public class WordRepository {
    * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
-  public Word create(Word word, UUID userUuid) {
-    Integer userId = userRepository.findIdByUuid(userUuid);
-
+  public Word create(Word word, Integer userId) {
     WordRecord wordRecord = dsl.newRecord(WORD);
-
     wordRecord.setLanguage(word.language());
     wordRecord.setLanguageTo(word.languageTo());
     wordRecord.setSentence(word.sentence());
@@ -120,7 +113,7 @@ public class WordRepository {
     wordRecord.setDescription(word.description());
     wordRecord.setUserId(userId);
     wordRecord.insert();
-    return findById(wordRecord.getId()).orElseThrow(
+    return findById(wordRecord.getId(), userId).orElseThrow(
         () -> new DataExecutionException("failed to create word[sentence]: " + word.sentence()));
   }
 
@@ -139,9 +132,10 @@ public class WordRepository {
    * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
-  public Word update(UUID uuid, Word word) {
+  public Word update(UUID uuid, Word word, Integer userId) {
     WordRecord wordRecord = dsl.selectFrom(WORD)
         .where(WORD.EXTERNAL_ID.eq(uuid))
+        .and(WORD.USER_ID.eq(userId))
         .fetchOptional()
         .orElseThrow(() -> new DataNotFoundException("Word not found: " + uuid));
     if (word.language() != null) {
@@ -160,7 +154,7 @@ public class WordRepository {
       wordRecord.setDescription(word.description());
     }
     wordRecord.update();
-    return findById(wordRecord.getId()).orElseThrow(
+    return findById(wordRecord.getId(), userId).orElseThrow(
         () -> new DataExecutionException("failed to update word: " + uuid));
   }
 
@@ -171,10 +165,11 @@ public class WordRepository {
    * @throws DataNotFoundException if the city does not exist
    */
   @Transactional(readOnly = false)
-  public boolean delete(UUID uuid) {
+  public boolean delete(UUID uuid, Integer userId) {
     Integer propertyId = dsl.select(WORD.ID)
         .from(WORD)
         .where(WORD.EXTERNAL_ID.eq(uuid))
+        .and(WORD.USER_ID.eq(userId))
         .fetchOptional(WORD.ID).orElseThrow(
             () -> new DataNotFoundException("Word not found: " + uuid));
     return dsl.deleteFrom(WORD)
@@ -183,18 +178,14 @@ public class WordRepository {
   }
 
 
-  private SelectConditionStep<Record6<UUID, String, String, String, Language, Language>> getSelect(String keycloakId) {
+  private SelectConditionStep<Record6<UUID, String, String, String, Language, Language>> getSelect(
+      Integer userId) {
     return select()
         .from(WORD)
         .join(USER).on(WORD.USER_ID.eq(USER.ID))
-        .where(USER.KEYCLOAKID.equalIgnoreCase(keycloakId));
+        .where(USER.ID.eq(userId));
   }
 
-  private SelectConditionStep<Record6<UUID, String, String, String, Language, Language>> getSelect(Integer wordId) {
-    return select()
-        .from(WORD)
-        .where(WORD.ID.equal(wordId));
-  }
 
   private  SelectSelectStep<Record6<UUID, String, String, String, Language, Language>> select() {
     return dsl.select(

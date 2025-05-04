@@ -51,6 +51,8 @@ class WordRepositoryTest {
 
   static final UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
   static final int HELLO_ID = 1000000;
+  static final int USER_ENRICO_ID = 1000000;
+  static final int USER_LUCIO_ID = 1000001;
 
   @Autowired
   WordRepository wordRepository;
@@ -63,7 +65,7 @@ class WordRepositoryTest {
   @Test
   void findByExternalId() {
     Word word = wordRepository.findByExternalId(
-        HELLO_UUID).orElseThrow();
+        HELLO_UUID, USER_ENRICO_ID).orElseThrow();
     assertThat(word, notNullValue());
     assertThat(word.sentence(), equalTo("Hello"));
     assertThat(word.language().getLanguage(), equalTo("English"));
@@ -72,17 +74,24 @@ class WordRepositoryTest {
 
   @Test
   void findById() {
-    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
     assertThat(word, notNullValue());
     assertThat(word.uuid(), equalTo(HELLO_UUID));
     assertThat(word.language().getLanguage(), equalTo("English"));
   }
 
   @Test
-  void findAllByEnrico() {
+  void findAllWordsOwnedByEnrico() {
     Page<Word> result = wordRepository.find(FilterCriteria.of(),
-        PageRequest.ofSize(Integer.MAX_VALUE));
+        PageRequest.ofSize(Integer.MAX_VALUE), USER_ENRICO_ID);
     assertThat(result, iterableWithSize(5));
+  }
+
+  @Test
+  void findAllWordsOwnedByLucio() {
+    Page<Word> result = wordRepository.find(FilterCriteria.of(),
+        PageRequest.ofSize(Integer.MAX_VALUE), USER_LUCIO_ID);
+    assertThat(result, iterableWithSize(1));
   }
 
   @Test
@@ -90,7 +99,7 @@ class WordRepositoryTest {
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("sentence")));
     FilterCriteria filter = FilterCriteria.of(
         FilterCondition.of("sentence", CustomJooqUtils.CONTAINS_IGNORE_CASE, "cat"));
-    Page<Word> page = wordRepository.find(filter, pageable);
+    Page<Word> page = wordRepository.find(filter, pageable, USER_ENRICO_ID);
     assertThat(page, iterableWithSize(2));
     Word word = page.getContent().getFirst();
     assertThat(word, notNullValue());
@@ -102,7 +111,7 @@ class WordRepositoryTest {
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Order.asc("sentence")));
     FilterCriteria filter = FilterCriteria.of(
         FilterCondition.of(WordRepository.LANGUAGE_TO_ALIAS, CustomJooqUtils.EQUAL, "German"));
-    Page<Word> page = wordRepository.find(filter, pageable);
+    Page<Word> page = wordRepository.find(filter, pageable, USER_ENRICO_ID);
     assertThat(page, iterableWithSize(1));
     Word word = page.getContent().getFirst();
     assertThat(word, notNullValue());

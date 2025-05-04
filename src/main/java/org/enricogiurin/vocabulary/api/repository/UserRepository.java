@@ -24,7 +24,6 @@ package org.enricogiurin.vocabulary.api.repository;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.USER;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +57,16 @@ public class UserRepository {
         .fetchOptional()
         .map(this::map);
   }
+
+  public Integer findUserIdByKeycloakId(String keycloakId) {
+    return dsl.select(USER.ID)
+        .from(USER)
+        .where(USER.KEYCLOAKID.eq(keycloakId))
+        .fetchOptional(USER.ID)
+        .orElseThrow(
+            () -> new DataNotFoundException("Cannot find user with keycloakId: " + keycloakId));
+  }
+
 
   public Optional<User> findByUuid(UUID uuid) {
     return getSelect()
