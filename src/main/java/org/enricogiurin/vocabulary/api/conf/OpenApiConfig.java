@@ -20,6 +20,7 @@ package org.enricogiurin.vocabulary.api.conf;
  * #L%
  */
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
@@ -36,35 +37,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 class OpenApiConfig {
 
+
+
   @Bean
-  public OpenAPI configOpenApi(
-      @Value("${spring.application.name}") String name,
+  OpenAPI configOpenApi(@Value("${spring.application.name}") String name,
       @Value("${application.api.version}") String version,
       @Value("${application.api.description}") String description) {
-
-    return new OpenAPI()
-        .info(new Info()
-            .title(name)
-            .version(version)
-            .description(description)
-            .termsOfService("https://github.com/egch/vocabulary")
-            .license(new License().name("Apache License, Version 2.0")
-                .identifier("Apache-2.0")
+    return new OpenAPI().info(new Info().title(name).version(version).description(description)
+            //.termsOfService("https://github.com/your-rents/your-rents-api")
+            .license(new License().name("Apache License, Version 2.0").identifier("Apache-2.0")
                 .url("https://opensource.org/license/apache-2-0/")))
-        .components(new io.swagger.v3.oas.models.Components()
-            .addSecuritySchemes("googleOauth2", createOAuth2Scheme()))
-        .addSecurityItem(new SecurityRequirement().addList("googleOauth2"));
+        .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
+        .components(new Components().addSecuritySchemes("Bearer Authentication",
+            createAPIKeyScheme()));
   }
 
-  private SecurityScheme createOAuth2Scheme() {
-    return new SecurityScheme()
-        .type(Type.OAUTH2)
-        .flows(new OAuthFlows()
-            .authorizationCode(new OAuthFlow()
-                //http://localhost:9090/oauth2/authorization/google
-                .authorizationUrl("http://localhost:9090/oauth2/authorization/google")
 
-                .tokenUrl("https://oauth2.googleapis.com/token")
-                .scopes(new Scopes().addString("email", "Access to Gmail"))));
+  private SecurityScheme createAPIKeyScheme() {
+    return new SecurityScheme().type(SecurityScheme.Type.HTTP).bearerFormat("JWT")
+        .scheme("bearer");
   }
 }

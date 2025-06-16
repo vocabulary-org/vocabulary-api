@@ -21,7 +21,7 @@ Replace client-id and client-secret with your own.
 ### from cli with maven
 
 ```shell
-$ mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dgoogle.clientId=<client-id> -Dgoogle.clientSecret=<client-secret>"
+$ mvn spring-boot:run 
 ```
 
 ### with intellij
@@ -29,8 +29,21 @@ $ mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dgoogle.clientId=<client-
 ### Accessing Swagger
 [Swagger-localhost](http://localhost:9090/swagger-ui/index.html#/)
 
-### Login Page
-![img.png](docs/images/login.png)
+
+### Get the access token
+
+```shell
+TOKEN=$(curl -X POST \
+http://localhost:18080/realms/your-rents/protocol/openid-connect/token \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-d username=user \
+-d password=user \
+-d grant_type=password \
+-d client_id=your-rents-api \
+-d client_secret=ZEeQ3Zmhnm3NX6QPGlEpPOLB2OavM3GZ \
+| jq -r .access_token)
+```
+
 
 ## Credits
 Developed with the [YourRents Geodata](https://github.com/your-rents) technology stack.
