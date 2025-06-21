@@ -34,14 +34,13 @@ $ mvn spring-boot:run
 
 ```shell
 TOKEN=$(curl -X POST \
-http://localhost:18080/realms/your-rents/protocol/openid-connect/token \
--H 'Content-Type: application/x-www-form-urlencoded' \
--d username=user \
--d password=user \
--d grant_type=password \
--d client_id=your-rents-api \
--d client_secret=ZEeQ3Zmhnm3NX6QPGlEpPOLB2OavM3GZ \
-| jq -r .access_token)
+  http://keycloak.local:18081/realms/vocabulary/protocol/openid-connect/token \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d username=enrico \
+  -d password=enrico \
+  -d grant_type=password \
+  -d client_id=vocabulary-rest-api \
+  | jq -r .access_token)
 ```
 
 

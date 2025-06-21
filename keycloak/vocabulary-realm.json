@@ -5,7 +5,7 @@
     {
       "username": "admin",
       "enabled": true,
-      "emailVerified": true,
+      "emailVerified": false,
       "firstName": "Admin",
       "lastName": "User",
       "credentials": [

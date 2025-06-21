@@ -56,7 +56,7 @@ class SecurityConfiguration {
     return http.csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authorizeRequests -> authorizeRequests
             .requestMatchers("/actuator/**").permitAll()
-            .requestMatchers("/api/**").hasRole("USER")
+            .requestMatchers("/api/**").authenticated()
             .anyRequest().permitAll())
         .oauth2ResourceServer(oauth2 -> oauth2
             .jwt(jwt -> jwt.jwtAuthenticationConverter(
