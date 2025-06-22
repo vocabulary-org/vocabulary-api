@@ -99,7 +99,7 @@ public class UserRepository {
    * @return the new created User
    * @throws DataExecutionException if something unexpected happens
    */
-  @Transactional(readOnly = false)
+  //@Transactional(readOnly = false)
   public User add(User user) {
     Optional<User> optionalUser = findByEmail(user.email());
     if (optionalUser.isPresent()) {

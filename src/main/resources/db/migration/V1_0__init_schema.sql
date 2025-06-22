@@ -27,6 +27,10 @@ CREATE TABLE vocabulary.user
     is_admin    BOOLEAN                DEFAULT FALSE,
     external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
+-- on the long term we won't need this
+INSERT INTO vocabulary.user (username, email, keycloakId, is_admin)
+VALUES ('enrico', 'enrico@user.com', 'd4822fac-0242-420a-ba92-86a033d06827', TRUE);
+
 
 CREATE TABLE vocabulary.word
 (
