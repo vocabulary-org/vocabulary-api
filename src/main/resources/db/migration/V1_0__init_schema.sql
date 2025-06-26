@@ -29,7 +29,7 @@ CREATE TABLE vocabulary.user
 );
 -- on the long term we won't need this
 INSERT INTO vocabulary.user (username, email, keycloakId, is_admin)
-VALUES ('enrico', 'enrico@user.com', 'd4822fac-0242-420a-ba92-86a033d06827', TRUE);
+VALUES ('enrico', 'enrico@user.com', 'ab8d6366-3e74-47f0-9c9b-114215b1b99f', TRUE);
 
 
 CREATE TABLE vocabulary.word
