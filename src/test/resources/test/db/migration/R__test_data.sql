@@ -1,4 +1,3 @@
----
 -- #%L
 -- Vocabulary API
 -- %%
@@ -16,11 +15,9 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- #L%
----
-
-INSERT INTO vocabulary.user (id, username, email, external_id)
-VALUES (1000000, 'enrico', 'enrico@gmail.com', '00000000-0000-0000-0000-000000000007'),
-       (1000001, 'lucio', 'lucio@gmail.com', '00000000-0000-0000-0000-000000000008')
+INSERT INTO vocabulary.user (id, username, email, keycloakId, is_admin, external_id)
+VALUES (1000000, 'enrico', 'enrico@gmail.com', 'f95cb50f-5f3b-4b71-9f8b-3495d47622cf', true, '00000000-0000-0000-0000-000000000007'),
+       (1000001, 'lucio', 'lucio@gmail.com', '0a3d2c4b-8e79-4a5c-95d1-13c96c2ef4b7', false, '00000000-0000-0000-0000-000000000008' )
 ;
 
 --test data for word
@@ -35,6 +32,8 @@ INSERT INTO vocabulary.word (id, sentence, translation, description, language, l
                            (1000003, 'tomcat', 'gattone', 'my big gat', 'English', 'Italian',
                             1000000, '00000000-0000-0000-0000-000000000004'),
                            (1000004, 'Latte', 'die Milk', 'milk', 'English', 'German',
-                            1000000, '00000000-0000-0000-0000-000000000005')
+                            1000000, '00000000-0000-0000-0000-000000000005'),
+                           (1000005, 'Hello', 'Ciao', 'a gentle salutation', 'English', 'Italian',
+                            1000001, '00000000-0000-0000-0000-000000000006')
 ;
 

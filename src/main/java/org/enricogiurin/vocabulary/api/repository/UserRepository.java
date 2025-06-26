@@ -4,7 +4,7 @@ package org.enricogiurin.vocabulary.api.repository;
  * #%L
  * Vocabulary API
  * %%
- * Copyright (C) 2024 Vocabulary Team
+ * Copyright (C) 2024 - 2025 Vocabulary Team
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ package org.enricogiurin.vocabulary.api.repository;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.USER;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.UserRecord;
 import org.enricogiurin.vocabulary.api.model.User;
-import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record4;
@@ -51,7 +49,6 @@ public class UserRepository {
   public static final String EMAIL_ALIAS = "email";
   public static final String IS_ADMIN_ALIAS = "isAdmin";
   private final DSLContext dsl;
-  private final IAuthenticatedUserProvider authenticatedUserProvider;
 
 
   public Optional<User> findById(Integer id) {
@@ -60,6 +57,16 @@ public class UserRepository {
         .fetchOptional()
         .map(this::map);
   }
+
+  public Integer findUserIdByKeycloakId(String keycloakId) {
+    return dsl.select(USER.ID)
+        .from(USER)
+        .where(USER.KEYCLOAKID.eq(keycloakId))
+        .fetchOptional(USER.ID)
+        .orElseThrow(
+            () -> new DataNotFoundException("Cannot find user with keycloakId: " + keycloakId));
+  }
+
 
   public Optional<User> findByUuid(UUID uuid) {
     return getSelect()
@@ -75,15 +82,16 @@ public class UserRepository {
         .map(this::map);
   }
 
-  public Integer findIdByAuthenticatedEmail() {
-    String authenticatedUserEmail = authenticatedUserProvider.getAuthenticatedUserEmail();
+  public Integer findIdByUuid(UUID uuid) {
+
     return dsl.select(USER.ID)
         .from(USER)
-        .where(USER.EMAIL.eq(authenticatedUserEmail))
+        .where(USER.EXTERNAL_ID.eq(uuid))
         .fetchOptional(USER.ID).orElseThrow(
             () -> new DataNotFoundException("User not found: "
-                + authenticatedUserEmail));
+                + uuid));
   }
+
 
   /**
    * Create a new User.
@@ -91,7 +99,7 @@ public class UserRepository {
    * @return the new created User
    * @throws DataExecutionException if something unexpected happens
    */
-  @Transactional(readOnly = false)
+  //@Transactional(readOnly = false)
   public User add(User user) {
     Optional<User> optionalUser = findByEmail(user.email());
     if (optionalUser.isPresent()) {
@@ -100,7 +108,6 @@ public class UserRepository {
     UserRecord userRecord = dsl.newRecord(USER);
     userRecord.setUsername(user.username());
     userRecord.setEmail(user.email());
-    userRecord.setCreatedAt(LocalDateTime.now());
     userRecord.insert();
     return findById(userRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to create user[username]: " + user.username()));
@@ -123,7 +130,6 @@ public class UserRepository {
     userRecord.setUsername(user.username());
     userRecord.setEmail(user.email());
     userRecord.setIsAdmin(user.isAdmin());
-    userRecord.setUpdatedAt(LocalDateTime.now());
     userRecord.insert();
     return findById(userRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to update user[uuid]: " + uuid));

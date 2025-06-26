@@ -4,7 +4,7 @@ package org.enricogiurin.vocabulary.api.rest.user;
  * #%L
  * Vocabulary API
  * %%
- * Copyright (C) 2024 Vocabulary Team
+ * Copyright (C) 2024 - 2025 Vocabulary Team
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,16 +36,16 @@ import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
-import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
+import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,23 +55,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class WordControllerCreateUpdateDeleteTest {
 
-  static int HELLO_ID = 1000000;
+  static final int USER_ENRICO_ID = 1000000;
+  static final int HELLO_ID = 1000000;
 
   @Autowired
   MockMvc mvc;
 
   @Autowired
   WordRepository wordRepository;
+
+  @MockitoBean
+  PrincipalAccessor accessor;
   @Value("${application.api.user-path}/word")
   String basePath;
 
-  @MockBean
-  IAuthenticatedUserProvider authenticatedUserProvider;
 
   @BeforeEach
   void setUp() {
-    when(authenticatedUserProvider.getAuthenticatedUserEmail())
-        .thenReturn("enrico@gmail.com");
+    when(accessor.getSubject()).thenReturn("f95cb50f-5f3b-4b71-9f8b-3495d47622cf");
   }
 
   @Test
@@ -101,7 +102,7 @@ class WordControllerCreateUpdateDeleteTest {
   @Test
   void updateAnExistingWord() throws Exception {
 
-    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
     mvc.perform(patch(basePath + "/" + word.uuid())
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -122,11 +123,11 @@ class WordControllerCreateUpdateDeleteTest {
 
   @Test
   void deleteAnExistingWord() throws Exception {
-    Word word = wordRepository.findById(HELLO_ID).orElseThrow();
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
     mvc.perform(delete(basePath + "/" + word.uuid()).contentType(
             MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
-    assertThat(wordRepository.findById(HELLO_ID).isPresent(), is(false));
+    assertThat(wordRepository.findById(HELLO_ID, USER_ENRICO_ID).isPresent(), is(false));
   }
 
   @Test

@@ -4,7 +4,7 @@ package org.enricogiurin.vocabulary.api.repository;
  * #%L
  * Vocabulary API
  * %%
- * Copyright (C) 2024 Vocabulary Team
+ * Copyright (C) 2024 - 2025 Vocabulary Team
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import static org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.Word.WORD;
 
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,13 +37,13 @@ import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordRecord;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
-import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Record6;
 import org.jooq.Select;
 import org.jooq.SelectConditionStep;
+import org.jooq.SelectSelectStep;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -68,28 +67,24 @@ public class WordRepository {
   private final DSLContext dsl;
   private final CustomJooqUtils jooqUtils;
 
-  private final IAuthenticatedUserProvider authenticatedUserProvider;
-  private final UserRepository userRepository;
-
-  public Optional<Word> findByExternalId(UUID externalId) {
-
-    return getSelect()
+  public Optional<Word> findByExternalId(UUID externalId, Integer userId) {
+    return getSelect(userId)
         .and(WORD.EXTERNAL_ID.eq(externalId))
         .fetchOptional()
         .map(this::map);
   }
 
-  public Optional<Word> findById(Integer id) {
-    return getSelect()
-        .and(WORD.ID.eq(id))
+  public Optional<Word> findById(Integer wordId, Integer userId) {
+    return getSelect(userId)
+        .and(WORD.ID.eq(wordId))
         .fetchOptional()
         .map(this::map);
   }
 
-  public Page<Word> find(Searchable filter, Pageable pageable) {
+  public Page<Word> find(Searchable filter, Pageable pageable, Integer userId) {
     Select<?> result = jooqUtils.paginate(
         dsl,
-        jooqUtils.getQueryWithConditionsAndSorts(getSelect(),
+        jooqUtils.getQueryWithConditionsAndSorts(getSelect(userId),
             filter, this::getSupportedField,
             pageable, this::getSupportedField),
         pageable.getPageSize(), pageable.getOffset());
@@ -109,20 +104,16 @@ public class WordRepository {
    * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
-  public Word create(Word word) {
-
-    Integer userIdByAuthenticatedEmail = userRepository.findIdByAuthenticatedEmail();
+  public Word create(Word word, Integer userId) {
     WordRecord wordRecord = dsl.newRecord(WORD);
-
     wordRecord.setLanguage(word.language());
     wordRecord.setLanguageTo(word.languageTo());
     wordRecord.setSentence(word.sentence());
     wordRecord.setTranslation(word.translation());
     wordRecord.setDescription(word.description());
-    wordRecord.setUserId(userIdByAuthenticatedEmail);
-    wordRecord.setCreatedAt(LocalDateTime.now());
+    wordRecord.setUserId(userId);
     wordRecord.insert();
-    return findById(wordRecord.getId()).orElseThrow(
+    return findById(wordRecord.getId(), userId).orElseThrow(
         () -> new DataExecutionException("failed to create word[sentence]: " + word.sentence()));
   }
 
@@ -141,9 +132,10 @@ public class WordRepository {
    * @throws DataExecutionException if something unexpected happens
    */
   @Transactional(readOnly = false)
-  public Word update(UUID uuid, Word word) {
+  public Word update(UUID uuid, Word word, Integer userId) {
     WordRecord wordRecord = dsl.selectFrom(WORD)
         .where(WORD.EXTERNAL_ID.eq(uuid))
+        .and(WORD.USER_ID.eq(userId))
         .fetchOptional()
         .orElseThrow(() -> new DataNotFoundException("Word not found: " + uuid));
     if (word.language() != null) {
@@ -161,9 +153,8 @@ public class WordRepository {
     if (word.description() != null) {
       wordRecord.setDescription(word.description());
     }
-    wordRecord.setUpdatedAt(LocalDateTime.now());
     wordRecord.update();
-    return findById(wordRecord.getId()).orElseThrow(
+    return findById(wordRecord.getId(), userId).orElseThrow(
         () -> new DataExecutionException("failed to update word: " + uuid));
   }
 
@@ -174,10 +165,11 @@ public class WordRepository {
    * @throws DataNotFoundException if the city does not exist
    */
   @Transactional(readOnly = false)
-  public boolean delete(UUID uuid) {
+  public boolean delete(UUID uuid, Integer userId) {
     Integer propertyId = dsl.select(WORD.ID)
         .from(WORD)
         .where(WORD.EXTERNAL_ID.eq(uuid))
+        .and(WORD.USER_ID.eq(userId))
         .fetchOptional(WORD.ID).orElseThrow(
             () -> new DataNotFoundException("Word not found: " + uuid));
     return dsl.deleteFrom(WORD)
@@ -186,20 +178,24 @@ public class WordRepository {
   }
 
 
-  private SelectConditionStep<Record6<UUID, String, String, String, Language, Language>> getSelect() {
-    final String authenticatedUserEmail = authenticatedUserProvider.getAuthenticatedUserEmail();
-    log.info("authenticated user: {}", authenticatedUserEmail);
-    return dsl.select(
-            WORD.EXTERNAL_ID.as(UUID_ALIAS),
-            WORD.SENTENCE.as(SENTENCE_ALIAS),
-            WORD.TRANSLATION.as(TRANSLATION_ALIAS),
-            WORD.DESCRIPTION.as(DESCRIPTION_ALIAS),
-            WORD.LANGUAGE.as(LANGUAGE_ALIAS),
-            WORD.LANGUAGE_TO.as(LANGUAGE_TO_ALIAS)
-        )
+  private SelectConditionStep<Record6<UUID, String, String, String, Language, Language>> getSelect(
+      Integer userId) {
+    return select()
         .from(WORD)
         .join(USER).on(WORD.USER_ID.eq(USER.ID))
-        .where(USER.EMAIL.eq(authenticatedUserEmail));
+        .where(USER.ID.eq(userId));
+  }
+
+
+  private  SelectSelectStep<Record6<UUID, String, String, String, Language, Language>> select() {
+    return dsl.select(
+        WORD.EXTERNAL_ID.as(UUID_ALIAS),
+        WORD.SENTENCE.as(SENTENCE_ALIAS),
+        WORD.TRANSLATION.as(TRANSLATION_ALIAS),
+        WORD.DESCRIPTION.as(DESCRIPTION_ALIAS),
+        WORD.LANGUAGE.as(LANGUAGE_ALIAS),
+        WORD.LANGUAGE_TO.as(LANGUAGE_TO_ALIAS)
+    );
   }
 
   private Field<?> getSupportedField(String field) {

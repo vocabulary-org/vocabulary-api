@@ -4,7 +4,7 @@ package org.enricogiurin.vocabulary.api.security;
  * #%L
  * Vocabulary API
  * %%
- * Copyright (C) 2024 Vocabulary Team
+ * Copyright (C) 2024 - 2025 Vocabulary Team
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,42 @@ package org.enricogiurin.vocabulary.api.security;
  * #L%
  */
 
-import org.springframework.security.core.Authentication;
+
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 @Component
-class AuthenticatedUserProvider implements IAuthenticatedUserProvider {
+public class JwtPrincipalAccessor implements PrincipalAccessor {
 
   @Override
-  public String getAuthenticatedUserEmail() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication instanceof OAuth2AuthenticationToken authToken) {
-      OAuth2User user = authToken.getPrincipal();
-      return user.getAttribute("email");
-    }
-    throw new UsernameNotFoundException("user not authenticated");
+  public String getUsername() {
+    return jwt().getClaimAsString("preferred_username");
   }
+
+  @Override
+  public String getName() {
+    return jwt().getClaimAsString("name");
+  }
+
+  @Override
+  public String getSubject() {
+    return jwt().getClaimAsString("sub");
+  }
+
+  @Override
+  public boolean isValid() {
+    return getPrincipal() instanceof Jwt;
+
+  }
+
+  private Jwt jwt() {
+    return (Jwt) getPrincipal();
+  }
+
+  private Object getPrincipal() {
+    return SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+  }
+
+
 }

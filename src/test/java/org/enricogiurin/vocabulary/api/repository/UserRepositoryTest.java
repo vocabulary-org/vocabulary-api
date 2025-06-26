@@ -4,7 +4,7 @@ package org.enricogiurin.vocabulary.api.repository;
  * #%L
  * Vocabulary API
  * %%
- * Copyright (C) 2024 Vocabulary Team
+ * Copyright (C) 2024 - 2025 Vocabulary Team
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,13 @@ package org.enricogiurin.vocabulary.api.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.User;
-import org.enricogiurin.vocabulary.api.security.IAuthenticatedUserProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,8 +41,6 @@ class UserRepositoryTest {
   @Autowired
   UserRepository userRepository;
 
-  @MockBean
-  IAuthenticatedUserProvider authenticatedUserProvider;
 
 
   @Test
@@ -59,16 +54,6 @@ class UserRepositoryTest {
     assertThat(user.uuid()).isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000007"));
   }
 
-  @Test
-  void findIdByAuthenticatedEmail() {
-    //given
-    when(authenticatedUserProvider.getAuthenticatedUserEmail())
-        .thenReturn("enrico@gmail.com");
-    //when
-    Integer userIdByAuthenticatedEmail = userRepository.findIdByAuthenticatedEmail();
-    //then
-    assertThat(userIdByAuthenticatedEmail).isEqualTo(1000000);
-  }
 
   @Test
   void add() {
@@ -105,5 +90,13 @@ class UserRepositoryTest {
     assertThat(result.username()).isEqualTo("John");
     assertThat(result.email()).isEqualTo("a@google.com");
     assertThat(result.isAdmin()).isTrue();
+  }
+
+  @Test
+  void findUserIdByKeycloakId() {
+    Integer userId = userRepository.findUserIdByKeycloakId(
+        "f95cb50f-5f3b-4b71-9f8b-3495d47622cf");
+    assertThat(userId).isNotNull();
+    assertThat(userId).isEqualTo(1000000);
   }
 }

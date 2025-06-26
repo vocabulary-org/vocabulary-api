@@ -1,10 +1,10 @@
-package org.enricogiurin.vocabulary.api.rest.authenticated;
+package org.enricogiurin.vocabulary.api.security;
 
 /*-
  * #%L
  * Vocabulary API
  * %%
- * Copyright (C) 2024 Vocabulary Team
+ * Copyright (C) 2024 - 2025 Vocabulary Team
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,16 @@ package org.enricogiurin.vocabulary.api.rest.authenticated;
  */
 
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+/**
+ * An interface for accessing the data of the principal.
+ */
+public interface PrincipalAccessor {
 
-@RestController
-@RequestMapping("${application.api.authenticated-path}/simple")
-@RequiredArgsConstructor
-public class SimpleController {
+    String getUsername();
 
-  @GetMapping
-  ResponseEntity<String> find() {
-    return ResponseEntity.ok("everything is fine!");
-  }
+    String getName();
 
+    String getSubject();
 
+    boolean isValid();
 }

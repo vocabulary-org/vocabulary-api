@@ -21,7 +21,7 @@ Replace client-id and client-secret with your own.
 ### from cli with maven
 
 ```shell
-$ mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dgoogle.clientId=<client-id> -Dgoogle.clientSecret=<client-secret>"
+$ mvn spring-boot:run 
 ```
 
 ### with intellij
@@ -29,8 +29,39 @@ $ mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dgoogle.clientId=<client-
 ### Accessing Swagger
 [Swagger-localhost](http://localhost:9090/swagger-ui/index.html#/)
 
-### Login Page
-![img.png](docs/images/login.png)
+
+## Get the access token
+
+```shell
+TOKEN=$(curl -X POST \
+  http://localhost:18081/realms/vocabulary/protocol/openid-connect/token \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d username=enrico \
+  -d password=enrico \
+  -d grant_type=password \
+  -d client_id=vocabulary-rest-api \
+  | jq -r .access_token)
+```
+### copy to swagger
+![Bearer](docs/images/swagger-token.png)
+
+## Export the realm
+```shell
+docker exec -it vocabulary-api-keycloak-1 bash
+##within the docker container 
+mkdir opt/keycloak/data/import/
+  
+/opt/keycloak/bin/kc.sh export --file /opt/keycloak/data/import/vocabulary-realm.json --users same_file --realm  vocabulary --verbose \
+  --db=postgres \
+  --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak \
+  --db-username=keycloak \
+  --db-password=keycloak
+exit
+  
+##out of the docker container 
+cp vocabulary-api-keycloak-1:/opt/keycloak/data/import/vocabulary-realm.json /Users/enrico/github/vocabulary-org/vocabulary-api/keycloak/vocabulary-realm.json
+
+```
 
 ## Credits
 Developed with the [YourRents Geodata](https://github.com/your-rents) technology stack.

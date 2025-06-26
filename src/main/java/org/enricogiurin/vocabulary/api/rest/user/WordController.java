@@ -4,7 +4,7 @@ package org.enricogiurin.vocabulary.api.rest.user;
  * #%L
  * Vocabulary API
  * %%
- * Copyright (C) 2024 Vocabulary Team
+ * Copyright (C) 2024 - 2025 Vocabulary Team
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
+import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
+import org.enricogiurin.vocabulary.api.service.WordService;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,19 +51,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class WordController {
 
-  private final WordRepository wordRepository;
+  private final WordService wordService;
+  private final PrincipalAccessor principalAccessor;
 
   @GetMapping
   ResponseEntity<Page<Word>> find(
       @ParameterObject Searchable filter,
       @ParameterObject @SortDefault(sort = WordRepository.SENTENCE_ALIAS, direction = Direction.ASC) Pageable pagination) {
-    Page<Word> page = wordRepository.find(filter, pagination);
+    String keycloakId = principalAccessor.getSubject();
+    Page<Word> page = wordService.find(filter, pagination, keycloakId);
     return ResponseEntity.ok(page);
   }
 
   @GetMapping("/{uuid}")
   ResponseEntity<Word> findByUuid(@PathVariable UUID uuid) {
-    Word result = wordRepository.findByExternalId(uuid)
+    String subject = principalAccessor.getSubject();
+    Word result = wordService.findByExternalId(uuid, subject)
         .orElseThrow(
             () -> new DataNotFoundException("can't find Word having uuid: " + uuid));
     return ResponseEntity.ok(result);
@@ -69,20 +74,23 @@ public class WordController {
 
   @PostMapping
   ResponseEntity<Word> add(@RequestBody Word word) {
-    Word savedProperty = wordRepository.create(word);
+    String subject = principalAccessor.getSubject();
+    Word savedProperty = wordService.createNewWord(word, subject);
     return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{uuid}")
   ResponseEntity<Word> update(@PathVariable UUID uuid, @RequestBody Word wordToUpdate) {
-    Word updatedProperty = wordRepository.update(uuid, wordToUpdate);
+    String subject = principalAccessor.getSubject();
+    Word updatedProperty = wordService.updateAnExistingWord(uuid, wordToUpdate, subject);
     return ResponseEntity.ok(updatedProperty);
   }
 
   @DeleteMapping("/{uuid}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void delete(@PathVariable UUID uuid) {
-    wordRepository.delete(uuid);
+    String subject = principalAccessor.getSubject();
+    wordService.deleteAnExistingWord(uuid, subject);
   }
 
 }

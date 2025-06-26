@@ -1,4 +1,3 @@
----
 -- #%L
 -- Vocabulary API
 -- %%
@@ -16,8 +15,6 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- #L%
----
-
 CREATE TYPE vocabulary.language AS ENUM (
   'English', 'Spanish', 'French', 'German', 'Italian', 'Russian');
 
@@ -26,11 +23,14 @@ CREATE TABLE vocabulary.user
     id          SERIAL,
     username    character varying(256) NOT NULL,
     email       character varying(256) NOT NULL UNIQUE,
+    keycloakId  character varying(256),
     is_admin    BOOLEAN                DEFAULT FALSE,
-    created_at  TIMESTAMP              DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP              DEFAULT CURRENT_TIMESTAMP,
     external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
+-- on the long term we won't need this
+INSERT INTO vocabulary.user (username, email, keycloakId, is_admin)
+VALUES ('enrico', 'enrico@user.com', 'ab8d6366-3e74-47f0-9c9b-114215b1b99f', TRUE);
+
 
 CREATE TABLE vocabulary.word
 (
@@ -41,8 +41,6 @@ CREATE TABLE vocabulary.word
     language       vocabulary.language          NOT NULL,
     language_to    vocabulary.language          NOT NULL,
     user_id        integer                      NOT NULL,
-    created_at     TIMESTAMP                    DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP                    DEFAULT CURRENT_TIMESTAMP,
     external_id    UUID                         NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
