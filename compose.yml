@@ -31,7 +31,7 @@ services:
     volumes:
       - postgres-keycloak:/var/lib/postgresql/data
     environment:
-      - 'POSTGRES_DB=keycloak'
+      - 'POSTGRES_DB=keycloak-vocabulary-db'
       - 'POSTGRES_PASSWORD=keycloak'
       - 'POSTGRES_USER=keycloak'
     labels:
