@@ -53,13 +53,13 @@ mkdir opt/keycloak/data/import/
   
 /opt/keycloak/bin/kc.sh export --file /opt/keycloak/data/import/vocabulary-realm.json --users same_file --realm  vocabulary --verbose \
   --db=postgres \
-  --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak \
+  --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak-vocabulary-db \
   --db-username=keycloak \
   --db-password=keycloak
 exit
   
 ##out of the docker container 
-cp vocabulary-api-keycloak-1:/opt/keycloak/data/import/vocabulary-realm.json /Users/enrico/github/vocabulary-org/vocabulary-api/keycloak/vocabulary-realm.json
+docker cp vocabulary-api-keycloak-1:/opt/keycloak/data/import/vocabulary-realm.json /Users/enrico/github/vocabulary-org/vocabulary-api/keycloak/vocabulary-realm.json
 
 ```
 

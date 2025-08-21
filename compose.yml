@@ -52,7 +52,7 @@ services:
     command:
       - start-dev
       - --db=postgres
-      - --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak
+      - --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak-vocabulary-db
       - --db-username=keycloak
       - --db-password=keycloak
       - --import-realm
