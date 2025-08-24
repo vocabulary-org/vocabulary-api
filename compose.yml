@@ -31,7 +31,7 @@ services:
     volumes:
       - postgres-keycloak:/var/lib/postgresql/data
     environment:
-      - 'POSTGRES_DB=keycloak'
+      - 'POSTGRES_DB=keycloak-vocabulary-db'
       - 'POSTGRES_PASSWORD=keycloak'
       - 'POSTGRES_USER=keycloak'
     labels:
@@ -52,7 +52,7 @@ services:
     command:
       - start-dev
       - --db=postgres
-      - --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak
+      - --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak-vocabulary-db
       - --db-username=keycloak
       - --db-password=keycloak
       - --import-realm
