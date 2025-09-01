@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.admin;
+package org.enricogiurin.vocabulary.api.service;
 
 /*-
  * #%L
@@ -20,22 +20,26 @@ package org.enricogiurin.vocabulary.api.rest.admin;
  * #L%
  */
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.enricogiurin.vocabulary.api.service.KeycloakAdminService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.stereotype.Service;
 
-@RestController
-@RequestMapping("${application.api.admin-path}/keycloak")
+@Service
 @RequiredArgsConstructor
-public class KeycloakAdminController {
+@Slf4j
+public class KeycloakAdminService {
 
-  private final KeycloakAdminService keycloakAdminService;
+  private final Keycloak keycloak;
 
-  @GetMapping("/listusers")
-  public void list() {
-    keycloakAdminService.printUsers();
-
+  public void printUsers() {
+    List<UserRepresentation> userList = keycloak.realm("vocabulary")
+        .users()
+        .list();
+    userList.forEach(userRepresentation -> log.info("user: {}", userRepresentation.getUsername()));
   }
+
+
 }

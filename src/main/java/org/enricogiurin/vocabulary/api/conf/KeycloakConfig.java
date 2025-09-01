@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.admin;
+package org.enricogiurin.vocabulary.api.conf;
 
 /*-
  * #%L
@@ -20,22 +20,25 @@ package org.enricogiurin.vocabulary.api.rest.admin;
  * #L%
  */
 
-import lombok.RequiredArgsConstructor;
-import org.enricogiurin.vocabulary.api.service.KeycloakAdminService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.keycloak.OAuth2Constants;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@RestController
-@RequestMapping("${application.api.admin-path}/keycloak")
-@RequiredArgsConstructor
-public class KeycloakAdminController {
+@Configuration
+class KeycloakConfig {
 
-  private final KeycloakAdminService keycloakAdminService;
-
-  @GetMapping("/listusers")
-  public void list() {
-    keycloakAdminService.printUsers();
-
+  @Bean
+  Keycloak keycloak() {
+    return KeycloakBuilder.builder()
+        .serverUrl("http://localhost:18081")
+        .realm("master")
+        .clientId("admin-cli")
+        .grantType(OAuth2Constants.PASSWORD)
+        .username("admin")
+        .password("Pa55w0rd")
+        .build();
   }
+
 }
