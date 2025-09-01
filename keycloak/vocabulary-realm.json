@@ -86,6 +86,14 @@
         "clientRole" : true,
         "containerId" : "2e41a39c-ed6e-499c-b02b-b8b918a49361",
         "attributes" : { }
+      }, {
+        "id" : "aecb8efd-c340-42da-82ee-c23f0f74be9f",
+        "name" : "ADMIN",
+        "description" : "admin role",
+        "composite" : false,
+        "clientRole" : true,
+        "containerId" : "2e41a39c-ed6e-499c-b02b-b8b918a49361",
+        "attributes" : { }
       } ],
       "realm-management" : [ {
         "id" : "be09fc6e-cf89-43fc-91ce-f9fc4d246307",
@@ -345,6 +353,16 @@
     }
   },
   "groups" : [ {
+    "id" : "ce3e1dd1-aac1-46dc-aa88-8b4b9b035185",
+    "name" : "vocabulary-admins",
+    "path" : "/vocabulary-admins",
+    "subGroups" : [ ],
+    "attributes" : { },
+    "realmRoles" : [ ],
+    "clientRoles" : {
+      "vocabulary-rest-api" : [ "ADMIN" ]
+    }
+  }, {
     "id" : "76135cfb-8c06-4f26-adb3-1de249e6de55",
     "name" : "vocabulary-users",
     "path" : "/vocabulary-users",
@@ -417,7 +435,7 @@
     "requiredActions" : [ ],
     "realmRoles" : [ "default-roles-vocabulary" ],
     "notBefore" : 0,
-    "groups" : [ ]
+    "groups" : [ "/vocabulary-admins" ]
   }, {
     "id" : "ab8d6366-3e74-47f0-9c9b-114215b1b99f",
     "username" : "enrico",
@@ -1361,7 +1379,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-user-property-mapper", "saml-user-attribute-mapper", "oidc-full-name-mapper", "oidc-usermodel-property-mapper", "saml-role-list-mapper", "oidc-address-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-attribute-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "saml-role-list-mapper", "oidc-usermodel-attribute-mapper", "saml-user-attribute-mapper", "oidc-address-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-user-property-mapper", "oidc-usermodel-property-mapper" ]
       }
     }, {
       "id" : "99cd62da-2dcc-4efa-b573-50239b140f73",
@@ -1411,7 +1429,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "saml-user-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-property-mapper", "oidc-address-mapper", "oidc-full-name-mapper", "saml-role-list-mapper", "saml-user-property-mapper", "oidc-usermodel-attribute-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-address-mapper", "oidc-usermodel-attribute-mapper", "saml-user-property-mapper", "saml-user-attribute-mapper", "oidc-full-name-mapper", "saml-role-list-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-property-mapper" ]
       }
     } ],
     "org.keycloak.keys.KeyProvider" : [ {
