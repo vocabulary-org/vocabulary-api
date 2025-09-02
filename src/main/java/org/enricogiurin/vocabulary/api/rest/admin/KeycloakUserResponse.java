@@ -20,22 +20,9 @@ package org.enricogiurin.vocabulary.api.rest.admin;
  * #L%
  */
 
-import lombok.RequiredArgsConstructor;
-import org.enricogiurin.vocabulary.api.service.KeycloakAdminService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.Builder;
 
-@RestController
-@RequestMapping("${application.api.admin-path}/keycloak")
-@RequiredArgsConstructor
-public class KeycloakAdminController {
+@Builder
+public record KeycloakUserResponse(String username, String tmpPassword) {
 
-  private final KeycloakAdminService keycloakAdminService;
-
-  @GetMapping("/listusers")
-  public void list() {
-    keycloakAdminService.printUsers();
-
-  }
 }
