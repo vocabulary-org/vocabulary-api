@@ -22,46 +22,40 @@ package org.enricogiurin.vocabulary.api.service;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.keycloak.admin.client.Keycloak;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 
 @SpringBootTest
 @Import(VocabularyTestConfiguration.class)
 @Transactional
+@Testcontainers
 class KeycloakAdminServiceIntegrationTest {
 
   private static final String TEST_REALM_JSON = "keycloak/test-realm.json";
-  //private static final String TEST_REALM_JSON = "keycloak/vocabulary-realm.json";
-/*  public static final KeycloakContainer KEYCLOAK = new KeycloakContainer()
-      .withRealmImportFile(TEST_REALM_JSON)
-      // this would normally be just "target/classes"
-      .withProviderClassesFrom("target/test-classes")
-      // this enables KeycloakContainer reuse across tests
-      .withReuse(true);*/
+
+  @Container
+  static KeycloakContainer keycloak = new KeycloakContainer()
+      .withAdminUsername("admin")
+      .withAdminPassword("Pa55w0rd")
+      .withRealmImportFiles(TEST_REALM_JSON);
   @Autowired
   KeycloakAdminService keycloakAdminService;
 
-  //@BeforeAll
-/*  public static void beforeAll() {
-    KEYCLOAK.start();
-  }*/
-
-  //@AfterAll
-/*  public static void afterAll() {
-    KEYCLOAK.stop();
-  }*/
+  @DynamicPropertySource
+  static void setProperties(DynamicPropertyRegistry registry) {
+    registry.add("application.keycloak.url", keycloak::getAuthServerUrl);
+  }
 
   @Test
-  @Disabled
-  void test() {
+  void printUsers() {
     keycloakAdminService.printUsers();
   }
 

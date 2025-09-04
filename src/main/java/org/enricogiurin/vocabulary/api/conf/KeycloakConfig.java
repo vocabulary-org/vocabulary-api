@@ -23,18 +23,17 @@ package org.enricogiurin.vocabulary.api.conf;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 @Configuration
 class KeycloakConfig {
 
   @Bean
-  @Profile("!test")
-  Keycloak keycloak() {
+  Keycloak keycloak(@Value("${application.keycloak.url}") String keycloakUrl) {
     return KeycloakBuilder.builder()
-        .serverUrl("http://localhost:18081")
+        .serverUrl(keycloakUrl)
         .realm("master")
         .clientId("admin-cli")
         .grantType(OAuth2Constants.PASSWORD)

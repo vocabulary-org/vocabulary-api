@@ -18,7 +18,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:18081/realms/vocabulary
+          issuer-uri: ${application.keycloak.url}/realms/vocabulary
           jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
 
 
@@ -27,6 +27,8 @@ spring:
     locations: classpath:/db/migration
     schemas: vocabulary
 application:
+  keycloak:
+    url: http://localhost:18081
 
   # CORS configuration
   cors:
