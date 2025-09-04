@@ -30,7 +30,10 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+
+import java.time.Duration;
 
 @TestConfiguration(proxyBeanMethods = false)
 public class VocabularyTestConfiguration {
@@ -50,6 +53,8 @@ public class VocabularyTestConfiguration {
   KeycloakContainer keycloakContainer() {
     return new KeycloakContainer("quay.io/keycloak/keycloak:24.0.1")
             .withRealmImportFile("keycloak/vocabulary-realm.json")
+            .waitingFor(Wait.forHttp("/").forStatusCode(200)
+                    .withStartupTimeout(Duration.ofMinutes(3)))
             .withAdminUsername("admin")
             .withAdminPassword("Pa55w0rd");
   }
