@@ -31,6 +31,7 @@ $ mvn spring-boot:run
 
 
 ## Get the access token
+### as an user
 
 ```shell
 TOKEN=$(curl -X POST \
@@ -41,6 +42,24 @@ TOKEN=$(curl -X POST \
   -d grant_type=password \
   -d client_id=vocabulary-rest-api \
   | jq -r .access_token)
+  
+
+```
+### as an admin
+```shell
+TOKEN=$(curl -X POST \
+  http://localhost:18081/realms/vocabulary/protocol/openid-connect/token \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d username=enrico \
+  -d password=enrico \
+  -d grant_type=password \
+  -d client_id=vocabulary-rest-api \
+  | jq -r .access_token)
+```
+
+### copy the token to the clipboard
+```shell
+echo $TOKEN | pbcopy    
 ```
 ### copy to swagger
 ![Bearer](docs/images/swagger-token.png)
@@ -62,6 +81,9 @@ exit
 docker cp vocabulary-api-keycloak-1:/opt/keycloak/data/import/vocabulary-realm.json /Users/enrico/github/vocabulary-org/vocabulary-api/keycloak/vocabulary-realm.json
 
 ```
+
+## References
+- [testcontainers-keycloak](https://github.com/dasniko/testcontainers-keycloak)
 
 ## Credits
 Developed with the [YourRents Geodata](https://github.com/your-rents) technology stack.
