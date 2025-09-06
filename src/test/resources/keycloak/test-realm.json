@@ -1,0 +1,34 @@
+{
+    "realm": "vocabulary",
+    "enabled": true,
+
+    "groups": [
+        {
+            "name": "vocabulary-users"
+        }
+    ],
+
+    "users": [
+        {
+            "username": "test-user",
+            "enabled": true,
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "test-pass"
+                }
+            ],
+            "groups": [
+                "vocabulary-users"
+            ]
+        }
+    ],
+
+    "clients": [
+        {
+            "clientId": "vocabulary-rest-api",
+            "directAccessGrantsEnabled": true,
+            "publicClient": true
+        }
+    ]
+}

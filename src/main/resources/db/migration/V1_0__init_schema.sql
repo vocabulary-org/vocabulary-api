@@ -23,7 +23,7 @@ CREATE TABLE vocabulary.user
     id          SERIAL,
     username    character varying(256) NOT NULL,
     email       character varying(256) NOT NULL UNIQUE,
-    keycloakId  character varying(256),
+    keycloakId  character varying(256) NOT NULL UNIQUE,
     is_admin    BOOLEAN                DEFAULT FALSE,
     external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );

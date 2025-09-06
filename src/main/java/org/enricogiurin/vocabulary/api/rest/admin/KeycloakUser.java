@@ -1,4 +1,6 @@
-package org.enricogiurin.vocabulary.api.rest.authenticated;
+package org.enricogiurin.vocabulary.api.rest.admin;
+
+import lombok.Builder;
 
 /*-
  * #%L
@@ -19,25 +21,8 @@ package org.enricogiurin.vocabulary.api.rest.authenticated;
  * limitations under the License.
  * #L%
  */
-
-
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-@RequestMapping("${application.api.authenticated-path}/logout")
-@RequiredArgsConstructor
-@Slf4j
-public class LogoutController {
-
-  @GetMapping
-  public String logout(HttpServletRequest request) {
-    request.getSession().invalidate();
-    return "redirect:/";
-  }
+@Builder
+public record KeycloakUser(String username, String firstName, String lastName, String email,
+                           boolean isAdmin) {
 
 }

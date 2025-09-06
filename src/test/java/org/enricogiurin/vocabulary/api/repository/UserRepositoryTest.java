@@ -58,7 +58,7 @@ class UserRepositoryTest {
   @Test
   void add() {
     //given
-    User newUser = new User(null, "john", "john@gmail.com", false);
+    User newUser = new User(null, "john", "john@gmail.com", "aaa", false);
     //when
     User result = userRepository.add(newUser);
     //then
@@ -72,7 +72,7 @@ class UserRepositoryTest {
   void addAnExistingUser() {
     //given
     userRepository.findByEmail("enrico@gmail.com").orElseThrow();
-    User user = new User(null, "john", "enrico@gmail.com", false);
+    User user = new User(null, "john", "enrico@gmail.com", "aaa", false);
     //when-then
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> userRepository.add(user))
@@ -83,7 +83,7 @@ class UserRepositoryTest {
   @Test
   void update() {
     User oldUser = userRepository.findById(1000000).orElseThrow();
-    User user = new User(null, "John", "a@google.com", true);
+    User user = new User(null, "John", "a@google.com", "aaa", true);
     User result = userRepository.update(oldUser.uuid(), user);
     assertThat(result).isNotNull();
     assertThat(result.uuid()).isNotNull();

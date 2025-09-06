@@ -21,6 +21,8 @@ package org.enricogiurin.vocabulary.api.model;
  */
 
 import java.util.UUID;
+import lombok.Builder;
 
-public record User(UUID uuid, String username, String email, Boolean isAdmin) {
+@Builder
+public record User(UUID uuid, String username, String email, String keycloakId, Boolean isAdmin) {
 }

@@ -41,4 +41,5 @@ public class VocabularyTestConfiguration {
     return new PostgreSQLContainer<>(DockerImageName.parse("postgres:15"));
   }
 
+
 }
