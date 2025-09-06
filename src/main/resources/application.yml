@@ -29,6 +29,8 @@ spring:
 application:
   keycloak:
     url: http://localhost:18081
+    username: 'admin'
+    password: 'Pa55w0rd'
 
   # CORS configuration
   cors:

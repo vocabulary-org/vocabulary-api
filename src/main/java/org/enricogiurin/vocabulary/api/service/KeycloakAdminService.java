@@ -51,11 +51,10 @@ public class KeycloakAdminService {
   private final Keycloak keycloak;
   private final UserRepository userRepository;
 
-  public void printUsers() {
-    List<UserRepresentation> userList = keycloak.realm(REALM)
+  public List<UserRepresentation> userList() {
+    return keycloak.realm(REALM)
         .users()
         .list();
-    userList.forEach(userRepresentation -> log.info("user: {}", userRepresentation.getUsername()));
   }
 
   @Transactional

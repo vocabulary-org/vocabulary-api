@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.conf;
+package org.enricogiurin.vocabulary.api.service;
 
 /*-
  * #%L
@@ -20,28 +20,38 @@ package org.enricogiurin.vocabulary.api.conf;
  * #L%
  */
 
+import dasniko.testcontainers.keycloak.KeycloakContainer;
+import org.enricogiurin.vocabulary.api.conf.KeycloakConfig;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
-@Configuration
-public class KeycloakConfig {
+@TestConfiguration
+class KeycloakTestConfiguration {
 
-  public static final String REALM = "master";
-  public static final String CLIENT_ID = "admin-cli";
+  private static final String TEST_REALM_JSON = "keycloak/test-realm.json";
 
   @Bean
-  Keycloak keycloak(@Value("${application.keycloak.url}") String keycloakUrl,
-      @Value("${application.keycloak.username}") String username,
-      @Value("${application.keycloak.password}") String password
-  ) {
+  KeycloakContainer keycloakContainer() {
+    return new KeycloakContainer()
+        .withAdminUsername("admin")
+        .withAdminPassword("Pa55w0rd")
+        .withRealmImportFiles(TEST_REALM_JSON);
+  }
+
+  @Primary
+  @Bean("keycloakTest")
+  Keycloak keycloak(KeycloakContainer container,
+      @Value("${application.keycloak.username}") final String username,
+      @Value("${application.keycloak.password}") final String password) {
     return KeycloakBuilder.builder()
-        .serverUrl(keycloakUrl)
-        .realm(REALM)
-        .clientId(CLIENT_ID)
+        .serverUrl(container.getAuthServerUrl())
+        .realm(KeycloakConfig.REALM)
+        .clientId(KeycloakConfig.CLIENT_ID)
         .grantType(OAuth2Constants.PASSWORD)
         .username(username)
         .password(password)

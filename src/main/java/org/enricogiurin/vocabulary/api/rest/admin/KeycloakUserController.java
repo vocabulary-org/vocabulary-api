@@ -20,8 +20,10 @@ package org.enricogiurin.vocabulary.api.rest.admin;
  * #L%
  */
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.enricogiurin.vocabulary.api.service.KeycloakAdminService;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,8 +39,9 @@ public class KeycloakUserController {
   private final KeycloakAdminService keycloakAdminService;
 
   @GetMapping()
-  public void list() {
-    keycloakAdminService.printUsers();
+  public ResponseEntity<List<UserRepresentation>> list() {
+    List<UserRepresentation> list = keycloakAdminService.userList();
+    return ResponseEntity.ok(list);
   }
 
   @PutMapping()
