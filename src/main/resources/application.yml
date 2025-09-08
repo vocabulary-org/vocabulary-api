@@ -27,21 +27,26 @@ spring:
     locations: classpath:/db/migration
     schemas: vocabulary
 application:
+  spa:
+    url: http://localhost:4200
   keycloak:
     url: http://localhost:18081
     username: 'admin'
     password: 'Pa55w0rd'
+    realm: 'vocabulary'
+  keycloak-client-service:
+    skip-email: false
+
 
   # CORS configuration
   cors:
-    allowed-origins: http://localhost:4200
+    allowed-origins: ${application.spa.url}
   api:
     version: v1
     description: ${spring.application.name}
     base-path: /api/${application.api.version}/vocabulary
     admin-path: ${application.api.base-path}/admin
     user-path: ${application.api.base-path}/user
-    authenticated-path: ${application.api.base-path}/authenticated
     public-path: ${application.api.base-path}/public
 
 

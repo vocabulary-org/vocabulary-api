@@ -50,8 +50,8 @@ TOKEN=$(curl -X POST \
 TOKEN=$(curl -X POST \
   http://localhost:18081/realms/vocabulary/protocol/openid-connect/token \
   -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d username=enrico \
-  -d password=enrico \
+  -d username=admin \
+  -d password=admin \
   -d grant_type=password \
   -d client_id=vocabulary-rest-api \
   | jq -r .access_token)
@@ -64,6 +64,12 @@ echo $TOKEN | pbcopy
 ### copy to swagger
 ![Bearer](docs/images/swagger-token.png)
 
+
+## Keycloak
+### Keycloak admin console
+[keycloak console](http://localhost:18081/admin/master/console/)
+
+Switch to `vocabulary` realm.
 ## Export the realm
 ```shell
 docker exec -it vocabulary-api-keycloak-1 bash
@@ -82,8 +88,32 @@ docker cp vocabulary-api-keycloak-1:/opt/keycloak/data/import/vocabulary-realm.j
 
 ```
 
+## Troubleshooting 
+### Keycloak logs
+```shell
+docker logs -f vocabulary-api-keycloak-1
+```
+### SSL issues
+
+<img src="docs/images/KC-SSL.png" alt="HTTPS required" width="400">
+
+```shell
+nrico@Mac-mini-3 ~ % docker exec -it vocabulary-api-keycloak-1 bash
+bash-5.1$ cd /opt/keycloak/bin/
+bash-5.1$ ./kcadm.sh config credentials \
+  --server http://127.0.0.1:8080 \
+  --realm master \
+  --user admin \
+  --password Pa55w0rd
+Logging into http://127.0.0.1:8080 as user admin of realm master
+
+bash-5.1$ ./kcadm.sh update realms/vocabulary -s sslRequired=NONE
+
+```
 ## References
 - [testcontainers-keycloak](https://github.com/dasniko/testcontainers-keycloak)
+- [Setting up Gmail SMTP for Keycloak](https://www.youtube.com/watch?v=wwOKKwMq5pA)
+
 
 ## Credits
 Developed with the [YourRents Geodata](https://github.com/your-rents) technology stack.

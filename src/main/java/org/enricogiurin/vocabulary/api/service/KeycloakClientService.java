@@ -22,12 +22,12 @@ package org.enricogiurin.vocabulary.api.service;
 
 import jakarta.ws.rs.core.Response;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.enricogiurin.vocabulary.api.exception.KeyCloakException;
 import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
-import org.enricogiurin.vocabulary.api.rest.admin.KeycloakUser;
+import org.enricogiurin.vocabulary.api.rest.dto.KeycloakUser;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.GroupsResource;
@@ -36,49 +36,68 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class KeycloakAdminService {
+public class KeycloakClientService {
 
   static final String REALM = "vocabulary";
+  static final String CLIENT_ID = "vocabulary-rest-api";
   static final String GROUP_USERS = "vocabulary-users";
+  static final int LIFESPAN_IN_SECS = 6_000;
 
-  private final Keycloak keycloak;
+  static final String ACTION_VERIFY_EMAIL = "VERIFY_EMAIL";
+  static final String ACTION_UPDATE_PASSWORD = "UPDATE_PASSWORD";
+
+  private final Keycloak keycloakClient;
   private final UserRepository userRepository;
+  private final String redirectUri;
+  private final boolean skipEmail;
+
+
+  KeycloakClientService(final Keycloak keycloakClient,
+      final UserRepository userRepository,
+      @Value("${application.spa.url}") final String redirectUri,
+      @Value("${application.keycloak-client-service.skip-email:false}") final boolean skipEmail) {
+    this.keycloakClient = keycloakClient;
+    this.userRepository = userRepository;
+    this.redirectUri = redirectUri;
+    this.skipEmail = skipEmail;
+  }
 
   public List<UserRepresentation> userList() {
-    return keycloak.realm(REALM)
+    List<UserRepresentation> list = keycloakClient.realm(REALM)
         .users()
         .list();
+    list.forEach(ur -> log.info("user: {}", ur.getUsername()));
+    return list;
   }
 
   @Transactional
-  public String createNewUser(KeycloakUser user) {
-    UserRepresentation userRepresentation = getUserRepresentation(
-        user);
-
-    UsersResource usersResource = keycloak.realm(REALM).users();
+  public void createNewUser(KeycloakUser user) {
+    UserRepresentation userRepresentation = getUserRepresentation(user);
+    UsersResource usersResource = keycloakClient.realm(REALM).users();
     String userId;
     try (Response response = usersResource.create(userRepresentation)) {
       if (response.getStatus() != HttpStatus.CREATED.value()) {
-        throw new RuntimeException(
+        throw new KeyCloakException(
             "Error while creating new user: " + userRepresentation.getUsername() + " - status: "
                 + response.getStatus());
       }
       userId = CreatedResponseUtil.getCreatedId(response);
-      log.info("Created new user with userId: {}", userId);
     }
     UserResource userResource = usersResource.get(userId);
     final String password = randomPassword();
     setPasswordRenew(userResource, password);
     setGroup(userResource);
     saveUser(userResource);
-    return password;
+    sendActionsEmail(userResource);
+    log.info("user: {} - userId: {} has been successfully created",
+        userRepresentation.getUsername(), userId);
   }
 
   UserRepresentation getUserRepresentation(KeycloakUser user) {
@@ -101,7 +120,7 @@ public class KeycloakAdminService {
   }
 
   void setGroup(UserResource userResource) {
-    GroupsResource groups = keycloak.realm(REALM).groups();
+    GroupsResource groups = keycloakClient.realm(REALM).groups();
     GroupRepresentation group = groups.groups().stream()
         .filter(g -> GROUP_USERS.equals(g.getName()))
         .findFirst()
@@ -111,7 +130,6 @@ public class KeycloakAdminService {
 
   void saveUser(UserResource userResource) {
     UserRepresentation userRepresentation = userResource.toRepresentation();
-
     User newUser = User.builder()
         .email(userRepresentation.getEmail())
         .username(userRepresentation.getUsername())
@@ -120,6 +138,17 @@ public class KeycloakAdminService {
         .build();
     User added = userRepository.add(newUser);
     log.info("Inserted user: {}", added);
+  }
+
+
+  void sendActionsEmail(UserResource userResource) {
+    if (skipEmail) {
+      log.warn("email to the user won't be sent out!");
+      return;
+    }
+    userResource.executeActionsEmail(
+        CLIENT_ID, redirectUri, LIFESPAN_IN_SECS,
+        List.of(ACTION_VERIFY_EMAIL, ACTION_UPDATE_PASSWORD));
   }
 
   String randomPassword() {

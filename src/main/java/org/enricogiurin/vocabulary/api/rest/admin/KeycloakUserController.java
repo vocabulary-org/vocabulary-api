@@ -22,12 +22,10 @@ package org.enricogiurin.vocabulary.api.rest.admin;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.enricogiurin.vocabulary.api.service.KeycloakAdminService;
+import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class KeycloakUserController {
 
-  private final KeycloakAdminService keycloakAdminService;
+  private final KeycloakClientService keycloakAdminService;
 
   @GetMapping()
   public ResponseEntity<List<UserRepresentation>> list() {
@@ -44,13 +42,4 @@ public class KeycloakUserController {
     return ResponseEntity.ok(list);
   }
 
-  @PutMapping()
-  public ResponseEntity<KeycloakUserResponse> createNewKeycloakUser(
-      @RequestBody KeycloakUser keycloakUser) {
-    String pwd = keycloakAdminService.createNewUser(keycloakUser);
-    return ResponseEntity.ok(KeycloakUserResponse.builder()
-        .tmpPassword(pwd)
-        .username(keycloakUser.username())
-        .build());
-  }
 }

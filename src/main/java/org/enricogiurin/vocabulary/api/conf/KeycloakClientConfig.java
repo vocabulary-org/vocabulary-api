@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class KeycloakConfig {
+public class KeycloakClientConfig {
 
   public static final String REALM = "master";
   public static final String CLIENT_ID = "admin-cli";

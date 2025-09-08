@@ -26,7 +26,7 @@
   "oauth2DeviceCodeLifespan" : 600,
   "oauth2DevicePollingInterval" : 5,
   "enabled" : true,
-  "sslRequired" : "external",
+  "sslRequired" : "none",
   "registrationAllowed" : false,
   "registrationEmailAsUsername" : false,
   "rememberMe" : false,
@@ -413,15 +413,15 @@
   "webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister" : false,
   "webAuthnPolicyPasswordlessAcceptableAaguids" : [ ],
   "webAuthnPolicyPasswordlessExtraOrigins" : [ ],
-  "users" : [ {
+  "users" : [{
     "id" : "aaef1841-8966-440c-b311-25903541237d",
     "username" : "admin",
     "firstName" : "admin",
     "lastName" : "admin",
     "email" : "admin@gmail.com",
     "emailVerified" : false,
-    "createdTimestamp" : 1750893533948,
     "enabled" : true,
+    "createdTimestamp" : 1750893533948,
     "totp" : false,
     "credentials" : [ {
       "id" : "af13b06f-fb94-421b-91b4-1ccb581ed93b",
@@ -440,11 +440,11 @@
     "id" : "ab8d6366-3e74-47f0-9c9b-114215b1b99f",
     "username" : "enrico",
     "firstName" : "Enrico",
-    "lastName" : "Giurin",
+    "lastName" : "Marini",
     "email" : "enrico@gmail.com",
     "emailVerified" : false,
-    "createdTimestamp" : 1750893331601,
     "enabled" : true,
+    "createdTimestamp" : 1750893331601,
     "totp" : false,
     "credentials" : [ {
       "id" : "db4c3471-9bba-482d-b273-b1cbf0efd648",
@@ -1353,7 +1353,23 @@
     "contentSecurityPolicy" : "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
     "strictTransportSecurity" : "max-age=31536000; includeSubDomains"
   },
-  "smtpServer" : { },
+  "smtpServer" : {
+    "allowutf8" : "",
+    "replyToDisplayName" : "",
+    "debug" : "true",
+    "starttls" : "true",
+    "auth" : "true",
+    "envelopeFrom" : "",
+    "ssl" : "false",
+    "password" : "xxx",
+    "port" : "587",
+    "replyTo" : "",
+    "host" : "smtp.gmail.com",
+    "from" : "vocabulary-admin@gmail.com",
+    "fromDisplayName" : "",
+    "authType" : "basic",
+    "user" : "vocabulary-admin@gmail.com"
+  },
   "eventsEnabled" : false,
   "eventsListeners" : [ "jboss-logging" ],
   "enabledEventTypes" : [ ],
@@ -1379,7 +1395,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "saml-role-list-mapper", "oidc-usermodel-attribute-mapper", "saml-user-attribute-mapper", "oidc-address-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-user-property-mapper", "oidc-usermodel-property-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-usermodel-attribute-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-user-property-mapper", "saml-role-list-mapper", "oidc-usermodel-property-mapper", "oidc-address-mapper", "oidc-full-name-mapper", "saml-user-attribute-mapper" ]
       }
     }, {
       "id" : "99cd62da-2dcc-4efa-b573-50239b140f73",
@@ -1429,7 +1445,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-address-mapper", "oidc-usermodel-attribute-mapper", "saml-user-property-mapper", "saml-user-attribute-mapper", "oidc-full-name-mapper", "saml-role-list-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-usermodel-property-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-address-mapper", "oidc-usermodel-attribute-mapper", "saml-user-attribute-mapper", "oidc-usermodel-property-mapper", "saml-role-list-mapper", "saml-user-property-mapper", "oidc-full-name-mapper", "oidc-sha256-pairwise-sub-mapper" ]
       }
     } ],
     "org.keycloak.keys.KeyProvider" : [ {
@@ -1479,7 +1495,6 @@
     } ]
   },
   "internationalizationEnabled" : false,
-  "supportedLocales" : [ ],
   "authenticationFlows" : [ {
     "id" : "1730f0a3-b6b9-4f19-b4e8-1cd94fd2b7e0",
     "alias" : "Account verification options",
@@ -2088,6 +2103,14 @@
     "priority" : 100,
     "config" : { }
   }, {
+    "alias" : "idp_link",
+    "name" : "Linking Identity Provider",
+    "providerId" : "idp_link",
+    "enabled" : true,
+    "defaultAction" : false,
+    "priority" : 110,
+    "config" : { }
+  }, {
     "alias" : "update_user_locale",
     "name" : "Update User Locale",
     "providerId" : "update_user_locale",
@@ -2117,7 +2140,7 @@
     "cibaInterval" : "5",
     "realmReusableOtpCode" : "false"
   },
-  "keycloakVersion" : "26.2.5",
+  "keycloakVersion" : "26.3.3",
   "userManagedAccessAllowed" : false,
   "organizationsEnabled" : false,
   "verifiableCredentialsEnabled" : false,

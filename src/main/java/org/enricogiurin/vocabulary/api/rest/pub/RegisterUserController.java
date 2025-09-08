@@ -20,26 +20,31 @@ package org.enricogiurin.vocabulary.api.rest.pub;
  * #L%
  */
 
-import java.net.URI;
+
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.enricogiurin.vocabulary.api.rest.admin.KeycloakUserResponse;
+import org.enricogiurin.vocabulary.api.rest.dto.KeycloakUser;
+import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("${application.api.public-path}/user")
 @RequiredArgsConstructor
-@Slf4j
-public class HomeController {
+public class RegisterUserController {
 
-  @GetMapping
-  ResponseEntity<Void> redirect() {
-    return ResponseEntity.status(HttpStatus.FOUND)
-        .location(URI.create("http://localhost:9090/swagger-ui/index.html"))
-        .build();
+  private final KeycloakClientService keycloakAdminService;
+
+  @PutMapping()
+  public ResponseEntity<KeycloakUserResponse> createNewKeycloakUser(
+      @RequestBody KeycloakUser keycloakUser) {
+    keycloakAdminService.createNewUser(keycloakUser);
+    return ResponseEntity.ok(KeycloakUserResponse.builder()
+        .username(keycloakUser.username())
+        .build());
   }
 
 }

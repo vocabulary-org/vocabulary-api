@@ -1,6 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.admin;
-
-import lombok.Builder;
+package org.enricogiurin.vocabulary.api.exception;
 
 /*-
  * #%L
@@ -21,8 +19,14 @@ import lombok.Builder;
  * limitations under the License.
  * #L%
  */
-@Builder
-public record KeycloakUser(String username, String firstName, String lastName, String email,
-                           boolean isAdmin) {
 
+public class KeyCloakException extends RuntimeException {
+
+  public KeyCloakException(String message) {
+    super(message);
+  }
+
+  public KeyCloakException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
