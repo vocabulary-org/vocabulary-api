@@ -17,3 +17,4 @@ buildNumber.properties
 .classpath
 /.idea/
 src/main/resources/application-local.yml
+/keycloak/vocabulary-realm-real.json

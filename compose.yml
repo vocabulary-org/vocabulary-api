@@ -45,7 +45,7 @@ services:
     networks:
       - vocabulary-api-network
   keycloak:
-    image: quay.io/keycloak/keycloak:latest
+    image: 'quay.io/keycloak/keycloak:latest'
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: Pa55w0rd
