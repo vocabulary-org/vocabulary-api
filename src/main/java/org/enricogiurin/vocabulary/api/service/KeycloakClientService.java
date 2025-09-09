@@ -27,7 +27,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.enricogiurin.vocabulary.api.exception.KeyCloakException;
 import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
-import org.enricogiurin.vocabulary.api.rest.dto.KeycloakUser;
+import org.enricogiurin.vocabulary.api.rest.pub.KeycloakUser;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.GroupsResource;
@@ -134,7 +134,6 @@ public class KeycloakClientService {
         .email(userRepresentation.getEmail())
         .username(userRepresentation.getUsername())
         .keycloakId(userRepresentation.getId())
-        .isAdmin(false)
         .build();
     User added = userRepository.add(newUser);
     log.info("Inserted user: {}", added);

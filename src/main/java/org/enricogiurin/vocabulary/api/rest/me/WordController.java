@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.user;
+package org.enricogiurin.vocabulary.api.rest.me;
 
 /*-
  * #%L
@@ -47,7 +47,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${application.api.user-path}/word")
+@RequestMapping("${application.api.user-path}/words")
 @RequiredArgsConstructor
 public class WordController {
 

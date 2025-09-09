@@ -23,28 +23,30 @@ package org.enricogiurin.vocabulary.api.rest.pub;
 
 import lombok.RequiredArgsConstructor;
 import org.enricogiurin.vocabulary.api.rest.admin.KeycloakUserResponse;
-import org.enricogiurin.vocabulary.api.rest.dto.KeycloakUser;
 import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${application.api.public-path}/user")
+@RequestMapping("${application.api.public-path}/users")
 @RequiredArgsConstructor
 public class RegisterUserController {
 
   private final KeycloakClientService keycloakAdminService;
 
-  @PutMapping()
+  @PostMapping()
   public ResponseEntity<KeycloakUserResponse> createNewKeycloakUser(
       @RequestBody KeycloakUser keycloakUser) {
     keycloakAdminService.createNewUser(keycloakUser);
-    return ResponseEntity.ok(KeycloakUserResponse.builder()
-        .username(keycloakUser.username())
-        .build());
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(KeycloakUserResponse.builder()
+            .username(keycloakUser.username())
+            .build());
   }
 
 }

@@ -26,7 +26,7 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 import java.util.List;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
-import org.enricogiurin.vocabulary.api.rest.dto.KeycloakUser;
+import org.enricogiurin.vocabulary.api.rest.pub.KeycloakUser;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

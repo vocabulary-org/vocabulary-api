@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.user;
+package org.enricogiurin.vocabulary.api.rest.me;
 
 /*-
  * #%L
@@ -58,7 +58,7 @@ class WordControllerTest {
   @MockitoBean
   PrincipalAccessor accessor;
 
-  @Value("${application.api.user-path}/word")
+  @Value("${application.api.user-path}/words")
   String basePath;
 
   @BeforeEach

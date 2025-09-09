@@ -24,5 +24,5 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record User(UUID uuid, String username, String email, String keycloakId, Boolean isAdmin) {
+public record User(UUID uuid, String username, String email, String keycloakId) {
 }

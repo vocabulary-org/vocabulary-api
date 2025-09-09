@@ -33,7 +33,7 @@ import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.UserRecord
 import org.enricogiurin.vocabulary.api.model.User;
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.Record5;
+import org.jooq.Record4;
 import org.jooq.SelectJoinStep;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,7 +110,6 @@ public class UserRepository {
     userRecord.setUsername(user.username());
     userRecord.setEmail(user.email());
     userRecord.setKeycloakid(user.keycloakId());
-    userRecord.setIsAdmin(user.isAdmin());
     userRecord.insert();
     return findById(userRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to create user[username]: " + user.username()));
@@ -131,20 +130,18 @@ public class UserRepository {
             () -> new DataNotFoundException("User not found: " + uuid));
     userRecord.setUsername(user.username());
     userRecord.setEmail(user.email());
-    userRecord.setIsAdmin(user.isAdmin());
     userRecord.setKeycloakid(user.keycloakId());
     userRecord.insert();
     return findById(userRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to update user[uuid]: " + uuid));
   }
 
-  private SelectJoinStep<Record5<UUID, String, String, String, Boolean>> getSelect() {
+  private SelectJoinStep<Record4<UUID, String, String, String>> getSelect() {
     return dsl.select(
             USER.EXTERNAL_ID.as(UUID_ALIAS),
             USER.USERNAME.as(USERNAME_ALIAS),
             USER.EMAIL.as(EMAIL_ALIAS),
-            USER.KEYCLOAKID.as(KEYCLOAK_ID_ALIAS),
-            USER.IS_ADMIN.as(IS_ADMIN_ALIAS))
+            USER.KEYCLOAKID.as(KEYCLOAK_ID_ALIAS))
         .from(USER);
   }
 
@@ -153,8 +150,7 @@ public class UserRepository {
         record.get(UUID_ALIAS, UUID.class),
         record.get(USERNAME_ALIAS, String.class),
         record.get(EMAIL_ALIAS, String.class),
-        record.get(KEYCLOAK_ID_ALIAS, String.class),
-        record.get(IS_ADMIN_ALIAS, Boolean.class)
+        record.get(KEYCLOAK_ID_ALIAS, String.class)
     );
   }
 

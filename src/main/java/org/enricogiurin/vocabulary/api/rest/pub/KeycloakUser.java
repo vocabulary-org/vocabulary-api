@@ -1,4 +1,7 @@
-package org.enricogiurin.vocabulary.api.rest.user;
+package org.enricogiurin.vocabulary.api.rest.pub;
+
+import lombok.Builder;
+
 /*-
  * #%L
  * Vocabulary API
@@ -18,3 +21,8 @@ package org.enricogiurin.vocabulary.api.rest.user;
  * limitations under the License.
  * #L%
  */
+@Builder
+public record KeycloakUser(String username, String firstName, String lastName, String email,
+                           boolean isAdmin) {
+
+}
