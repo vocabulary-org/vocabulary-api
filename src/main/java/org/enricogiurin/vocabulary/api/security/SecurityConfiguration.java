@@ -67,14 +67,20 @@ class SecurityConfiguration {
 
 
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http)
+  SecurityFilterChain securityFilterChain(HttpSecurity http,
+      @Value("${application.api.public-path}") String pubUrl,
+      @Value("${application.api.admin-path}") String adminUrl,
+      @Value("${application.api.user-path}") String userUrl)
       throws Exception {
     return http.csrf(csrf -> csrf.disable()).cors(Customizer.withDefaults())
         .authorizeHttpRequests(
             authorizeRequests -> authorizeRequests
-                .requestMatchers("/me/**").hasRole("USER")
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().permitAll())
+                .requestMatchers("/actuator/**").permitAll()  //spring actuator
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()  //swagger UI
+                .requestMatchers(pubUrl+"/**").permitAll()
+                .requestMatchers(userUrl+"/**").hasRole("USER")
+                .requestMatchers(adminUrl+ "/**").hasRole("ADMIN")
+                .anyRequest().authenticated())
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakJwtTokenConverter)))
         .sessionManagement(
