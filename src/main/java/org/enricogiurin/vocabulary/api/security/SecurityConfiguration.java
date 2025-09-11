@@ -32,7 +32,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -43,21 +42,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Slf4j
 class SecurityConfiguration {
 
-  private final KeycloakJwtTokenConverter keycloakJwtTokenConverter;
-
-  private final String allowedOrigins;
 
   @Value("${spring.websecurity.debug:true}")
   private boolean webSecurityDebug;
 
-  SecurityConfiguration(TokenConverterProperties properties,
-      @Value("${application.cors.allowed-origins}") String allowedOrigins) {
-    JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
-        new JwtGrantedAuthoritiesConverter();
-    this.keycloakJwtTokenConverter =
-        new KeycloakJwtTokenConverter(jwtGrantedAuthoritiesConverter, properties);
-    this.allowedOrigins = allowedOrigins;
-  }
 
   @Bean
   WebSecurityCustomizer webSecurityCustomizer() {
@@ -68,6 +56,7 @@ class SecurityConfiguration {
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http,
+      KeycloakJwtTokenConverter keycloakJwtTokenConverter,
       @Value("${application.api.public-path}") String pubUrl,
       @Value("${application.api.admin-path}") String adminUrl,
       @Value("${application.api.user-path}") String userUrl)
@@ -88,9 +77,9 @@ class SecurityConfiguration {
         .build();
   }
 
-
   @Bean
-  CorsConfigurationSource corsConfigurationSource() {
+  CorsConfigurationSource corsConfigurationSource(
+      @Value("${application.cors.allowed-origins}") String allowedOrigins) {
     log.info("Configuring CORS with allowed origins: {}", allowedOrigins);
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
@@ -100,8 +89,5 @@ class SecurityConfiguration {
     source.registerCorsConfiguration("/**", configuration);
     return source;
   }
-
-
-
 
 }

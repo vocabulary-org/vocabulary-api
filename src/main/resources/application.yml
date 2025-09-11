@@ -33,7 +33,7 @@ application:
     url: http://localhost:18081
     username: 'admin'
     password: 'Pa55w0rd'
-    realm: 'vocabulary'
+    client-id: 'vocabulary-rest-api'
   keycloak-client-service:
     skip-email: false
 

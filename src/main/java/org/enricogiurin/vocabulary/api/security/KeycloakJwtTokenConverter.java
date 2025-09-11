@@ -20,58 +20,59 @@ package org.enricogiurin.vocabulary.api.security;
  * #L%
  */
 
-
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.lang.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.stereotype.Component;
 
+@Slf4j
+@Component
 class KeycloakJwtTokenConverter implements Converter<Jwt, JwtAuthenticationToken> {
 
-  private static final Logger log = LoggerFactory.getLogger(KeycloakJwtTokenConverter.class);
   private static final String RESOURCE_ACCESS = "resource_access";
   private static final String ROLES = "roles";
   private static final String ROLE_PREFIX = "ROLE_";
-  private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter;
-  private final TokenConverterProperties properties;
 
-  KeycloakJwtTokenConverter(JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter,
-      TokenConverterProperties properties) {
-    this.jwtGrantedAuthoritiesConverter = jwtGrantedAuthoritiesConverter;
-    this.properties = properties;
+  private final String clientId;
+
+  KeycloakJwtTokenConverter(@Value("${application.keycloak.client-id}") String clientId) {
+    this.clientId = clientId;
   }
 
+
   @Override
-  @SuppressWarnings("unchecked")
-  public JwtAuthenticationToken convert(@NonNull Jwt jwt) {
-    log.debug(jwt.getTokenValue());
-    Stream<SimpleGrantedAuthority> accesses =
-        Optional.of(jwt).map(token -> token.getClaimAsMap(RESOURCE_ACCESS))
-            .map(claimMap -> (Map<String, Object>) claimMap.get(properties.getResourceId()))
-            .map(resourceData -> (Collection<String>) resourceData.get(ROLES)).stream()
-            .flatMap(
-                roles -> roles.stream().map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role)))
-            .distinct();
+  public JwtAuthenticationToken convert(Jwt jwt) {
+    String tokenValue = jwt.getTokenValue();
+    log.debug("token: {}", tokenValue);
+    Collection<GrantedAuthority> authorities = extractResourceRoles(jwt);
+    return new JwtAuthenticationToken(jwt, authorities, jwt.getSubject());
+  }
 
-    Set<GrantedAuthority> authorities =
-        Stream.concat(jwtGrantedAuthoritiesConverter.convert(jwt).stream(), accesses)
-            .collect(Collectors.toSet());
-
-    String principalClaimName = properties.getPrincipalAttribute().map(jwt::getClaimAsString)
-        .orElse(jwt.getClaimAsString(JwtClaimNames.SUB));
-
-    return new JwtAuthenticationToken(jwt, authorities, principalClaimName);
+  private Collection<GrantedAuthority> extractResourceRoles(Jwt jwt) {
+    Object resourceAccess = jwt.getClaims().get(RESOURCE_ACCESS);
+    Collection<GrantedAuthority> result = Collections.emptySet();
+    if (resourceAccess instanceof Map<?, ?> map) {
+      Object client = map.get(clientId);
+      if (client instanceof Map<?, ?> clientMap) {
+        Object roles = clientMap.get(ROLES);
+        if (roles instanceof List<?> roleList) {
+          result = roleList.stream()
+              .filter(String.class::isInstance)
+              .map(String.class::cast)
+              .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role))
+              .collect(Collectors.toSet());
+        }
+      }
+    }
+    return result;
   }
 }
