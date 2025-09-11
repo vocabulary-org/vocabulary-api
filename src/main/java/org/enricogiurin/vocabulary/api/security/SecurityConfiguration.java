@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.security;
 
 
 import java.util.Arrays;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -31,35 +32,20 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 @Slf4j
 class SecurityConfiguration {
 
-  private final KeycloakJwtTokenConverter keycloakJwtTokenConverter;
 
-  private final String allowedOrigins;
-
-  @Value("${spring.websecurity.debug:false}")
+  @Value("${spring.websecurity.debug:true}")
   private boolean webSecurityDebug;
 
-  SecurityConfiguration(TokenConverterProperties properties,
-      @Value("${application.cors.allowed-origins}") String allowedOrigins) {
-    JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
-        new JwtGrantedAuthoritiesConverter();
-    this.keycloakJwtTokenConverter =
-        new KeycloakJwtTokenConverter(jwtGrantedAuthoritiesConverter, properties);
-    this.allowedOrigins = allowedOrigins;
-  }
 
   @Bean
   WebSecurityCustomizer webSecurityCustomizer() {
@@ -69,14 +55,21 @@ class SecurityConfiguration {
 
 
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http)
+  SecurityFilterChain securityFilterChain(HttpSecurity http,
+      KeycloakJwtTokenConverter keycloakJwtTokenConverter,
+      @Value("${application.api.public-path}") String pubUrl,
+      @Value("${application.api.admin-path}") String adminUrl,
+      @Value("${application.api.user-path}") String userUrl)
       throws Exception {
     return http.csrf(csrf -> csrf.disable()).cors(Customizer.withDefaults())
         .authorizeHttpRequests(
             authorizeRequests -> authorizeRequests
-                .requestMatchers("/api/user/**").hasRole("USER")
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .anyRequest().permitAll())
+                .requestMatchers("/actuator/**").permitAll()  //spring actuator
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()  //swagger UI
+                .requestMatchers(pubUrl+"/**").permitAll()
+                .requestMatchers(userUrl+"/**").hasRole("USER")
+                .requestMatchers(adminUrl+ "/**").hasRole("ADMIN")
+                .anyRequest().authenticated())
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakJwtTokenConverter)))
         .sessionManagement(
@@ -84,20 +77,17 @@ class SecurityConfiguration {
         .build();
   }
 
-
   @Bean
-  CorsConfigurationSource corsConfigurationSource() {
+  CorsConfigurationSource corsConfigurationSource(
+      @Value("${application.cors.allowed-origins}") String allowedOrigins) {
     log.info("Configuring CORS with allowed origins: {}", allowedOrigins);
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-    configuration.setAllowedMethods(Arrays.asList("*"));
-    configuration.setAllowedHeaders(Arrays.asList("*"));
+    configuration.setAllowedMethods(List.of("*"));
+    configuration.setAllowedHeaders(List.of("*"));
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;
   }
-
-
-
 
 }

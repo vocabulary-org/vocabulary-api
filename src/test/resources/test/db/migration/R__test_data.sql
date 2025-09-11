@@ -15,9 +15,9 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- #L%
-INSERT INTO vocabulary.user (id, username, email, keycloakId, is_admin, external_id)
-VALUES (1000000, 'enrico', 'enrico@gmail.com', 'f95cb50f-5f3b-4b71-9f8b-3495d47622cf', true, '00000000-0000-0000-0000-000000000007'),
-       (1000001, 'lucio', 'lucio@gmail.com', '0a3d2c4b-8e79-4a5c-95d1-13c96c2ef4b7', false, '00000000-0000-0000-0000-000000000008' )
+INSERT INTO vocabulary.user (id, username, email, keycloakId, external_id)
+VALUES (1000000, 'enrico', 'enrico@gmail.com', 'f95cb50f-5f3b-4b71-9f8b-3495d47622cf',  '00000000-0000-0000-0000-000000000007'),
+       (1000001, 'lucio', 'lucio@gmail.com', '0a3d2c4b-8e79-4a5c-95d1-13c96c2ef4b7', '00000000-0000-0000-0000-000000000008' )
 ;
 
 --test data for word

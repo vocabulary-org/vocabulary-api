@@ -1,5 +1,4 @@
-package org.enricogiurin.vocabulary.api.security;
-
+package org.enricogiurin.vocabulary.api.rest.me;
 /*-
  * #%L
  * Vocabulary API
@@ -19,7 +18,3 @@ package org.enricogiurin.vocabulary.api.security;
  * limitations under the License.
  * #L%
  */
-
-enum Roles {
-  USER, ADMIN
-}

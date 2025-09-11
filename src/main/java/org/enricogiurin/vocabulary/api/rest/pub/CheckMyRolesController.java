@@ -21,32 +21,33 @@ package org.enricogiurin.vocabulary.api.rest.pub;
  */
 
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.enricogiurin.vocabulary.api.rest.admin.KeycloakUserResponse;
-import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${application.api.public-path}/users")
+@RequestMapping("${application.api.public-path}/roles")
 @RequiredArgsConstructor
-public class RegisterUserController {
+@Slf4j
+class CheckMyRolesController {
 
-  private final KeycloakClientService keycloakAdminService;
-
-  @PostMapping()
-  public ResponseEntity<KeycloakUserResponse> createNewKeycloakUser(
-      @RequestBody KeycloakUser keycloakUser) {
-    keycloakAdminService.createNewUser(keycloakUser);
-    return ResponseEntity
-        .status(HttpStatus.CREATED)
-        .body(KeycloakUserResponse.builder()
-            .username(keycloakUser.username())
-            .build());
+  @GetMapping
+  ResponseEntity<List<String>> roles(Authentication authentication) {
+    if(authentication==null){
+      log.warn("user not authenticated");
+      return ResponseEntity.ok(List.of());
+    }
+    List<String> list = authentication.getAuthorities().stream()
+        .map(GrantedAuthority::getAuthority)
+        .toList();
+    list.forEach(s -> log.info("roles: {}", s));
+    return ResponseEntity.ok(list);
   }
 
 }

@@ -33,7 +33,7 @@ application:
     url: http://localhost:18081
     username: 'admin'
     password: 'Pa55w0rd'
-    realm: 'vocabulary'
+    client-id: 'vocabulary-rest-api'
   keycloak-client-service:
     skip-email: false
 
@@ -46,7 +46,7 @@ application:
     description: ${spring.application.name}
     base-path: /api/${application.api.version}/vocabulary
     admin-path: ${application.api.base-path}/admin
-    user-path: ${application.api.base-path}/user
+    user-path: ${application.api.base-path}/me
     public-path: ${application.api.base-path}/public
 
 

@@ -24,12 +24,11 @@ CREATE TABLE vocabulary.user
     username    character varying(256) NOT NULL,
     email       character varying(256) NOT NULL UNIQUE,
     keycloakId  character varying(256) NOT NULL UNIQUE,
-    is_admin    BOOLEAN                DEFAULT FALSE,
     external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 -- on the long term we won't need this
-INSERT INTO vocabulary.user (username, email, keycloakId, is_admin)
-VALUES ('enrico', 'enrico@user.com', 'ab8d6366-3e74-47f0-9c9b-114215b1b99f', TRUE);
+INSERT INTO vocabulary.user (username, email, keycloakId)
+VALUES ('enrico', 'enrico@user.com', 'ab8d6366-3e74-47f0-9c9b-114215b1b99f');
 
 
 CREATE TABLE vocabulary.word

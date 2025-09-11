@@ -23,6 +23,6 @@ package org.enricogiurin.vocabulary.api.rest.admin;
 import lombok.Builder;
 
 @Builder
-public record KeycloakUserResponse(String username, String tmpPassword) {
+public record KeycloakUserResponse(String username) {
 
 }

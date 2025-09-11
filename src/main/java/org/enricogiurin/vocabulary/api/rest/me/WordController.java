@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.user;
+package org.enricogiurin.vocabulary.api.rest.me;
 
 /*-
  * #%L
@@ -47,7 +47,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${application.api.user-path}/word")
+@RequestMapping("${application.api.user-path}/words")
 @RequiredArgsConstructor
 public class WordController {
 
@@ -58,15 +58,15 @@ public class WordController {
   ResponseEntity<Page<Word>> find(
       @ParameterObject Searchable filter,
       @ParameterObject @SortDefault(sort = WordRepository.SENTENCE_ALIAS, direction = Direction.ASC) Pageable pagination) {
-    String keycloakId = principalAccessor.getSubject();
+    String keycloakId = getKeycloakId();
     Page<Word> page = wordService.find(filter, pagination, keycloakId);
     return ResponseEntity.ok(page);
   }
 
   @GetMapping("/{uuid}")
   ResponseEntity<Word> findByUuid(@PathVariable UUID uuid) {
-    String subject = principalAccessor.getSubject();
-    Word result = wordService.findByExternalId(uuid, subject)
+    String keycloakId = getKeycloakId();
+    Word result = wordService.findByExternalId(uuid, keycloakId)
         .orElseThrow(
             () -> new DataNotFoundException("can't find Word having uuid: " + uuid));
     return ResponseEntity.ok(result);
@@ -74,23 +74,27 @@ public class WordController {
 
   @PostMapping
   ResponseEntity<Word> add(@RequestBody Word word) {
-    String subject = principalAccessor.getSubject();
-    Word savedProperty = wordService.createNewWord(word, subject);
+    String keycloakId = getKeycloakId();
+    Word savedProperty = wordService.createNewWord(word, keycloakId);
     return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{uuid}")
   ResponseEntity<Word> update(@PathVariable UUID uuid, @RequestBody Word wordToUpdate) {
-    String subject = principalAccessor.getSubject();
-    Word updatedProperty = wordService.updateAnExistingWord(uuid, wordToUpdate, subject);
+    String keycloakId = getKeycloakId();
+    Word updatedProperty = wordService.updateAnExistingWord(uuid, wordToUpdate, keycloakId);
     return ResponseEntity.ok(updatedProperty);
   }
 
   @DeleteMapping("/{uuid}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void delete(@PathVariable UUID uuid) {
-    String subject = principalAccessor.getSubject();
-    wordService.deleteAnExistingWord(uuid, subject);
+    String keycloakId = getKeycloakId();
+    wordService.deleteAnExistingWord(uuid, keycloakId);
+  }
+
+  private String getKeycloakId() {
+    return principalAccessor.getSubject();
   }
 
 }

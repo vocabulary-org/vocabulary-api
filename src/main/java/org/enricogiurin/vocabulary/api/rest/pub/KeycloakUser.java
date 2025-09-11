@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.dto;
+package org.enricogiurin.vocabulary.api.rest.pub;
 
 import lombok.Builder;
 
