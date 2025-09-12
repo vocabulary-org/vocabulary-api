@@ -20,7 +20,7 @@ package org.enricogiurin.vocabulary.api.service;
  * #L%
  */
 
-import static org.enricogiurin.vocabulary.api.conf.KeycloakClientConfig.REALM;
+
 
 import jakarta.ws.rs.core.Response;
 import java.util.List;
@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class KeycloakClientService {
 
-
+  static final String REALM_VOCABULARY = "vocabulary";
   static final String CLIENT_ID = "vocabulary-rest-api";
   static final String GROUP_USERS = "vocabulary-users";
   static final int LIFESPAN_IN_SECS = 6_000;
@@ -72,7 +72,7 @@ public class KeycloakClientService {
   }
 
   public List<UserRepresentation> userList() {
-    List<UserRepresentation> list = keycloakClient.realm(REALM)
+    List<UserRepresentation> list = keycloakClient.realm(REALM_VOCABULARY)
         .users()
         .list();
     list.forEach(ur -> log.info("user: {}", ur.getUsername()));
@@ -82,7 +82,7 @@ public class KeycloakClientService {
   @Transactional
   public String createNewUser(KeycloakUser user) {
     UserRepresentation userRepresentation = getUserRepresentation(user);
-    UsersResource usersResource = keycloakClient.realm(REALM).users();
+    UsersResource usersResource = keycloakClient.realm(REALM_VOCABULARY).users();
     final String userId;
     try (Response response = usersResource.create(userRepresentation)) {
       if (response.getStatus() != HttpStatus.CREATED.value()) {
@@ -126,7 +126,7 @@ public class KeycloakClientService {
   }
 
   void setGroup(UserResource userResource) {
-    GroupsResource groups = keycloakClient.realm(REALM).groups();
+    GroupsResource groups = keycloakClient.realm(REALM_VOCABULARY).groups();
     GroupRepresentation group = groups.groups().stream()
         .filter(g -> GROUP_USERS.equals(g.getName()))
         .findFirst()

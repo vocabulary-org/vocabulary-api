@@ -22,7 +22,7 @@ package org.enricogiurin.vocabulary.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.enricogiurin.vocabulary.api.conf.KeycloakClientConfig.REALM;
+import static org.enricogiurin.vocabulary.api.service.KeycloakClientService.REALM_VOCABULARY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -82,9 +82,8 @@ class KeycloakClientServiceTest {
         .thenReturn(HttpStatus.CONFLICT.value());  //it's called twice
     when(response.readEntity(String.class))
         .thenReturn("conflict");
-    when(keycloakAdminClient.realm(REALM)).thenReturn(realmResource);
+    when(keycloakAdminClient.realm(REALM_VOCABULARY)).thenReturn(realmResource);
     when(realmResource.users()).thenReturn(usersResource);
-    when(keycloakAdminClient.realm(REALM).users()).thenReturn(usersResource);
     ArgumentCaptor<UserRepresentation> acUserRepresentation = ArgumentCaptor.forClass(
         UserRepresentation.class);
     when(usersResource.create(acUserRepresentation.capture())).thenReturn(response);
