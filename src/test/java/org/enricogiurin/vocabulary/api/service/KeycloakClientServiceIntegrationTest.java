@@ -21,10 +21,12 @@ package org.enricogiurin.vocabulary.api.service;
  */
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import java.util.List;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.exception.KeyCloakException;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
 import org.enricogiurin.vocabulary.api.rest.pub.KeycloakUser;
 import org.junit.jupiter.api.AfterAll;
@@ -36,6 +38,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -51,8 +54,10 @@ class KeycloakClientServiceIntegrationTest {
       .withAdminPassword("pwd")
       .withRealmImportFiles(TEST_REALM_JSON)
       .withReuse(true);
+
   @Autowired
   UserRepository userRepository;
+
   KeycloakClientService keycloakClientService;
 
   @BeforeAll
@@ -101,6 +106,23 @@ class KeycloakClientServiceIntegrationTest {
 
     //then
     userRepository.findUserIdByKeycloakId(keycloakId).orElseThrow();
+  }
+
+  @Test
+  void createNewUser_conflict() {
+    //given
+    KeycloakUser user = KeycloakUser.builder()
+        .username("test-user")
+        .firstName("test")
+        .lastName("user")
+        .email("test-user@vocabulary.org")
+        .isAdmin(false)
+        .build();
+    //when-then
+    assertThatExceptionOfType(KeyCloakException.class)
+        .isThrownBy(() -> keycloakClientService.createNewUser(user))
+        .withMessageContaining("" + HttpStatus.CONFLICT.value());
+
   }
 
 }
