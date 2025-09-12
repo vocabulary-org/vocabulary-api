@@ -21,79 +21,52 @@ package org.enricogiurin.vocabulary.api.service;
  */
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.enricogiurin.vocabulary.api.service.KeycloakClientService.REALM_VOCABULARY;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
-import java.util.List;
-import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import jakarta.ws.rs.core.Response;
+import org.enricogiurin.vocabulary.api.exception.KeyCloakException;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
 import org.enricogiurin.vocabulary.api.rest.pub.KeycloakUser;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
+import org.mockito.ArgumentCaptor;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-
-@SpringBootTest
-@Import({VocabularyTestConfiguration.class})
-@Transactional
+@ExtendWith(SpringExtension.class)
 class KeycloakClientServiceTest {
 
-  static final String USER_EMAIL = "john.doe@example.com";
-  private static final String TEST_REALM_JSON = "keycloak/test-realm.json";
-  static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer()
-      .withAdminUsername("admin")
-      .withAdminPassword("pwd")
-      .withRealmImportFiles(TEST_REALM_JSON)
-      .withReuse(true);
-  @Autowired
+  private static final String USER_EMAIL = "john.doe@example.com";
+
+  @MockitoBean
   UserRepository userRepository;
-
-  @BeforeAll
-  public static void beforeAll() {
-    KEYCLOAK_CONTAINER.start();
-  }
-
-  @AfterAll
-  public static void afterAll() {
-    KEYCLOAK_CONTAINER.stop();
-  }
+  @MockitoBean
+  Keycloak keycloakAdminClient;
 
   KeycloakClientService keycloakClientService;
 
+
   @BeforeEach
   void setUp() {
-    Keycloak keycloakAdminClient = KEYCLOAK_CONTAINER.getKeycloakAdminClient();
     this.keycloakClientService = new KeycloakClientService(keycloakAdminClient, userRepository, "",
         true);
   }
 
-
   @Test
-  void userList() {
-    //when
-    List<UserRepresentation> userRepresentationList = keycloakClientService.userList();
-    //then
-    assertThat(userRepresentationList).isNotNull();
-    assertThat(userRepresentationList)
-        .singleElement()
-        .extracting(UserRepresentation::getUsername)
-        .isEqualTo("test-user");
-  }
-
-  //to evaluate also if user is present in the KC test container
-  @Test
-  void createNewUser() {
+  void createNewUser_conflict() {
     //given
-    userRepository.findByEmail(USER_EMAIL)
-        .ifPresent(u -> {
-          throw new IllegalStateException("User with email " + USER_EMAIL + " already exists!");
-        });
     KeycloakUser user = KeycloakUser.builder()
         .username("johndoe")
         .firstName("John")
@@ -101,11 +74,31 @@ class KeycloakClientServiceTest {
         .email(USER_EMAIL)
         .isAdmin(false)
         .build();
-    //when
-    keycloakClientService.createNewUser(user);
+    UsersResource usersResource = mock(UsersResource.class);
+    Response response = mock(Response.class);
+    RealmResource realmResource = mock(RealmResource.class);
+    when(response.getStatus())
+        .thenReturn(HttpStatus.CONFLICT.value())
+        .thenReturn(HttpStatus.CONFLICT.value());  //it's called twice
+    when(response.readEntity(String.class))
+        .thenReturn("conflict");
+    when(keycloakAdminClient.realm(REALM_VOCABULARY)).thenReturn(realmResource);
+    when(realmResource.users()).thenReturn(usersResource);
+    ArgumentCaptor<UserRepresentation> acUserRepresentation = ArgumentCaptor.forClass(
+        UserRepresentation.class);
+    when(usersResource.create(acUserRepresentation.capture())).thenReturn(response);
 
+    //when
+    assertThatExceptionOfType(KeyCloakException.class)
+        .isThrownBy(() -> keycloakClientService.createNewUser(user))
+        .withMessageContaining("" + HttpStatus.CONFLICT.value());
     //then
-    userRepository.findByEmail(USER_EMAIL).orElseThrow();
+    UserRepresentation userRepresentation = acUserRepresentation.getValue();
+    assertThat(userRepresentation.getUsername()).isEqualTo(user.username());
+    assertThat(userRepresentation.getEmail()).isEqualTo(user.email());
+    assertThat(userRepresentation.getFirstName()).isEqualTo(user.firstName());
+    assertThat(userRepresentation.getLastName()).isEqualTo(user.lastName());
+    verify(userRepository, never()).add(any());
   }
 
 }

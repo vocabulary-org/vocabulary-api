@@ -15,17 +15,17 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- #L%
-CREATE TYPE vocabulary.language AS ENUM (
-  'English', 'Spanish', 'French', 'German', 'Italian', 'Russian');
-
 CREATE TABLE vocabulary.user
 (
     id          SERIAL,
-    username    character varying(256) NOT NULL,
-    email       character varying(256) NOT NULL UNIQUE,
     keycloakId  character varying(256) NOT NULL UNIQUE,
+    username    character varying(256) , -- only for audit purpose
+    email       character varying(256) , -- only for audit purpose
     external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
+
+CREATE TYPE vocabulary.language AS ENUM (
+  'English', 'Spanish', 'French', 'German', 'Italian', 'Russian');
 -- on the long term we won't need this
 INSERT INTO vocabulary.user (username, email, keycloakId)
 VALUES ('enrico', 'enrico@user.com', 'ab8d6366-3e74-47f0-9c9b-114215b1b99f');

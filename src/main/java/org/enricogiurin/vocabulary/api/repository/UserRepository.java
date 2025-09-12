@@ -38,6 +38,10 @@ import org.jooq.SelectJoinStep;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * This class should only be used by the
+ * {@link org.enricogiurin.vocabulary.api.service.KeycloakClientService}
+ */
 @Repository
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -47,52 +51,24 @@ public class UserRepository {
   public static final String UUID_ALIAS = "uuid";
   public static final String USERNAME_ALIAS = "username";
   public static final String EMAIL_ALIAS = "email";
-  public static final String IS_ADMIN_ALIAS = "isAdmin";
   public static final String KEYCLOAK_ID_ALIAS = "keycloakId";
 
   private final DSLContext dsl;
 
 
-  public Optional<User> findById(Integer id) {
+  Optional<User> findById(Integer id) {
     return getSelect()
         .where(USER.ID.eq(id))
         .fetchOptional()
         .map(this::map);
   }
 
-  public Integer findUserIdByKeycloakId(String keycloakId) {
+  public Optional<Integer> findUserIdByKeycloakId(String keycloakId) {
     return dsl.select(USER.ID)
         .from(USER)
         .where(USER.KEYCLOAKID.eq(keycloakId))
-        .fetchOptional(USER.ID)
-        .orElseThrow(
-            () -> new DataNotFoundException("Cannot find user with keycloakId: " + keycloakId));
+        .fetchOptional(USER.ID);
   }
-
-
-  public Optional<User> findByUuid(UUID uuid) {
-    return getSelect()
-        .where(USER.EXTERNAL_ID.eq(uuid))
-        .fetchOptional()
-        .map(this::map);
-  }
-
-  public Optional<User> findByEmail(String email) {
-    return getSelect()
-        .where(USER.EMAIL.eq(email))
-        .fetchOptional()
-        .map(this::map);
-  }
-
-  public Integer findIdByUuid(UUID uuid) {
-    return dsl.select(USER.ID)
-        .from(USER)
-        .where(USER.EXTERNAL_ID.eq(uuid))
-        .fetchOptional(USER.ID).orElseThrow(
-            () -> new DataNotFoundException("User not found: "
-                + uuid));
-  }
-
 
   /**
    * Create a new User.
@@ -100,11 +76,11 @@ public class UserRepository {
    * @return the new created User
    * @throws DataExecutionException if something unexpected happens
    */
-  //@Transactional(readOnly = false)
+  @Transactional(readOnly = false)
   public User add(User user) {
-    Optional<User> optionalUser = findByEmail(user.email());
+    Optional<Integer> optionalUser = findUserIdByKeycloakId(user.keycloakId());
     if (optionalUser.isPresent()) {
-      throw new IllegalArgumentException(user.email() + " is already present in the User table");
+      throw new IllegalArgumentException(user.keycloakId() + " is already present in the User table");
     }
     UserRecord userRecord = dsl.newRecord(USER);
     userRecord.setUsername(user.username());
