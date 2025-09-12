@@ -20,6 +20,8 @@ package org.enricogiurin.vocabulary.api.service;
  * #L%
  */
 
+import static org.enricogiurin.vocabulary.api.conf.KeycloakClientConfig.REALM;
+
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class KeycloakClientService {
 
-  static final String REALM = "vocabulary";
+
   static final String CLIENT_ID = "vocabulary-rest-api";
   static final String GROUP_USERS = "vocabulary-users";
   static final int LIFESPAN_IN_SECS = 6_000;
@@ -78,12 +80,15 @@ public class KeycloakClientService {
   }
 
   @Transactional
-  public void createNewUser(KeycloakUser user) {
+  public String createNewUser(KeycloakUser user) {
     UserRepresentation userRepresentation = getUserRepresentation(user);
     UsersResource usersResource = keycloakClient.realm(REALM).users();
-    String userId;
+    final String userId;
     try (Response response = usersResource.create(userRepresentation)) {
       if (response.getStatus() != HttpStatus.CREATED.value()) {
+        String errorMessage = response.readEntity(String.class); // body as string
+        log.warn("Failed to create a new user - status: {} - message:\n{}", response.getStatus(),
+            errorMessage);
         throw new KeyCloakException(
             "Error while creating new user: " + userRepresentation.getUsername() + " - status: "
                 + response.getStatus());
@@ -98,6 +103,7 @@ public class KeycloakClientService {
     sendActionsEmail(userResource);
     log.info("user: {} - userId: {} has been successfully created",
         userRepresentation.getUsername(), userId);
+    return userId;
   }
 
   UserRepresentation getUserRepresentation(KeycloakUser user) {

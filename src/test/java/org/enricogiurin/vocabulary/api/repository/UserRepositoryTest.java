@@ -38,6 +38,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class UserRepositoryTest {
 
+  private static final String KEYCLOAK_ID = "f95cb50f-5f3b-4b71-9f8b-3495d47622cf";
+
+
   @Autowired
   UserRepository userRepository;
 
@@ -71,13 +74,12 @@ class UserRepositoryTest {
   @Test
   void addAnExistingUser() {
     //given
-    userRepository.findByEmail("enrico@gmail.com").orElseThrow();
-    User user = new User(null, "john", "enrico@gmail.com", "aaa");
+    userRepository.findUserIdByKeycloakId(KEYCLOAK_ID).orElseThrow();
+    User user = new User(null, "john", "enrico@gmail.com", KEYCLOAK_ID);
     //when-then
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> userRepository.add(user))
-        .withMessageContaining("is already present in the User table");
-
+        .withMessageContaining(KEYCLOAK_ID + " is already present in the User table");
   }
 
   @Test
@@ -94,7 +96,7 @@ class UserRepositoryTest {
   @Test
   void findUserIdByKeycloakId() {
     Integer userId = userRepository.findUserIdByKeycloakId(
-        "f95cb50f-5f3b-4b71-9f8b-3495d47622cf");
+        "f95cb50f-5f3b-4b71-9f8b-3495d47622cf").orElseThrow();
     assertThat(userId).isNotNull();
     assertThat(userId).isEqualTo(1000000);
   }
