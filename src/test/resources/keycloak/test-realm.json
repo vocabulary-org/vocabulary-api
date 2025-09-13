@@ -11,6 +11,7 @@
     "users": [
         {
             "username": "test-user",
+            "email": "test-user@vocabulary.org",
             "enabled": true,
             "credentials": [
                 {

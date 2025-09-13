@@ -20,13 +20,17 @@ package org.enricogiurin.vocabulary.api.exception;
  * #L%
  */
 
-public class KeyCloakException extends RuntimeException {
+/**
+ * Thrown when an error occurs while communicating with Keycloak.
+ */
 
-  public KeyCloakException(String message) {
+public class KeycloakException extends RuntimeException {
+
+  public KeycloakException(String message) {
     super(message);
   }
 
-  public KeyCloakException(String message, Throwable cause) {
+  public KeycloakException(String message, Throwable cause) {
     super(message, cause);
   }
 }
