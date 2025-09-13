@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import java.util.List;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.exception.KeyCloakException;
+import org.enricogiurin.vocabulary.api.exception.DataConflictException;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
 import org.enricogiurin.vocabulary.api.rest.pub.KeycloakUser;
 import org.junit.jupiter.api.AfterAll;
@@ -38,14 +38,13 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 
 @SpringBootTest
 @Import({VocabularyTestConfiguration.class})
 @Transactional
-class KeycloakClientServiceIntegrationTest {
+class KeycloakClientServiceTest {
 
   private static final String USER_EMAIL = "john.doe@example.com";
   private static final String TEST_REALM_JSON = "keycloak/test-realm.json";
@@ -119,9 +118,9 @@ class KeycloakClientServiceIntegrationTest {
         .isAdmin(false)
         .build();
     //when-then
-    assertThatExceptionOfType(KeyCloakException.class)
-        .isThrownBy(() -> keycloakClientService.createNewUser(user))
-        .withMessageContaining("" + HttpStatus.CONFLICT.value());
+    assertThatExceptionOfType(DataConflictException.class)
+        .isThrownBy(() -> keycloakClientService.createNewUser(user));
+
 
   }
 

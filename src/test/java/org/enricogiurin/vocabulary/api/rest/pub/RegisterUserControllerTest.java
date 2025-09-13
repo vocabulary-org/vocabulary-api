@@ -22,6 +22,8 @@ package org.enricogiurin.vocabulary.api.rest.pub;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -29,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.exception.DataConflictException;
 import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +45,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
 
 @SpringBootTest
 @Import(VocabularyTestConfiguration.class)
@@ -58,6 +60,7 @@ class RegisterUserControllerTest {
 
   @MockitoBean
   KeycloakClientService keycloakClientService;
+
 
   @BeforeEach
   void setUp() {
@@ -85,5 +88,20 @@ class RegisterUserControllerTest {
     KeycloakUser captured = captor.getValue();
     assertThat(captured.username()).isEqualTo(username);
     assertThat(captured.isAdmin()).isFalse();
+  }
+
+  @Test
+  void createNewUser_conflict() throws Exception {
+    final String username = "mario-rossi";
+
+    doThrow(DataConflictException.class).when(keycloakClientService).createNewUser(any());
+    mvc.perform(post(basePath)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                }
+                """))
+        .andExpect(status().isConflict())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 }

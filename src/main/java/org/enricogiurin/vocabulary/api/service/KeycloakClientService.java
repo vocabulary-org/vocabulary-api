@@ -21,12 +21,12 @@ package org.enricogiurin.vocabulary.api.service;
  */
 
 
-
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.enricogiurin.vocabulary.api.exception.KeyCloakException;
+import org.enricogiurin.vocabulary.api.exception.DataConflictException;
+import org.enricogiurin.vocabulary.api.exception.KeycloakException;
 import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
 import org.enricogiurin.vocabulary.api.rest.pub.KeycloakUser;
@@ -85,13 +85,18 @@ public class KeycloakClientService {
     UsersResource usersResource = keycloakClient.realm(REALM_VOCABULARY).users();
     final String userId;
     try (Response response = usersResource.create(userRepresentation)) {
-      if (response.getStatus() != HttpStatus.CREATED.value()) {
+      int status = response.getStatus();
+      if (status != HttpStatus.CREATED.value()) {
         String errorMessage = response.readEntity(String.class); // body as string
-        log.warn("Failed to create a new user - status: {} - message:\n{}", response.getStatus(),
+        log.warn("Failed to create a new user - status: {} - message:\n{}", status,
             errorMessage);
-        throw new KeyCloakException(
+        if (status == HttpStatus.CONFLICT.value()) {
+          throw new DataConflictException(
+              "user already present: " + userRepresentation.getUsername());
+        }
+        throw new KeycloakException(
             "Error while creating new user: " + userRepresentation.getUsername() + " - status: "
-                + response.getStatus());
+                + status);
       }
       userId = CreatedResponseUtil.getCreatedId(response);
     }
@@ -159,6 +164,5 @@ public class KeycloakClientService {
   String randomPassword() {
     return RandomStringUtils.randomAlphanumeric(8);
   }
-
 
 }
