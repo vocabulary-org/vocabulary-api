@@ -110,6 +110,26 @@ Logging into http://127.0.0.1:8080 as user admin of realm master
 bash-5.1$ ./kcadm.sh update realms/vocabulary -s sslRequired=NONE
 
 ```
+
+## Docker
+### Build the image
+Build and upload a docker image on github.
+
+```shell
+mvn spring-boot:build-image
+docker login
+docker tag vocabulary/vocabulary-api egch/vocabulary-api:latest
+docker push egch/vocabulary-api:latest
+```
+
+### Running the service with Docker Compose
+A `docker-compose-vocabulary-api.yaml` file is provided to run the service with Docker Compose:
+
+```shell
+docker compose -f ddocker-compose-vocabulary-api.yaml up
+```
+
+
 ## References
 - [testcontainers-keycloak](https://github.com/dasniko/testcontainers-keycloak)
 - [Setting up Gmail SMTP for Keycloak](https://www.youtube.com/watch?v=wwOKKwMq5pA)
