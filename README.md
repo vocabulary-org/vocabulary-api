@@ -31,6 +31,7 @@ $ mvn spring-boot:run
 
 ### Spring Actuator - env
 [actuator](http://localhost:9090/actuator/env/)
+
 ## Get the access token
 ### as an user
 
@@ -96,10 +97,10 @@ docker logs -f vocabulary-api-keycloak-1
 ```
 ### SSL issues
 
-<img src="docs/images/KC-SSL.png" alt="HTTPS required" width="400">
+<img src="docs/images/KC-SSL.ptyng" alt="HTTPS required" width="400">
 
 ```shell
-nrico@Mac-mini-3 ~ % docker exec -it vocabulary-api-keycloak-1 bash
+enrico@Mac-mini-3 ~ % docker exec -it vocabulary-api-keycloak-1 bash
 bash-5.1$ cd /opt/keycloak/bin/
 bash-5.1$ ./kcadm.sh config credentials \
   --server http://127.0.0.1:8080 \
