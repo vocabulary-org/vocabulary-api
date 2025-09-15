@@ -23,6 +23,7 @@ services:
       - 'POSTGRES_DB=vocabulary_api'
       - 'POSTGRES_PASSWORD=enrico'
       - 'POSTGRES_USER=enrico'
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U vocabulary_api"]
       interval: 10s
@@ -31,45 +32,45 @@ services:
       start_period: 10s
     networks:
       - vocabulary-network
-  keycloak-db:
-    image: 'postgres:15-alpine'
-    volumes:
-      - keycloak-db:/var/lib/postgresql/data
-    environment:
-      - 'POSTGRES_DB=keycloak-vocabulary-db'
-      - 'POSTGRES_PASSWORD=keycloak'
-      - 'POSTGRES_USER=keycloak'
-    labels:
-      org.springframework.boot.ignore: true
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U keycloak"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - vocabulary-network
-  keycloak:
-    image: 'quay.io/keycloak/keycloak:latest'
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: Pa55w0rd
-    command:
-      - start-dev
-      - --db=postgres
-      - --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak-vocabulary-db
-      - --db-username=keycloak
-      - --db-password=keycloak
-      - --import-realm
-    volumes:
-      - ./keycloak/vocabulary-realm.json:/opt/keycloak/data/import/vocabulary-realm.json
-    ports:
-      - 18081:8080
-    networks:
-      - vocabulary-network
-    depends_on:
-      keycloak-db:
-        condition: service_healthy
+#  keycloak-db:
+#    image: 'postgres:15-alpine'
+#    volumes:
+#      - keycloak-db:/var/lib/postgresql/data
+#    environment:
+#      - 'POSTGRES_DB=keycloak-vocabulary-db'
+#      - 'POSTGRES_PASSWORD=keycloak'
+#      - 'POSTGRES_USER=keycloak'
+#    labels:
+#      org.springframework.boot.ignore: true
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#      start_period: 10s
+#    networks:
+#      - vocabulary-network
+#  keycloak:
+#    image: 'quay.io/keycloak/keycloak:latest'
+#    environment:
+#      KEYCLOAK_ADMIN: admin
+#      KEYCLOAK_ADMIN_PASSWORD: Pa55w0rd
+#    command:
+#      - start-dev
+#      - --db=postgres
+#      - --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak-vocabulary-db
+#      - --db-username=keycloak
+#      - --db-password=keycloak
+#      - --import-realm
+#    volumes:
+#      - ./keycloak/vocabulary-realm.json:/opt/keycloak/data/import/vocabulary-realm.json
+#    ports:
+#      - 18081:8080
+#    networks:
+#      - vocabulary-network
+#    depends_on:
+#      keycloak-db:
+#        condition: service_healthy
 volumes:
   vocabulary-db:
     driver: local

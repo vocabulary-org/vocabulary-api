@@ -57,3 +57,11 @@ token:
     principal-attribute: preferred_username
     resource-id: vocabulary-api
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    env:
+      show-values: ALWAYS

@@ -29,7 +29,8 @@ $ mvn spring-boot:run
 ### Accessing Swagger
 [Swagger-localhost](http://localhost:9090/swagger-ui/index.html#/)
 
-
+### Spring Actuator - env
+[actuator](http://localhost:9090/actuator/env/)
 ## Get the access token
 ### as an user
 
