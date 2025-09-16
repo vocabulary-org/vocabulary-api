@@ -97,7 +97,7 @@ docker logs -f vocabulary-api-keycloak-1
 ```
 ### SSL issues
 
-<img src="docs/images/KC-SSL.ptyng" alt="HTTPS required" width="400">
+<img src="docs/images/KC-SSL.png" alt="HTTPS required" width="400">
 
 ```shell
 enrico@Mac-mini-3 ~ % docker exec -it vocabulary-api-keycloak-1 bash
@@ -130,6 +130,14 @@ A `docker-compose-vocabulary-api.yaml` file is provided to run the service with 
 ```shell
 docker compose -f ddocker-compose-vocabulary-api.yaml up
 ```
+### network
+For simplicity, assign a domain name to the KeyCloak server, for example `keycloak.local`, and add the following line to your `/etc/hosts` file:
+
+```text
+127.0.0.1 localhost keycloak.local
+```
+
+The Keycloak server is available at <http://keycloak.local:18080>. You can access the administration console with the `admin` user and the `Pa55w0rd` password.
 
 
 ## References

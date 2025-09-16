@@ -52,4 +52,13 @@
     <appender-ref ref="CONSOLE" />
   </root>
 
+  <!-- DOCKER: info-level, file logs (also keep console if you prefer Docker logs) -->
+  <springProfile name="docker">
+    <root level="INFO">
+      <appender-ref ref="CONSOLE"/>
+    </root>
+    <logger name="org.enricogiurin" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
+  </springProfile>
+
 </configuration>
