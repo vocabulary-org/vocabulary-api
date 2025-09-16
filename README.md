@@ -128,7 +128,7 @@ docker push egch/vocabulary-api:latest
 A `docker-compose-vocabulary-api.yaml` file is provided to run the service with Docker Compose:
 
 ```shell
-docker compose -f ddocker-compose-vocabulary-api.yaml up
+docker compose -f docker-compose-vocabulary-api.yaml up
 ```
 ### network
 For simplicity, assign a domain name to the KeyCloak server, for example `keycloak.local`, and add the following line to your `/etc/hosts` file:
