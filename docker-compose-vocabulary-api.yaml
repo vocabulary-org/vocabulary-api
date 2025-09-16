@@ -1,0 +1,79 @@
+services:
+  vocabulary-api:
+    image: 'egch/vocabulary-api:latest'
+    restart: unless-stopped
+    environment:
+      - "SPRING_PROFILES_ACTIVE=docker"
+    ports:
+      - 9090:9090
+    networks:
+      - vocabulary-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "keycloak.local:host-gateway"
+    depends_on:
+      vocabulary-db:
+        condition: service_healthy
+
+  vocabulary-db:
+    image: 'postgres:15-alpine'
+    volumes:
+      - vocabulary-db:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_DB=vocabulary_api'
+      - 'POSTGRES_PASSWORD=enrico'
+      - 'POSTGRES_USER=enrico'
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U enrico -d vocabulary_api"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - vocabulary-network
+  keycloak_db:
+    image: 'postgres:15'
+    volumes:
+      - keycloak-db:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_DB=keycloak'
+      - 'POSTGRES_PASSWORD=keycloak'
+      - 'POSTGRES_USER=keycloak'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - vocabulary-network
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: Pa55w0rd
+    command:
+      - start-dev
+      - --db=postgres
+      - --db-url=jdbc:postgresql://keycloak_db:5432/keycloak
+      - --db-username=keycloak
+      - --db-password=keycloak
+      - --import-realm
+    volumes:
+      - ./keycloak/vocabulary-realm.json:/opt/keycloak/data/import/vocabulary-realm.json
+    ports:
+      - 18080:8080
+    networks:
+      - vocabulary-network
+    depends_on:
+      keycloak_db:
+        condition: service_healthy
+volumes:
+  vocabulary-db:
+    driver: local
+  keycloak-db:
+    driver: local
+networks:
+  vocabulary-network:
+    driver: bridge

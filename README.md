@@ -29,6 +29,8 @@ $ mvn spring-boot:run
 ### Accessing Swagger
 [Swagger-localhost](http://localhost:9090/swagger-ui/index.html#/)
 
+### Spring Actuator - env
+[actuator](http://localhost:9090/actuator/env/)
 
 ## Get the access token
 ### as an user
@@ -98,7 +100,7 @@ docker logs -f vocabulary-api-keycloak-1
 <img src="docs/images/KC-SSL.png" alt="HTTPS required" width="400">
 
 ```shell
-nrico@Mac-mini-3 ~ % docker exec -it vocabulary-api-keycloak-1 bash
+enrico@Mac-mini-3 ~ % docker exec -it vocabulary-api-keycloak-1 bash
 bash-5.1$ cd /opt/keycloak/bin/
 bash-5.1$ ./kcadm.sh config credentials \
   --server http://127.0.0.1:8080 \
@@ -110,6 +112,34 @@ Logging into http://127.0.0.1:8080 as user admin of realm master
 bash-5.1$ ./kcadm.sh update realms/vocabulary -s sslRequired=NONE
 
 ```
+
+## Docker
+### Build the image
+Build and upload a docker image on github.
+
+```shell
+mvn spring-boot:build-image
+docker login
+docker tag vocabulary/vocabulary-api egch/vocabulary-api:latest
+docker push egch/vocabulary-api:latest
+```
+
+### Running the service with Docker Compose
+A `docker-compose-vocabulary-api.yaml` file is provided to run the service with Docker Compose:
+
+```shell
+docker compose -f docker-compose-vocabulary-api.yaml up
+```
+### network
+For simplicity, assign a domain name to the KeyCloak server, for example `keycloak.local`, and add the following line to your `/etc/hosts` file:
+
+```text
+127.0.0.1 localhost keycloak.local
+```
+
+The Keycloak server is available at <http://keycloak.local:18080>. You can access the administration console with the `admin` user and the `Pa55w0rd` password.
+
+
 ## References
 - [testcontainers-keycloak](https://github.com/dasniko/testcontainers-keycloak)
 - [Setting up Gmail SMTP for Keycloak](https://www.youtube.com/watch?v=wwOKKwMq5pA)
