@@ -22,25 +22,32 @@ package org.enricogiurin.vocabulary.api.rest.pub;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.rest.admin.KeycloakUserResponse;
 import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
+import org.enricogiurin.vocabulary.api.validation.ValidationGroups;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
 @RequestMapping("${application.api.public-path}/users")
 @RequiredArgsConstructor
+@Slf4j
 public class RegisterUserController {
 
   private final KeycloakClientService keycloakAdminService;
 
   @PostMapping()
   public ResponseEntity<KeycloakUserResponse> createNewKeycloakUser(
-      @RequestBody KeycloakUser keycloakUser) {
+      @Validated(ValidationGroups.Post.class) @RequestBody KeycloakUser keycloakUser) {
+    log.info("Creating new user: {}", keycloakUser);
     keycloakAdminService.createNewUser(keycloakUser);
     return ResponseEntity
         .status(HttpStatus.CREATED)
