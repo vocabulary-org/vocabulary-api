@@ -21,9 +21,11 @@ package org.enricogiurin.vocabulary.api.rest.pub;
  */
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -32,8 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.exception.DataConflictException;
+import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,10 +64,6 @@ class RegisterUserControllerTest {
   KeycloakClientService keycloakClientService;
 
 
-  @BeforeEach
-  void setUp() {
-  }
-
   @Test
   void createNewKeycloakUser() throws Exception {
     final String username = "mario-rossi";
@@ -88,6 +86,8 @@ class RegisterUserControllerTest {
     KeycloakUser captured = captor.getValue();
     assertThat(captured.username()).isEqualTo(username);
     assertThat(captured.isAdmin()).isFalse();
+    verify(keycloakClientService).createNewUser(any());
+
   }
 
   @Test
@@ -99,9 +99,36 @@ class RegisterUserControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
+                   "username": "%s",
+                   "firstName": "Mario",
+                   "lastName": "Rossi",
+                   "email": "new-user@vocabolary.org",
+                   "isAdmin": "false"
                 }
-                """))
+                """.formatted(username)))
         .andExpect(status().isConflict())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+    verify(keycloakClientService).createNewUser(any());
+  }
+
+  @Test
+  void createNewUser_badRequest() throws Exception {
+    final String username = "mario-rossi";
+    mvc.perform(post(basePath)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "firstName": "aa",
+                   "username": "%s",
+                   "lastName": "Rossi",
+                   "email": "not-a-valid-email",
+                   "isAdmin": "false"
+                }
+                """.formatted(username)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message", containsString(KeycloakUser.EMAIL_CONSTRAINT)))
+        .andExpect(jsonPath("$.message", containsString(KeycloakUser.FIRST_NAME_CONSTRAINT)))
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+    verify(keycloakClientService, never()).createNewUser(any());
   }
 }
