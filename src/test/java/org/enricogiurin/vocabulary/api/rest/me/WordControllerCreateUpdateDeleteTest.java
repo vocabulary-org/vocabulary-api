@@ -117,7 +117,6 @@ class WordControllerCreateUpdateDeleteTest {
                 """.formatted(Language.SPANISH.name(), Language.RUSSIAN.name())))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message", containsString(Word.SENTENCE_NOT_NULL_CONSTRAINT)))
-        .andExpect(jsonPath("$.message", containsString(Word.DESCRIPTION_CONSTRAINT)))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 

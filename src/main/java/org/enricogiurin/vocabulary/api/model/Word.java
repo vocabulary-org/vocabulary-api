@@ -36,7 +36,7 @@ public record Word(UUID uuid,
                        ValidationGroups.Post.class, ValidationGroups.Patch.class})
                    String translation,
 
-                   @Size(min = 1, max = 500, message = DESCRIPTION_CONSTRAINT, groups = {
+                   @Size(max = 500, message = DESCRIPTION_CONSTRAINT, groups = {
                        ValidationGroups.Post.class, ValidationGroups.Patch.class})
                    String description,
 
@@ -52,7 +52,7 @@ public record Word(UUID uuid,
   public static final String TRANSLATION_NOT_NULL_CONSTRAINT = "translation must not be null";
   public static final String TRANSLATION_CONSTRAINT = "translation must be between 1 and 200 characters";
 
-  public static final String DESCRIPTION_CONSTRAINT = "description must be between 1 and 500 characters";
+  public static final String DESCRIPTION_CONSTRAINT = "description can be up to 500 characters";
 
   public static final String LANGUAGE_NOT_NULL_CONSTRAINT = "language must not be null";
   public static final String LANGUAGE_TO_NOT_NULL_CONSTRAINT = "languageTo must not be null";
