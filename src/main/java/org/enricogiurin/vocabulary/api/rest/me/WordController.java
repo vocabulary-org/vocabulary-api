@@ -29,6 +29,7 @@ import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
 import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
 import org.enricogiurin.vocabulary.api.service.WordService;
+import org.enricogiurin.vocabulary.api.validation.ValidationGroups;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -73,14 +75,14 @@ public class WordController {
   }
 
   @PostMapping
-  ResponseEntity<Word> add(@RequestBody Word word) {
+  ResponseEntity<Word> add( @Validated(ValidationGroups.Post.class) @RequestBody Word word) {
     String keycloakId = getKeycloakId();
     Word savedProperty = wordService.createNewWord(word, keycloakId);
     return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{uuid}")
-  ResponseEntity<Word> update(@PathVariable UUID uuid, @RequestBody Word wordToUpdate) {
+  ResponseEntity<Word> update(@PathVariable UUID uuid,   @Validated(ValidationGroups.Patch.class) @RequestBody Word wordToUpdate) {
     String keycloakId = getKeycloakId();
     Word updatedProperty = wordService.updateAnExistingWord(uuid, wordToUpdate, keycloakId);
     return ResponseEntity.ok(updatedProperty);

@@ -21,7 +21,11 @@ package org.enricogiurin.vocabulary.api.rest.me;
  */
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -33,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
@@ -77,7 +82,6 @@ class WordControllerCreateUpdateDeleteTest {
 
   @Test
   void createNewWord() throws Exception {
-
     mvc.perform(post(basePath)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -98,10 +102,27 @@ class WordControllerCreateUpdateDeleteTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
+  @Test
+  void createNewWord_badRequest() throws Exception {
+    mvc.perform(post(basePath)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                   
+                   "translation": "Привет",
+                   "description": "",
+                   "language": "%s",
+                   "languageTo": "%s"
+                }
+                """.formatted(Language.SPANISH.name(), Language.RUSSIAN.name())))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message", containsString(Word.SENTENCE_NOT_NULL_CONSTRAINT)))
+        .andExpect(jsonPath("$.message", containsString(Word.DESCRIPTION_CONSTRAINT)))
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+  }
 
   @Test
   void updateAnExistingWord() throws Exception {
-
     Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
     mvc.perform(patch(basePath + "/" + word.uuid())
             .contentType(MediaType.APPLICATION_JSON)
@@ -118,6 +139,22 @@ class WordControllerCreateUpdateDeleteTest {
         .andExpect(jsonPath("$.language", is(Language.ENGLISH.name())))
         .andExpect(jsonPath("$.languageTo", is(Language.SPANISH.name())))
         .andExpect(jsonPath("$.uuid", is(word.uuid().toString())))
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+  }
+
+  @Test
+  void updateAnExistingWord_badRequest() throws Exception {
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
+    mvc.perform(patch(basePath + "/" + word.uuid())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                   "languageTo": "%s",
+                   "translation": ""
+                }
+                """.formatted(Language.SPANISH.name())))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message", containsString(Word.TRANSLATION_CONSTRAINT)))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
