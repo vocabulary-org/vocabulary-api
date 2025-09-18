@@ -20,9 +20,40 @@ package org.enricogiurin.vocabulary.api.model;
  * #L%
  */
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.UUID;
+import org.enricogiurin.vocabulary.api.validation.ValidationGroups;
 
-public record Word(UUID uuid, String sentence, String translation, String description,
-                   Language language, Language languageTo) {
+public record Word(UUID uuid,
+                   @NotNull(message = SENTENCE_NOT_NULL_CONSTRAINT, groups = ValidationGroups.Post.class)
+                   @Size(min = 1, max = 200, message = SENTENCE_CONSTRAINT, groups = {
+                       ValidationGroups.Post.class, ValidationGroups.Patch.class})
+                   String sentence,
 
+                   @NotNull(message = TRANSLATION_NOT_NULL_CONSTRAINT, groups = ValidationGroups.Post.class)
+                   @Size(min = 1, max = 200, message = TRANSLATION_CONSTRAINT, groups = {
+                       ValidationGroups.Post.class, ValidationGroups.Patch.class})
+                   String translation,
+
+                   @Size(min = 1, max = 500, message = DESCRIPTION_CONSTRAINT, groups = {
+                       ValidationGroups.Post.class, ValidationGroups.Patch.class})
+                   String description,
+
+                   @NotNull(message = LANGUAGE_NOT_NULL_CONSTRAINT, groups = ValidationGroups.Post.class)
+                   Language language,
+
+                   @NotNull(message = LANGUAGE_TO_NOT_NULL_CONSTRAINT, groups = ValidationGroups.Post.class)
+                   Language languageTo) {
+
+  public static final String SENTENCE_NOT_NULL_CONSTRAINT = "sentence must not be null";
+  public static final String SENTENCE_CONSTRAINT = "sentence must be between 1 and 200 characters";
+
+  public static final String TRANSLATION_NOT_NULL_CONSTRAINT = "translation must not be null";
+  public static final String TRANSLATION_CONSTRAINT = "translation must be between 1 and 200 characters";
+
+  public static final String DESCRIPTION_CONSTRAINT = "description must be between 1 and 500 characters";
+
+  public static final String LANGUAGE_NOT_NULL_CONSTRAINT = "language must not be null";
+  public static final String LANGUAGE_TO_NOT_NULL_CONSTRAINT = "languageTo must not be null";
 }
