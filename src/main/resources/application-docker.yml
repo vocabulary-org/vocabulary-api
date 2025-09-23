@@ -3,3 +3,10 @@ spring:
     url: jdbc:postgresql://vocabulary-db:5432/vocabulary_api
     username: enrico
     password: enrico
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: 'http://keycloak.local:18081/realms/vocabulary'
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs

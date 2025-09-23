@@ -24,6 +24,8 @@ services:
       - 'POSTGRES_DB=vocabulary_api'
       - 'POSTGRES_PASSWORD=enrico'
       - 'POSTGRES_USER=enrico'
+    ports:
+      - 25432:5432
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U enrico -d vocabulary_api"]
@@ -64,7 +66,7 @@ services:
     volumes:
       - ./keycloak/vocabulary-realm.json:/opt/keycloak/data/import/vocabulary-realm.json
     ports:
-      - 18080:8080
+      - 18081:8080
     networks:
       - vocabulary-network
     depends_on:
