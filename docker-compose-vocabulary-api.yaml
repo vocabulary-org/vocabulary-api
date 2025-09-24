@@ -1,6 +1,6 @@
 services:
   vocabulary-api:
-    image: 'egch/vocabulary-api:latest'
+    image: 'egch/vocabulary-api:d4'
     restart: unless-stopped
     mem_limit: "1g"
     environment:
