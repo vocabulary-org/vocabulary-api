@@ -124,7 +124,7 @@ docker tag vocabulary/vocabulary-api egch/vocabulary-api:latest
 docker push egch/vocabulary-api:latest
 ```
 
-### Running the service with Docker Compose
+## Running the service with Docker Compose
 A `docker-compose-vocabulary-api.yaml` file is provided to run the service with Docker Compose:
 
 ```shell
@@ -138,6 +138,10 @@ For simplicity, assign a domain name to the KeyCloak server, for example `keyclo
 ```
 
 The Keycloak server is available at <http://keycloak.local:18080>. You can access the administration console with the `admin` user and the `Pa55w0rd` password.
+
+### Get the access token
+Use the same **curl** command as shown in [Get the access token](#get-the-access-token), **but make sure to replace** `localhost` with `keycloak.local`.
+
 
 
 ## References

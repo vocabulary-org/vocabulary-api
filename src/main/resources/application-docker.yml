@@ -1,5 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:postgresql://vocabulary-db:5432/vocabulary_api
-    username: enrico
-    password: enrico
