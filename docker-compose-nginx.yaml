@@ -1,14 +1,9 @@
 services:
   nginx:
-    image: nginx:alpine
+    image: nginx:latest
     container_name: vocabulary-nginx
     ports:
       - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+#    volumes:
+#      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     restart: unless-stopped
-    networks:
-      - vocabulary-network
-
-networks:
-  vocabulary-network: {}   # no 'external'
