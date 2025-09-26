@@ -23,9 +23,6 @@ Replace client-id and client-secret with your own.
 ```shell
 $ mvn spring-boot:run 
 ```
-
-### with intellij
-![img.png](docs/images/intellij.png)
 ### Accessing Swagger
 [Swagger-localhost](http://localhost:9090/swagger-ui/index.html#/)
 
