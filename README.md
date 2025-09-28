@@ -143,13 +143,14 @@ Use the same **curl** command as shown in [Get the access token](#get-the-access
 [docker-compose-nginx.yaml](docker-compose-nginx.yaml)  
 ```shell
  docker cp vocabulary-nginx:/etc/nginx/conf.d/default.conf ngnix/default.conf
- winpty docker exec -it vocabulary-nginx bash
-
- 
-
+ docker exec -it vocabulary-nginx bash
 ```
 
-
+## Developer Notes
+### Spin up just the keycloak
+```shell
+ docker compose -f docker-compose-vocabulary-api.yaml up keycloak 
+```
 
 ## References
 - [testcontainers-keycloak](https://github.com/dasniko/testcontainers-keycloak)
