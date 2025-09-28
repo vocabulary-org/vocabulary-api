@@ -23,9 +23,6 @@ Replace client-id and client-secret with your own.
 ```shell
 $ mvn spring-boot:run 
 ```
-
-### with intellij
-![img.png](docs/images/intellij.png)
 ### Accessing Swagger
 [Swagger-localhost](http://localhost:9090/swagger-ui/index.html#/)
 
@@ -142,11 +139,23 @@ The Keycloak server is available at <http://keycloak.local:18080>. You can acces
 ### Get the access token
 Use the same **curl** command as shown in [Get the access token](#get-the-access-token), **but make sure to replace** `localhost` with `keycloak.local`.
 
+### Nginx as a docker container
+[docker-compose-nginx.yaml](docker-compose-nginx.yaml)  
+```shell
+ docker cp vocabulary-nginx:/etc/nginx/conf.d/default.conf ngnix/default.conf
+ docker exec -it vocabulary-nginx bash
+```
 
+## Developer Notes
+### Spin up just the keycloak
+```shell
+ docker compose -f docker-compose-vocabulary-api.yaml up keycloak 
+```
 
 ## References
 - [testcontainers-keycloak](https://github.com/dasniko/testcontainers-keycloak)
 - [Setting up Gmail SMTP for Keycloak](https://www.youtube.com/watch?v=wwOKKwMq5pA)
+- [Configure a Docker Nginx Reverse Proxy Image and Container](https://youtu.be/ZmH1L1QeNHk?si=MOyHUDYLzyxB_NUh)
 
 
 ## Credits
