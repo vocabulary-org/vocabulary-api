@@ -21,6 +21,7 @@ package org.enricogiurin.vocabulary.api.security;
  */
 
 
+import jakarta.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -42,9 +43,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Slf4j
 class SecurityConfiguration {
 
+  @PostConstruct
+  void postConstruct(){
+    log.info("issuerUri: {}", issuerUri);
+  }
+
 
   @Value("${spring.websecurity.debug:true}")
   private boolean webSecurityDebug;
+
+  @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+  private String issuerUri;
 
 
   @Bean

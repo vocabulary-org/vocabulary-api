@@ -28,9 +28,9 @@ spring:
     schemas: vocabulary
 application:
   spa:
-    url: http://localhost:4200
+    url: http://keycloak.local:4200
   keycloak:
-    url: http://localhost:18081
+    url: http://keycloak.local
     username: 'admin'
     password: 'Pa55w0rd'
     client-id: 'vocabulary-rest-api'
@@ -40,7 +40,8 @@ application:
 
   # CORS configuration
   cors:
-    allowed-origins: ${application.spa.url}
+    #allowed-origins: ${application.spa.url}
+    allowed-origins: '*'
   api:
     version: v1
     description: ${spring.application.name}
