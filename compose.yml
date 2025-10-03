@@ -49,6 +49,8 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: Pa55w0rd
+      KEYCLOAK_FRONTEND_URL: http://localhost:80
+      KC_PROXY: edge
     command:
       - start-dev
       - --db=postgres
