@@ -1,0 +1,16 @@
+spring:
+  docker:
+    compose:
+      # load base + override when this profile is active
+      file:
+        - compose.yaml
+        - compose.nginx.yaml
+application:
+  spa:
+    url: http://keycloak.local:4200
+  keycloak:
+    url: http://keycloak.local
+
+  cors:
+    #allowed-origins: ${application.spa.url}
+    allowed-origins: '*'

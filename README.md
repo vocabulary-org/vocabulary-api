@@ -17,20 +17,18 @@ $ mvn clean verify
 ```
 
 ## starting the application locally
-Replace client-id and client-secret with your own.
-### from cli with maven
 
+### from cli with maven
 ```shell
 $ mvn spring-boot:run 
 ```
+
+## Swagger
 ### Accessing Swagger
 [Swagger-localhost](http://localhost:9090/swagger-ui/index.html#/)
 
-### Spring Actuator - env
-[actuator](http://localhost:9090/actuator/env/)
-
-## Get the access token
-### as an user
+### Get the access token
+#### as an user
 
 ```shell
 TOKEN=$(curl -X POST \
@@ -44,7 +42,7 @@ TOKEN=$(curl -X POST \
   
 
 ```
-### as an admin
+#### as an admin
 ```shell
 TOKEN=$(curl -X POST \
   http://localhost:18081/realms/vocabulary/protocol/openid-connect/token \
@@ -56,70 +54,49 @@ TOKEN=$(curl -X POST \
   | jq -r .access_token)
 ```
 
-### copy the token to the clipboard
+#### copy the token to the clipboard
 ```shell
 echo $TOKEN | pbcopy    
 ```
+
 ### copy to swagger
 ![Bearer](docs/images/swagger-token.png)
 
+## Miscellaneous
+### Spring Actuator - env
+[actuator](http://localhost:9090/actuator/env/)
 
-## Keycloak
 ### Keycloak admin console
 [keycloak console](http://localhost:18081/admin/master/console/)
 
+You can access the administration console with the `admin` user and the `Pa55w0rd` password.
 Switch to `vocabulary` realm.
-## Export the realm
-```shell
-docker exec -it vocabulary-api-keycloak-1 bash
-##within the docker container 
-mkdir opt/keycloak/data/import/
-  
-/opt/keycloak/bin/kc.sh export --file /opt/keycloak/data/import/vocabulary-realm.json --users same_file --realm  vocabulary --verbose \
-  --db=postgres \
-  --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak-vocabulary-db \
-  --db-username=keycloak \
-  --db-password=keycloak
-exit
-  
-##out of the docker container 
-docker cp vocabulary-api-keycloak-1:/opt/keycloak/data/import/vocabulary-realm.json /Users/enrico/github/vocabulary-org/vocabulary-api/keycloak/vocabulary-realm.json
 
+## Running the application locally behind the nginx
+### network
+Assign a domain name to the KeyCloak server `keycloak.local`, by adding the following line to your `/etc/hosts` file:
+```text
+127.0.0.1 localhost keycloak.local
 ```
+### KC
+The Keycloak server is available at <http://keycloak.local:18081>. 
+You can access the administration console with the `admin` user and the `Pa55w0rd` password.
 
-## Troubleshooting 
-### Keycloak logs
+
+
+### Starting the backend
 ```shell
-docker logs -f vocabulary-api-keycloak-1
+mvn spring-boot:run -Dspring-boot.run.profiles=nginx
 ```
-### SSL issues
-
-<img src="docs/images/KC-SSL.png" alt="HTTPS required" width="400">
+### Starting the nginx (as a docker service)
 
 ```shell
-enrico@Mac-mini-3 ~ % docker exec -it vocabulary-api-keycloak-1 bash
-bash-5.1$ cd /opt/keycloak/bin/
-bash-5.1$ ./kcadm.sh config credentials \
-  --server http://127.0.0.1:8080 \
-  --realm master \
-  --user admin \
-  --password Pa55w0rd
-Logging into http://127.0.0.1:8080 as user admin of realm master
-
-bash-5.1$ ./kcadm.sh update realms/vocabulary -s sslRequired=NONE
-
+docker compose -f docker-compose-nginx.yaml up
 ```
+### Get the access token
+Use the same **curl** command as shown in [Get the access token](#get-the-access-token), **but make sure to replace** `localhost` with `keycloak.local`.
 
-## Docker
-### Build the image
-Build and upload a docker image on github.
 
-```shell
-mvn spring-boot:build-image
-docker login
-docker tag vocabulary/vocabulary-api egch/vocabulary-api:latest
-docker push egch/vocabulary-api:latest
-```
 
 ## Running the service with Docker Compose
 A `docker-compose-vocabulary-api.yaml` file is provided to run the service with Docker Compose:
@@ -127,30 +104,14 @@ A `docker-compose-vocabulary-api.yaml` file is provided to run the service with 
 ```shell
 docker compose -f docker-compose-vocabulary-api.yaml up
 ```
-### network
-For simplicity, assign a domain name to the KeyCloak server, for example `keycloak.local`, and add the following line to your `/etc/hosts` file:
 
-```text
-127.0.0.1 localhost keycloak.local
-```
 
-The Keycloak server is available at <http://keycloak.local:18080>. You can access the administration console with the `admin` user and the `Pa55w0rd` password.
 
-### Get the access token
-Use the same **curl** command as shown in [Get the access token](#get-the-access-token), **but make sure to replace** `localhost` with `keycloak.local`.
-
-### Nginx as a docker container
-[docker-compose-nginx.yaml](docker-compose-nginx.yaml)  
-```shell
- docker cp vocabulary-nginx:/etc/nginx/conf.d/default.conf ngnix/default.conf
- docker exec -it vocabulary-nginx bash
-```
 
 ## Developer Notes
-### Spin up just the keycloak
-```shell
- docker compose -f docker-compose-vocabulary-api.yaml up keycloak 
-```
+[Developer Notes](DeveloperNotes.md)
+
+
 
 ## References
 - [testcontainers-keycloak](https://github.com/dasniko/testcontainers-keycloak)

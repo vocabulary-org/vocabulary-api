@@ -1,0 +1,6 @@
+services:
+  keycloak:
+    environment:
+      KEYCLOAK_FRONTEND_URL: "http://keycloak.local"
+      KC_HOSTNAME: "keycloak.local"
+      KC_PROXY: "edge"
