@@ -36,7 +36,7 @@
     <appender-ref ref="CONSOLE" />
   </logger>
 
-  <logger name="org.springframework" level="debug" additivity="false">
+  <logger name="org.springframework" level="info" additivity="false">
     <appender-ref ref="CONSOLE" />
   </logger>
 
