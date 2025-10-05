@@ -109,7 +109,7 @@ docker compose -f docker-compose-vocabulary-api.yaml up
 
 
 ## Developer Notes
-[Developer Notes](DeveloperNotes.md)
+[Developer Notes](docs/DeveloperNotes.md)
 
 
 
