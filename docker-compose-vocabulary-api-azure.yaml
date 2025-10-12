@@ -60,6 +60,7 @@ services:
       KC_HTTPS_ENABLED: "false"
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
+      KEYCLOAK_FRONTEND_URL: http://20.223.169.151:18081
 
     command:
       - start-dev
