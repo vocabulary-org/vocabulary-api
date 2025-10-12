@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://vocabulary-db:5432/vocabulary_api
+    username: enrico
+    password: enrico
+
+application:
+  spa:
+    url: http://localhost:4200
+  keycloak:
+    url: http://20.223.169.151:18081
+
+  cors:
+    #allowed-origins: ${application.spa.url}
+    allowed-origins: '*'
+
