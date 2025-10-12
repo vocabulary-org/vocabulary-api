@@ -58,6 +58,8 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
       KC_HTTP_ENABLED: "true"
       KC_HTTPS_ENABLED: "false"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
 
     command:
       - start-dev
