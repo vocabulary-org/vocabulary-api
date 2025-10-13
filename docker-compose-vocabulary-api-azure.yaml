@@ -5,6 +5,8 @@ services:
     mem_limit: "1g"
     environment:
       - "SPRING_PROFILES_ACTIVE=azure"
+      - "KC_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME}"
+      - "KC_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD}"
     ports:
       - 9090:9090
     networks:
