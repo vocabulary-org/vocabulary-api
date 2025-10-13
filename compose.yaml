@@ -46,17 +46,13 @@ services:
       - vocabulary-api-network
   keycloak:
     image: 'quay.io/keycloak/keycloak:latest'
-    env_file:
-      - .env
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
-      KC_HOSTNAME_STRICT: "true"
       KC_HTTP_ENABLED: "true"
-      KC_HTTPS_ENABLED: "false"
-
-
-
+#      KC_HTTPS_ENABLED: "false"
+#      KC_HOSTNAME_STRICT: "true"
+#      KC_HOSTNAME_STRICT_HTTPS: "false"
     command:
       - start-dev
       - --db=postgres

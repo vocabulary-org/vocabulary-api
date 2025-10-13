@@ -43,7 +43,7 @@ docker logs -f vocabulary-api-keycloak-1
 ```
 ### SSL issues
 
-<img src="docs/images/KC-SSL.png" alt="HTTPS required" width="400">
+<img src="images/KC-SSL.png" alt="HTTPS required" width="400">
 
 ```shell
 enrico@Mac-mini-3 ~ % docker exec -it vocabulary-api-keycloak-1 bash
@@ -55,7 +55,7 @@ bash-5.1$ ./kcadm.sh config credentials \
   --password Pa55w0rd
 Logging into http://127.0.0.1:8080 as user admin of realm master
 
-bash-5.1$ ./kcadm.sh update realms/vocabulary -s sslRequired=NONE
+bash-5.1$ ./kcadm.sh update realms/master -s sslRequired=NONE
 
 ```
 ## Spin up just the keycloak
