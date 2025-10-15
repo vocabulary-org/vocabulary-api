@@ -58,8 +58,6 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
-      KC_HTTP_ENABLED: "true"
-      KEYCLOAK_FRONTEND_URL: http://20.223.169.151:18081
 
     command:
       - start-dev

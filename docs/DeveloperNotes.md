@@ -56,7 +56,11 @@ bash-5.1$ ./kcadm.sh config credentials \
 Logging into http://127.0.0.1:8080 as user admin of realm master
 
 bash-5.1$ ./kcadm.sh update realms/master -s sslRequired=NONE
+```
 
+In alternative just execute this script:
+```shell
+./keycloak/changeSSLRequired.sh
 ```
 ## Spin up just the keycloak
 ```shell
