@@ -6,12 +6,14 @@ export $(grep -v '^#' ../.env | xargs)
 
 docker exec -e KEYCLOAK_ADMIN="$KC_BOOTSTRAP_ADMIN_USERNAME" \
             -e KEYCLOAK_ADMIN_PASSWORD="$KC_BOOTSTRAP_ADMIN_PASSWORD" \
+            -e KEYCLOAK_INTERNAL_URL="$KEYCLOAK_INTERNAL_URL" \
             -i vocabulary-api-keycloak-1 bash -lc '
   echo $KEYCLOAK_ADMIN
   echo $KEYCLOAK_ADMIN_PASSWORD
+  echo $KEYCLOAK_INTERNAL_URL
   cd /opt/keycloak/bin
   ./kcadm.sh config credentials \
-    --server http://127.0.0.1:8080 \
+    --server "$KEYCLOAK_INTERNAL_URL" \
     --realm master \
     --user "$KEYCLOAK_ADMIN" \
     --password "$KEYCLOAK_ADMIN_PASSWORD"
