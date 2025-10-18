@@ -13,6 +13,7 @@ application:
     password: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
 
   cors:
-    #allowed-origins: ${application.spa.url}
-    allowed-origins: '*'
+    allowed-origins: http://localhost:4200,https://gentle-tree-062b47803.1.azurestaticapps.net
+
+
 
