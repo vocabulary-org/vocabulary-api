@@ -1,43 +1,50 @@
 services:
-  adminer:
-    image: adminer
+  vocabulary-api:
+    image: 'egch/vocabulary-api:az_1.0.0'
     restart: unless-stopped
+    mem_limit: "1g"
     environment:
-      ADMINER_DEFAULT_SERVER: postgres_vocabulary_api
+      SPRING_PROFILES_ACTIVE: azure
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
     ports:
-      - 38080:8080
+      - 9090:9090
     networks:
-      - vocabulary-api-network
-  postgres_vocabulary_api:
+      - vocabulary-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "keycloak.local:host-gateway"
+    depends_on:
+      vocabulary-db:
+        condition: service_healthy
+
+  vocabulary-db:
     image: 'postgres:15-alpine'
     volumes:
-      - postgres-vocabulary-api:/var/lib/postgresql/data
+      - vocabulary-db:/var/lib/postgresql/data
     environment:
       - 'POSTGRES_DB=vocabulary_api'
       - 'POSTGRES_PASSWORD=enrico'
       - 'POSTGRES_USER=enrico'
     ports:
       - 25432:5432
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U vocabulary_api"]
+      test: ["CMD-SHELL", "pg_isready -U enrico -d vocabulary_api"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     networks:
-      - vocabulary-api-network
-  postgres_keycloak:
-    image: 'postgres:15-alpine'
+      - vocabulary-network
+  keycloak_db:
+    image: 'postgres:15'
     volumes:
-      - postgres-keycloak:/var/lib/postgresql/data
+      - keycloak-db:/var/lib/postgresql/data
     environment:
-      - 'POSTGRES_DB=keycloak-vocabulary-db'
+      - 'POSTGRES_DB=keycloak'
       - 'POSTGRES_PASSWORD=keycloak'
       - 'POSTGRES_USER=keycloak'
-#    ports:
-#      - 25433:5432
-    labels:
-      org.springframework.boot.ignore: true
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U keycloak"]
       interval: 10s
@@ -45,35 +52,34 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - vocabulary-api-network
+      - vocabulary-network
   keycloak:
-    image: 'quay.io/keycloak/keycloak:latest'
+    image: quay.io/keycloak/keycloak:latest
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+
     command:
       - start-dev
       - --db=postgres
-      - --db-url=jdbc:postgresql://postgres_keycloak:5432/keycloak-vocabulary-db
+      - --db-url=jdbc:postgresql://keycloak_db:5432/keycloak
       - --db-username=keycloak
       - --db-password=keycloak
       - --import-realm
     volumes:
       - ./keycloak/vocabulary-realm.json:/opt/keycloak/data/import/vocabulary-realm.json
-      #- ./keycloak/changeSSLRequired.sh:/docker-entrypoint-init.d/changeSSLRequired.sh:ro
-
     ports:
       - 18081:8080
     networks:
-      - vocabulary-api-network
+      - vocabulary-network
     depends_on:
-      postgres_keycloak:
+      keycloak_db:
         condition: service_healthy
 volumes:
-  postgres-vocabulary-api:
+  vocabulary-db:
     driver: local
-  postgres-keycloak:
+  keycloak-db:
     driver: local
 networks:
-  vocabulary-api-network:
+  vocabulary-network:
     driver: bridge
