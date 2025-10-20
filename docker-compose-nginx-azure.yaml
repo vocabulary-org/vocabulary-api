@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"       # only HTTP for now
+      # later you’ll add:
+      # - "443:443"
+    volumes:
+    - ./ngnix-conf/default-azure.conf:/etc/nginx/conf.d/default.conf:ro
+      # later you can mount certs here, e.g.:
+      # - ./certs:/etc/ssl:ro
+    depends_on:
+      - vocabulary-api
+      - vocabulary-keycloak
+    networks:
+      - vocabulary
+
+networks:
+  vocabulary:
+    external: true
+    # 👆 make sure your other compose file (with SB & KC)
+    # defines this same network: networks: { vocabulary: { name: vocabulary } }
