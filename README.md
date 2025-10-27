@@ -85,6 +85,7 @@ You can access the administration console with the `admin` user and the `Pa55w0r
 
 
 ### Starting the backend
+Make sure you enable the `nginx` spring profile.
 ```shell
 mvn spring-boot:run -Dspring-boot.run.profiles=nginx
 ```
