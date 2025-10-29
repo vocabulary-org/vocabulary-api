@@ -8,7 +8,7 @@ application:
   spa:
     url: http://localhost:4200
   keycloak:
-    url: http://20.223.169.151:18081
+    url: http://20.223.169.151
     username: ${KC_BOOTSTRAP_ADMIN_USERNAME}
     password: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
 
