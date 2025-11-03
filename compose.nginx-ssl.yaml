@@ -1,0 +1,4 @@
+services:
+  keycloak:
+    environment:
+      KC_PROXY: "edge"
