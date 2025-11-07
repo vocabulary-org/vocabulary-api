@@ -16,12 +16,48 @@ Clone the repository and run the following command to build the project:
 $ mvn clean verify
 ```
 
-## starting the application locally
 
-### from cli with maven
+## Running the application locally behind the nginx
+### network
+Assign a domain name to the KeyCloak server `keycloak.local`, by adding the following line to your `/etc/hosts` file:
+```text
+127.0.0.1 localhost keycloak.local
+```
+### KC
+The Keycloak server is available at <http://keycloak.local:18081>.
+You can access the administration console with the `admin` user and the `pwd` password.
+
+## Starting the application locally
+
+### with NO nginx
 ```shell
 $ mvn spring-boot:run 
 ```
+Alternatively, you can run the application locally in Intellij.
+
+### nginx (http) proxy edge
+```shell
+mvn spring-boot:run -Dspring-boot.run.profiles=nginx
+```
+Alternatively, you can run the application locally in IntelliJ with `nginx` set as the active Spring profile.   
+Starting the nginx:
+```shell
+cd docker-compose
+docker compose -f docker-compose-nginx.yaml up
+```
+
+### nginx-ssl (https) proxy edge
+```shell
+mvn spring-boot:run -Dspring-boot.run.profiles=nginx-ssl
+```
+Alternatively, you can run the application locally in IntelliJ with `nginx-ssl` set as the active Spring profile.
+
+Starting the nginx-ssl:
+```shell
+cd docker-compose
+docker compose -f docker-compose-nginx-ssl.yaml up
+```
+
 
 ## Swagger
 ### Accessing Swagger
@@ -72,28 +108,8 @@ echo $TOKEN | pbcopy
 You can access the administration console with the `admin` user and the `Pa55w0rd` password.
 Switch to `vocabulary` realm.
 
-## Running the application locally behind the nginx
-### network
-Assign a domain name to the KeyCloak server `keycloak.local`, by adding the following line to your `/etc/hosts` file:
-```text
-127.0.0.1 localhost keycloak.local
-```
-### KC
-The Keycloak server is available at <http://keycloak.local:18081>. 
-You can access the administration console with the `admin` user and the `Pa55w0rd` password.
 
 
-
-### Starting the backend
-Make sure you enable the `nginx` spring profile.
-```shell
-mvn spring-boot:run -Dspring-boot.run.profiles=nginx
-```
-### Starting the nginx (as a docker service)
-
-```shell
-docker compose -f docker-compose-nginx.yaml up
-```
 ### Get the access token
 Use the same **curl** command as shown in [Get the access token](#get-the-access-token), **but make sure to replace** `localhost` with `keycloak.local`.
 
