@@ -4,6 +4,13 @@ spring:
     username: enrico
     password: enrico
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri:  https://20.223.169.151/realms/vocabulary
+          jwk-set-uri: http://keycloak:8080/realms/vocabulary/protocol/openid-connect/certs
+
 application:
   spa:
     url: http://localhost:4200

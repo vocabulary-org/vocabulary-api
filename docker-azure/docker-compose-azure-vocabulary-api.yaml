@@ -58,9 +58,14 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
-      KEYCLOAK_FRONTEND_URL: "http://20.223.169.151"
-      KC_HOSTNAME: "20.223.169.151"
-      KC_PROXY: "edge"
+      # Core
+      KC_HTTP_ENABLED: "true"                 # Keycloak listens on 8080 internally
+      KC_HOSTNAME:  "20.223.169.151"         # public host
+      # Trust proxy headers from Nginx (replacement for old KC_PROXY=edge)
+      KC_PROXY_HEADERS: "xforwarded"
+      # (Optional but often helpful) force absolute URLs if needed
+      KC_FRONTEND_URL: "https://20.223.169.151"
+      KC_LOG_LEVEL: INFO
 
     command:
       - start-dev
