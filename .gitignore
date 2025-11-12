@@ -20,3 +20,6 @@ src/main/resources/application-local.yml
 /keycloak/vocabulary-realm-real.json
 /docker-compose/nginx-conf/ssl/example.crt
 /docker-compose/nginx-conf/ssl/example.key
+/docker-azure/nginx-conf/ssl/example.crt
+/docker-azure/nginx-conf/ssl/example.key
+/docker-azure/nginx-conf/ssl/
