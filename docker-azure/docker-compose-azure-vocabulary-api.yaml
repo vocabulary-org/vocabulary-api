@@ -5,8 +5,11 @@ services:
     mem_limit: "1g"
     environment:
       SPRING_PROFILES_ACTIVE: azure
+      SB_SECURITY_JWK_SET_URI: ${SB_SECURITY_JWK_SET_URI}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+
+      KC_URL: ${KC_URL}
     ports:
       - 9090:9090
     networks:
