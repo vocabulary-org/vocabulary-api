@@ -13,9 +13,9 @@ spring:
 
 application:
   spa:
-    url: http://localhost:4200
+    url: ${APPLICATION_SPA_URL}
   keycloak:
-    url: ${KC_URL}
+    url: ${APPLICATION_KC_URL}
     username: ${KC_BOOTSTRAP_ADMIN_USERNAME}
     password: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
 
