@@ -68,6 +68,7 @@ services:
       KC_PROXY_HEADERS: "xforwarded"
       # (Optional but often helpful) force absolute URLs if needed
       KC_FRONTEND_URL: "https://20.223.169.151"
+      KC_HOSTNAME_URL: "https://20.223.169.151"
       KC_LOG_LEVEL: INFO
 
     command:
