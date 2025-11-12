@@ -4,11 +4,18 @@ spring:
     username: enrico
     password: enrico
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri:  https://20.223.169.151/realms/vocabulary
+          jwk-set-uri: ${SB_SECURITY_JWK_SET_URI}
+
 application:
   spa:
-    url: http://localhost:4200
+    url: ${APPLICATION_SPA_URL}
   keycloak:
-    url: http://20.223.169.151:18081
+    url: ${APPLICATION_KC_URL}
     username: ${KC_BOOTSTRAP_ADMIN_USERNAME}
     password: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
 

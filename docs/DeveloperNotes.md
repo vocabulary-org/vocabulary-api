@@ -29,9 +29,9 @@ docker push egch/vocabulary-api:latest
 ```
 
 ### Nginx as a docker container
-[docker-compose-nginx.yaml](../docker-compose-nginx.yaml)
+[docker-compose-nginx.yaml](../docker-compose/docker-compose-nginx.yaml)
 ```shell
- docker cp vocabulary-nginx:/etc/nginx/conf.d/default.conf ngnix/default.conf
+ docker cp vocabulary-nginx:/etc/nginx/conf.d/default.conf nginx/default.conf
  docker exec -it vocabulary-nginx bash
 ```
 

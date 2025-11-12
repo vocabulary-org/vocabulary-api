@@ -18,3 +18,5 @@ buildNumber.properties
 /.idea/
 src/main/resources/application-local.yml
 /keycloak/vocabulary-realm-real.json
+/docker-compose/nginx-conf/ssl/example.crt
+/docker-compose/nginx-conf/ssl/example.key

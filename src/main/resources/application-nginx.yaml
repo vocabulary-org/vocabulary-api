@@ -4,7 +4,7 @@ spring:
       # load base + override when this profile is active
       file:
         - compose.yaml
-        - compose.nginx.yaml
+        - compose-overrides/compose.nginx.yaml
 application:
   spa:
     url: http://keycloak.local:4200
