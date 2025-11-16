@@ -5,13 +5,14 @@ services:
     mem_limit: "1g"
     environment:
       SPRING_PROFILES_ACTIVE: azure
-      SB_SECURITY_JWK_SET_URI: ${SB_SECURITY_JWK_SET_URI}
+
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
       APPLICATION_SPA_URL: ${APPLICATION_SPA_URL}
       APPLICATION_KC_URL: ${APPLICATION_KC_URL}
       APPLICATION_CORS_ALLOWED_ORIGINS: ${APPLICATION_CORS_ALLOWED_ORIGINS}
       SB_SECURITY_ISSUER_URI: ${SB_SECURITY_ISSUER_URI}
+      SB_SECURITY_JWK_SET_URI: ${SB_SECURITY_JWK_SET_URI}
 
     ports:
       - 9090:9090
@@ -66,12 +67,12 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
       # Core
       KC_HTTP_ENABLED: "true"                 # Keycloak listens on 8080 internally
-      KC_HOSTNAME:  "https://20.223.169.151"         # public host
-      KC_HOSTNAME_ADMIN: "https://20.223.169.151"
+      KC_HOSTNAME:  "https://116.203.230.142"         # public host
+      KC_HOSTNAME_ADMIN: "https://116.203.230.142"
       # Trust proxy headers from Nginx (replacement for old KC_PROXY=edge)
       KC_PROXY_HEADERS: "xforwarded"
       # (Optional but often helpful) force absolute URLs if needed
-      KC_FRONTEND_URL: "https://20.223.169.151"
+      KC_FRONTEND_URL: "https://116.203.230.142"
       KC_LOG_LEVEL: INFO
 
     command:
