@@ -1,4 +1,4 @@
-# Running on Azure
+# Running on Hetzner
 ## Installing docker on Ubuntu
 
 ````shell
@@ -52,5 +52,7 @@ newgrp docker
 ## Running docker compose
 ````shell
 sudo docker compose -f docker-compose-vocabulary-api.yaml up
-
 ````
+
+## Subdomains configuration
+TBD
