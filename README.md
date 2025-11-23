@@ -124,14 +124,15 @@ docker compose -f docker-compose-vocabulary-api.yaml up
 
 
 ## Developer Notes
-[Developer Notes](docs/developer-notes.md)
-[Hetzner Notes](docs/docker-hetzner.md)
+* [Developer Notes](docs/developer-notes.md)
+* [Hetzner Notes](docs/docker-hetzner.md)
 
 
 ## References
 - [testcontainers-keycloak](https://github.com/dasniko/testcontainers-keycloak)
 - [Setting up Gmail SMTP for Keycloak](https://www.youtube.com/watch?v=wwOKKwMq5pA)
 - [Configure a Docker Nginx Reverse Proxy Image and Container](https://youtu.be/ZmH1L1QeNHk?si=MOyHUDYLzyxB_NUh)
+- [Let's Encrypt Tutorial: Free SSL Certificate For Your Server](https://www.youtube.com/watch?v=iNFpyWFGl3M&t=554s)
 
 
 ## Credits
