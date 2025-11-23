@@ -28,6 +28,31 @@ docker tag vocabulary/vocabulary-api egch/vocabulary-api:latest
 docker push egch/vocabulary-api:latest
 ```
 
+### Docker Commands
+Stop/Delete all the containers
+```shell
+docker rm -f $(docker ps -aq)
+```
+Remove ALL containers + ALL images + ALL networks
+```shell
+docker system prune -a
+```
+Delete all the images
+```shell
+docker rmi -f $(docker images -q)
+```
+List all the volumes
+```shell
+docker volume ls
+```
+Remove a volume
+```shell
+docker volume rm <volume_name>
+```
+List all the networks
+```shell
+docker network ls
+```
 ### Nginx as a docker container
 [docker-compose-nginx.yaml](../docker-compose/docker-compose-nginx.yaml)
 ```shell

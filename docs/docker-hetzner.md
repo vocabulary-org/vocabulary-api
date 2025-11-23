@@ -1,4 +1,4 @@
-# Running on Azure
+# Running on Hetzner
 ## Installing docker on Ubuntu
 
 ````shell
@@ -52,5 +52,30 @@ newgrp docker
 ## Running docker compose
 ````shell
 sudo docker compose -f docker-compose-vocabulary-api.yaml up
-
 ````
+
+## Subdomains configuration
+### Define the DNS for the subdomains
+
+From the [Godaddy](https://www.godaddy.com/en) DNS console.
+
+<img src="images/dns.png" alt="subdomains in DNS" width="600">
+
+### SSL certbot configuration
+Check if the DNS is active.
+```shell
+dig +short api.myvocabulary.net 
+dig +short auth.myvocabulary.net 
+```
+Create the certificates with [certbot](https://certbot.eff.org/).
+
+Also make sure that port 80 on the virtual server is open during certificate creation.
+```shell
+ sudo certbot certonly --standalone   -d auth.myvocabulary.net
+ sudo certbot certonly --standalone   -d api.myvocabulary.net
+```
+Once the certificates are created, copy the `fullchain.pem` and `privkey.pem `
+for each subdomain (auth, api) into a directory that Nginx (running in Docker) 
+can access as a mounted volume.
+
+Make the certificate files readable by all users using **chmod**. 

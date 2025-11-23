@@ -350,11 +350,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.hibernate.validator</groupId>
-			<artifactId>hibernate-validator</artifactId>
-		</dependency>
-
-		<dependency>
 			<artifactId>lombok</artifactId>
 			<groupId>org.projectlombok</groupId>
 			<optional>true</optional>
