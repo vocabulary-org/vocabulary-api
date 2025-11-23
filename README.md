@@ -123,11 +123,9 @@ docker compose -f docker-compose-vocabulary-api.yaml up
 ```
 
 
-
-
 ## Developer Notes
-[Developer Notes](docs/DeveloperNotes.md)
-
+[Developer Notes](docs/developer-notes.md)
+[Hetzner Notes](docs/docker-hetzner.md)
 
 
 ## References
