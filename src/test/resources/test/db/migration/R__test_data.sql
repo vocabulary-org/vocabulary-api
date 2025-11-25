@@ -21,19 +21,36 @@ VALUES (1000000, 'enrico', 'enrico@gmail.com', 'f95cb50f-5f3b-4b71-9f8b-3495d476
 ;
 
 --test data for word
-INSERT INTO vocabulary.word (id, sentence, translation, description, language, language_to,
+INSERT INTO vocabulary.word (id, sentence, translation, description, language_id, language_to_id,
                              user_id, external_id)
-                    VALUES (1000000, 'Hello', 'Salve', 'a gentle salutation', 'English', 'Italian',
+                    VALUES (1000000, 'Hello', 'Salve', 'a gentle salutation',
+                            (SELECT id FROM language WHERE code = 'en'),
+                            (SELECT id FROM language WHERE code = 'it'),
                             1000000, '00000000-0000-0000-0000-000000000001'),
-                           (1000001, 'my house', 'La mia casa', 'my own house', 'English', 'Italian',
+
+                           (1000001, 'my house', 'La mia casa', 'my own house',
+                            (SELECT id FROM language WHERE code = 'en'),
+                            (SELECT id FROM language WHERE code = 'it'),
                             1000000, '00000000-0000-0000-0000-000000000002'),
-                           (1000002, 'cat', 'gatto', null, 'English', 'Italian',
+
+                           (1000002, 'cat', 'gatto', null,
+                            (SELECT id FROM language WHERE code = 'en'),
+                            (SELECT id FROM language WHERE code = 'it'),
                             1000000, '00000000-0000-0000-0000-000000000003'),
-                           (1000003, 'tomcat', 'gattone', 'my big gat', 'English', 'Italian',
+
+                           (1000003, 'tomcat', 'gattone', 'my big gat',
+                            (SELECT id FROM language WHERE code = 'en'),
+                            (SELECT id FROM language WHERE code = 'it'),
                             1000000, '00000000-0000-0000-0000-000000000004'),
-                           (1000004, 'Latte', 'die Milk', 'milk', 'English', 'German',
+
+                           (1000004, 'Latte', 'die Milk', 'milk',
+                            (SELECT id FROM language WHERE code = 'en'),
+                            (SELECT id FROM language WHERE code = 'de'),
                             1000000, '00000000-0000-0000-0000-000000000005'),
-                           (1000005, 'Hello', 'Ciao', 'a gentle salutation', 'English', 'Italian',
+
+                           (1000005, 'Hello', 'Ciao', 'a gentle salutation',
+                            (SELECT id FROM language WHERE code = 'en'),
+                            (SELECT id FROM language WHERE code = 'it'),
                             1000001, '00000000-0000-0000-0000-000000000006')
 ;
 

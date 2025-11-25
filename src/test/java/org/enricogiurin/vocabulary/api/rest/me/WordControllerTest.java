@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,8 +93,8 @@ class WordControllerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.sentence", is("Hello")))
         .andExpect(jsonPath("$.translation", is("Salve")))
-        .andExpect(jsonPath("$.language", is(Language.ENGLISH.name())))
-        .andExpect(jsonPath("$.languageTo", is(Language.ITALIAN.name())));
+        .andExpect(jsonPath("$.language.name", is("English")))
+        .andExpect(jsonPath("$.languageTo.name", is("Italian")));
   }
 
 }
