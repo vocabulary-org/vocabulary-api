@@ -24,3 +24,7 @@ VALUES ('en', 'English'),
        ('de', 'German'),
        ('it', 'Italian'),
        ('ru', 'Russian');
+
+-- insert a basic user, can be removed via KC admin console
+INSERT INTO vocabulary.user (username, email, keycloakId)
+VALUES ('enrico', 'enrico@user.com', 'ab8d6366-3e74-47f0-9c9b-114215b1b99f');
