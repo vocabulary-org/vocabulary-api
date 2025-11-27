@@ -15,6 +15,15 @@ Clone the repository and run the following command to build the project:
 ```shell
 $ mvn clean verify
 ```
+### Docker API version (Workaround)
+Add this following entry:
+```shell
+vim ~/.docker-java.properties  
+```
+```properties
+api.version=1.44
+```
+
 
 
 ## Running the application locally behind the nginx
