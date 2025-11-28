@@ -41,10 +41,10 @@ public record Word(UUID uuid,
                    String description,
 
                    @NotNull(message = LANGUAGE_NOT_NULL_CONSTRAINT, groups = ValidationGroups.Post.class)
-                   Language language,
+                   LanguageReference language,
 
                    @NotNull(message = LANGUAGE_TO_NOT_NULL_CONSTRAINT, groups = ValidationGroups.Post.class)
-                   Language languageTo) {
+                   LanguageReference languageTo) {
 
   public static final String SENTENCE_NOT_NULL_CONSTRAINT = "sentence must not be null";
   public static final String SENTENCE_CONSTRAINT = "sentence must be between 1 and 200 characters";

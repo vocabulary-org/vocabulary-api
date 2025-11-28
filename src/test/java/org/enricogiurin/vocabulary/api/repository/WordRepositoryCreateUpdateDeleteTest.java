@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.Language;
+import org.enricogiurin.vocabulary.api.model.LanguageReference;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,9 @@ class WordRepositoryCreateUpdateDeleteTest {
   @Autowired
   WordRepository wordRepository;
 
+  @Autowired
+  LanguageRepository languageRepository;
+
 
   @BeforeEach
   void setUp() {
@@ -58,16 +62,20 @@ class WordRepositoryCreateUpdateDeleteTest {
 
   @Test
   void createANewWord() {
+    Language english = languageRepository.findByName("English").orElseThrow();
+    Language german = languageRepository.findByName("German").orElseThrow();
 
-    Word newWord = new Word(null, "dog", "der Hund", "my dog", Language.ENGLISH, Language.GERMAN);
+    Word newWord = new Word(null, "dog", "der Hund", "my dog",
+        new LanguageReference(english.uuid(), null),
+        new LanguageReference(german.uuid(), null));
     Word result = wordRepository.create(newWord, USER_ENRICO_ID);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
     assertThat(result.sentence(), equalTo("dog"));
     assertThat(result.translation(), equalTo("der Hund"));
     assertThat(result.description(), equalTo("my dog"));
-    assertThat(result.language().getLanguage(), equalTo("English"));
-    assertThat(result.languageTo().getLanguage(), equalTo("German"));
+    assertThat(result.language().name(), equalTo("English"));
+    assertThat(result.languageTo().name(), equalTo("German"));
 
   }
 

@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.me;
+package org.enricogiurin.vocabulary.api.rest.admin;
 
 /*-
  * #%L
@@ -21,17 +21,13 @@ package org.enricogiurin.vocabulary.api.rest.me;
  */
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,62 +35,34 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @SpringBootTest
 @Import(VocabularyTestConfiguration.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
-class WordControllerTest {
-
-  static UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
-
+class LanguageControllerTest {
   @Autowired
   MockMvc mvc;
 
-  @MockitoBean
-  PrincipalAccessor accessor;
-
-  @Value("${application.api.user-path}/words")
+  @Value("${application.api.admin-path}/languages")
   String basePath;
 
-  @BeforeEach
-  void setUp() {
-    when(accessor.getSubject()).thenReturn("f95cb50f-5f3b-4b71-9f8b-3495d47622cf");
-  }
-
-
   @Test
-  void findAllEnrico() throws Exception {
+  void getAllLanguages() throws Exception {
     mvc.perform(get(basePath)
             .contentType(MediaType.APPLICATION_JSON)
             .param("page", "0")
             .param("size", String.valueOf(Integer.MAX_VALUE)))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content", hasSize(5)))
-        .andExpect(jsonPath("$.content[0].sentence", is("cat")))
-        .andExpect(jsonPath("$.content[4].sentence", is("tomcat")))
-
-        .andExpect(jsonPath("$.page.totalPages", is(1)))
-        .andExpect(jsonPath("$.page.totalElements", is(5)))
-        .andExpect(jsonPath("$.page.size", is(Integer.MAX_VALUE)))
-        .andExpect(jsonPath("$.page.number", is(0)));
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$", hasSize(6)))
+        .andExpect(jsonPath("$[0].name").value("English"))
+        .andExpect(jsonPath("$[0].code").value("en"))
+        .andExpect(jsonPath("$[5].name").value("Spanish"))
+        .andExpect(jsonPath("$[5].code").value("es"));
   }
-
-
-  @Test
-  void findByUuid() throws Exception {
-    mvc.perform(get(basePath + "/" + HELLO_UUID).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.sentence", is("Hello")))
-        .andExpect(jsonPath("$.translation", is("Salve")))
-        .andExpect(jsonPath("$.language.name", is("English")))
-        .andExpect(jsonPath("$.languageTo.name", is("Italian")));
-  }
-
 }

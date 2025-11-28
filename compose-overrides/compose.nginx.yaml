@@ -1,7 +1,0 @@
-services:
-  keycloak:
-    environment:
-      KC_HOSTNAME: "keycloak.local"
-      KC_PROXY_HEADERS: "xforwarded"
-      KEYCLOAK_FRONTEND_URL: "http://keycloak.local"
-      KC_LOG_LEVEL: INFO

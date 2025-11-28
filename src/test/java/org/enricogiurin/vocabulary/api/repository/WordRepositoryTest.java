@@ -57,10 +57,6 @@ class WordRepositoryTest {
   @Autowired
   WordRepository wordRepository;
 
-  @BeforeEach
-  void setUp() {
-
-  }
 
   @Test
   void findByExternalId() {
@@ -68,7 +64,7 @@ class WordRepositoryTest {
         HELLO_UUID, USER_ENRICO_ID).orElseThrow();
     assertThat(word, notNullValue());
     assertThat(word.sentence(), equalTo("Hello"));
-    assertThat(word.language().getLanguage(), equalTo("English"));
+    assertThat(word.language().name(), equalTo("English"));
 
   }
 
@@ -77,7 +73,7 @@ class WordRepositoryTest {
     Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
     assertThat(word, notNullValue());
     assertThat(word.uuid(), equalTo(HELLO_UUID));
-    assertThat(word.language().getLanguage(), equalTo("English"));
+    assertThat(word.language().name(), equalTo("English"));
   }
 
   @Test

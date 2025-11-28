@@ -23,9 +23,6 @@ package org.enricogiurin.vocabulary.api.rest.me;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -37,9 +34,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
+import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
 import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,6 +66,9 @@ class WordControllerCreateUpdateDeleteTest {
   @Autowired
   WordRepository wordRepository;
 
+  @Autowired
+  LanguageRepository languageRepository;
+
   @MockitoBean
   PrincipalAccessor accessor;
   @Value("${application.api.user-path}/words")
@@ -82,39 +82,44 @@ class WordControllerCreateUpdateDeleteTest {
 
   @Test
   void createNewWord() throws Exception {
+    Language spanish = languageRepository.findByName("Spanish").orElseThrow();
+    Language russian = languageRepository.findByName("Russian").orElseThrow();
+    final String body =
+        """
+            {
+              "sentence": "Hola",
+              "translation": "Привет",
+              "description": "Hola in RU",
+              "language":   {"uuid": "%s"},
+              "languageTo": {"uuid": "%s"}
+            }""".formatted(spanish.uuid(), russian.uuid());
+    //System.out.println(body);
     mvc.perform(post(basePath)
             .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                   "sentence": "Hola",
-                   "translation": "Привет",
-                   "description": "Hola in RU",
-                   "language": "%s",
-                   "languageTo": "%s"
-                }
-                """.formatted(Language.SPANISH.name(), Language.RUSSIAN.name())))
+            .content(body))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.sentence", is("Hola")))
         .andExpect(jsonPath("$.translation", is("Привет")))
-        .andExpect(jsonPath("$.language", is(Language.SPANISH.name())))
-        .andExpect(jsonPath("$.languageTo", is(Language.RUSSIAN.name())))
+        .andExpect(jsonPath("$.language.name", is("Spanish")))
+        .andExpect(jsonPath("$.languageTo.name", is("Russian")))
         .andExpect(jsonPath("$.uuid").isNotEmpty())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
 
   @Test
   void createNewWord_badRequest() throws Exception {
+    Language spanish = languageRepository.findByName("Spanish").orElseThrow();
+    Language russian = languageRepository.findByName("Russian").orElseThrow();
     mvc.perform(post(basePath)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
-                   
                    "translation": "Привет",
                    "description": "",
-                   "language": "%s",
-                   "languageTo": "%s"
-                }
-                """.formatted(Language.SPANISH.name(), Language.RUSSIAN.name())))
+                   "language": {"uuid": "%s"},
+                   "languageTo": {"uuid": "%s"}
+                }""".formatted(spanish.uuid(), russian.uuid())))
+        .andDo(print())   // <--
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message", containsString(Word.SENTENCE_NOT_NULL_CONSTRAINT)))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
@@ -123,20 +128,22 @@ class WordControllerCreateUpdateDeleteTest {
   @Test
   void updateAnExistingWord() throws Exception {
     Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
+    Language spanish = languageRepository.findByName("Spanish").orElseThrow();
+
     mvc.perform(patch(basePath + "/" + word.uuid())
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
-                   "languageTo": "%s",
+                   "languageTo": {"uuid": "%s"},
                    "translation": "Hola"
                 }
-                """.formatted(Language.SPANISH.name())))
+                """.formatted(spanish.uuid())))
         .andExpect(status().isOk())
-        .andDo(print())
+        //.andDo(print())
         .andExpect(jsonPath("$.sentence", is("Hello")))
         .andExpect(jsonPath("$.translation", is("Hola")))
-        .andExpect(jsonPath("$.language", is(Language.ENGLISH.name())))
-        .andExpect(jsonPath("$.languageTo", is(Language.SPANISH.name())))
+        .andExpect(jsonPath("$.language.name", is("English")))
+        .andExpect(jsonPath("$.languageTo.name", is("Spanish")))
         .andExpect(jsonPath("$.uuid", is(word.uuid().toString())))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
   }
@@ -144,14 +151,17 @@ class WordControllerCreateUpdateDeleteTest {
   @Test
   void updateAnExistingWord_badRequest() throws Exception {
     Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
+    Language spanish = languageRepository.findByName("Spanish").orElseThrow();
+
     mvc.perform(patch(basePath + "/" + word.uuid())
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
-                   "languageTo": "%s",
+                   "languageTo": {"uuid": "%s"},
                    "translation": ""
                 }
-                """.formatted(Language.SPANISH.name())))
+                """.formatted(spanish.uuid())))
+        //.andDo(print())
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message", containsString(Word.TRANSLATION_CONSTRAINT)))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));

@@ -20,18 +20,8 @@ package org.enricogiurin.vocabulary.api.model;
  * #L%
  */
 
-import org.jooq.impl.EnumConverter;
+import java.util.UUID;
 
-public class LanguageConverter extends
-    EnumConverter<org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.Language, Language> {
+public record LanguageReference(UUID uuid, String name) {
 
-  public LanguageConverter() {
-    super(org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.Language.class, Language.class);
-  }
-
-  @Override
-  public org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.Language to(Language language) {
-    return org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.Language.valueOf(
-        language.getLanguage());
-  }
 }

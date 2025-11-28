@@ -19,28 +19,30 @@ CREATE TABLE vocabulary.user
 (
     id          SERIAL,
     keycloakId  character varying(256) NOT NULL UNIQUE,
-    username    character varying(256) , -- only for audit purpose
-    email       character varying(256) , -- only for audit purpose
+    username    character varying(256), -- only for audit purpose
+    email       character varying(256), -- only for audit purpose
     external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
-CREATE TYPE vocabulary.language AS ENUM (
-  'English', 'Spanish', 'French', 'German', 'Italian', 'Russian');
--- on the long term we won't need this
-INSERT INTO vocabulary.user (username, email, keycloakId)
-VALUES ('enrico', 'enrico@user.com', 'ab8d6366-3e74-47f0-9c9b-114215b1b99f');
-
+CREATE TABLE vocabulary.language
+(
+    id          SERIAL,
+    code        VARCHAR(5) UNIQUE NOT NULL, -- ISO code: en, es, de...
+    name        character varying(256),     -- only for audit purpose NOT NULL,
+    active      BOOLEAN           NOT NULL        DEFAULT TRUE,
+    external_id UUID              NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);
 
 CREATE TABLE vocabulary.word
 (
-    id             SERIAL,
-    sentence       character varying(256)       NOT NULL,
-    translation    TEXT                         NOT NULL,
-    description    TEXT,
-    language       vocabulary.language          NOT NULL,
-    language_to    vocabulary.language          NOT NULL,
-    user_id        integer                      NOT NULL,
-    external_id    UUID                         NOT NULL UNIQUE DEFAULT gen_random_uuid()
+    id              SERIAL,
+    sentence        character varying(256) NOT NULL,
+    translation     TEXT                   NOT NULL,
+    description     TEXT,
+    language_id     integer                NOT NULL,
+    language_to_id  integer                NOT NULL,
+    user_id         integer                NOT NULL,
+    external_id     UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
 
