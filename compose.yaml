@@ -47,7 +47,7 @@ services:
     networks:
       - vocabulary-api-network
   keycloak:
-    image: 'quay.io/keycloak/keycloak:26.0.6'
+    image: 'quay.io/keycloak/keycloak:latest'
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}

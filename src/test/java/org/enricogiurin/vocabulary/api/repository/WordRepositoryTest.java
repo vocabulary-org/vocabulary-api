@@ -57,10 +57,6 @@ class WordRepositoryTest {
   @Autowired
   WordRepository wordRepository;
 
-  @BeforeEach
-  void setUp() {
-
-  }
 
   @Test
   void findByExternalId() {

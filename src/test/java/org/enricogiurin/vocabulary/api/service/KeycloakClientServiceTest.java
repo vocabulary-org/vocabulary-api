@@ -48,26 +48,27 @@ class KeycloakClientServiceTest {
 
   private static final String USER_EMAIL = "john.doe@example.com";
   private static final String TEST_REALM_JSON = "keycloak/test-realm.json";
+  static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer()
+      .withAdminUsername("admin")
+      .withAdminPassword("pwd")
+      .withRealmImportFiles(TEST_REALM_JSON)
+      .withReuse(true);
 
   @Autowired
   UserRepository userRepository;
 
-
-  @Test
-  public void shouldImportMasterRealmAdmin() {
-    try (KeycloakContainer keycloak = new KeycloakContainer()
-        .withAdminUsername("admin")
-        .withAdminPassword("pwd")
-        .withRealmImportFiles(TEST_REALM_JSON)) {
-      keycloak.start();
-      Keycloak keycloakAdminClient = keycloak.getKeycloakAdminClient();
-
-    }
-  }
-
   KeycloakClientService keycloakClientService;
 
-/*
+  @BeforeAll
+  public static void beforeAll() {
+    KEYCLOAK_CONTAINER.start();
+  }
+
+  @AfterAll
+  public static void afterAll() {
+    KEYCLOAK_CONTAINER.stop();
+  }
+
   @BeforeEach
   void setUp() {
     Keycloak keycloakAdminClient = KEYCLOAK_CONTAINER.getKeycloakAdminClient();
@@ -121,6 +122,6 @@ class KeycloakClientServiceTest {
         .isThrownBy(() -> keycloakClientService.createNewUser(user));
 
 
-  }*/
+  }
 
 }

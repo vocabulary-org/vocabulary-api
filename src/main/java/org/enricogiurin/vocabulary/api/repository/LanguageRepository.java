@@ -23,6 +23,7 @@ package org.enricogiurin.vocabulary.api.repository;
 
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.LANGUAGE;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,14 @@ public class LanguageRepository {
         .fetchOptional()
         .map(this::map);
   }
+
+  public List<Language> findAll() {
+    return getSelect()
+        .orderBy(LANGUAGE.NAME.asc())
+        .fetch()
+        .map(this::map);
+  }
+
 
 
   private SelectJoinStep<Record4<UUID, String, String, Boolean>> getSelect() {
