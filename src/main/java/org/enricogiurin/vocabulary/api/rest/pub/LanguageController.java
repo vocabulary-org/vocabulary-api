@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.admin;
+package org.enricogiurin.vocabulary.api.rest.pub;
 
 /*-
  * #%L
@@ -21,7 +21,6 @@ package org.enricogiurin.vocabulary.api.rest.admin;
  */
 
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.model.Language;
@@ -31,11 +30,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * REST Controller for managing Language resources.
  */
 @RestController
-@RequestMapping("${application.api.admin-path}/languages")
+@RequestMapping("${application.api.public-path}/languages")
 @RequiredArgsConstructor
 @Slf4j
 public class LanguageController {
