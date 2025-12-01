@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.pub;
+package org.enricogiurin.vocabulary.api.rest.me;
 
 /*-
  * #%L
@@ -36,7 +36,7 @@ import java.util.List;
  * REST Controller for managing Language resources.
  */
 @RestController
-@RequestMapping("${application.api.public-path}/languages")
+@RequestMapping("${application.api.user-path}/languages")
 @RequiredArgsConstructor
 @Slf4j
 public class LanguageController {

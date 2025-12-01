@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.pub;
+package org.enricogiurin.vocabulary.api.rest.me;
 
 /*-
  * #%L
@@ -44,7 +44,7 @@ class LanguageControllerTest {
   @Autowired
   MockMvc mvc;
 
-  @Value("${application.api.admin-path}/languages")
+  @Value("${application.api.user-path}/languages")
   String basePath;
 
   @Test
