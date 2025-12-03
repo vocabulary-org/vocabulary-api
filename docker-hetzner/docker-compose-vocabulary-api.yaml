@@ -1,7 +1,7 @@
 services:
   vocabulary-api:
     image: 'egch/vocabulary-api:1.0.1'
-    restart: unless-stopped
+    #restart: unless-stopped
     mem_limit: "1g"
     environment:
       SPRING_PROFILES_ACTIVE: hetzner
