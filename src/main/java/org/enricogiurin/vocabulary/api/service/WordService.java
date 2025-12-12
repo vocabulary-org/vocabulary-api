@@ -9,9 +9,9 @@ package org.enricogiurin.vocabulary.api.service;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,9 @@ import com.yourrents.services.common.searchable.Searchable;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataNotFoundException;
+import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
@@ -34,6 +36,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class WordService {
 
   private final UserRepository userRepository;
@@ -64,10 +67,18 @@ public class WordService {
     return wordRepository.find(filter, pageable, userId);
   }
 
-  private Integer findUserIdByKeycloakId(String subject) {
-    return userRepository.findUserIdByKeycloakId(subject).orElseThrow(
-        () -> new DataNotFoundException(
-            "User with subject: " + subject + " not present in the DB"));
+  Integer findUserIdByKeycloakId(String subject) {
+    return userRepository.findUserIdByKeycloakId(subject)
+        .orElseGet(() ->
+        {
+          userRepository.add(User.builder()
+              .keycloakId(subject)
+              .build());
+          log.info("created new user having keycloakId: {}", subject);
+          return userRepository.findUserIdByKeycloakId(subject)
+              .orElseThrow(
+                  () -> new DataNotFoundException("can't find user having keycloakId: " + subject));
+        });
   }
 
 
