@@ -137,6 +137,10 @@ docker compose -f docker-compose-vocabulary-api.yaml up
 * [Hetzner Notes](docs/docker-hetzner.md)
 
 
+## Oauth login
+[Keycloak Social Logins - Integrate Google](https://www.youtube.com/watch?v=RUXY5xqpq0A&list=PLaY-ehgC8dNOnVZxgKKY5kwjezQmQChSG&index=16&t=379s)
+
+
 ## References
 - [testcontainers-keycloak](https://github.com/dasniko/testcontainers-keycloak)
 - [Setting up Gmail SMTP for Keycloak](https://www.youtube.com/watch?v=wwOKKwMq5pA)
