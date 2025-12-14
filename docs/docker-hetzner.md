@@ -159,5 +159,14 @@ User: <your-postgres-user>
 Password: <your-postgres-password>
 ```
 
+## Check the logs
+### Keycloak log
+```shell
+docker logs -f docker-hetzner-keycloak-1
+```
 
+### Vocabulary log
+```shell
+docker logs -f docker-hetzner-vocabulary-api-1
+```
 
