@@ -9,9 +9,9 @@ package org.enricogiurin.vocabulary.api.conf;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,15 +29,23 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 class TranslatorClientConfig {
+  private static final String HEADER_SUBSCRIPTION_KEY =
+      "Ocp-Apim-Subscription-Key";
 
-    @Bean
-    RestClient translatorRestClient(RestClient.Builder builder,
-                                    @Value("${translator.azure.url}") String url) {
-        return builder
-                .baseUrl(url)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+  private static final String HEADER_SUBSCRIPTION_REGION =
+      "Ocp-Apim-Subscription-Region";
 
 
-                .build();
-    }
+  @Bean
+  RestClient translatorRestClient(RestClient.Builder builder,
+      final AzureTranslatorProperties props,
+
+      @Value("${translator.azure.url}") String url) {
+    return builder
+        .baseUrl(url)
+        .defaultHeader(HEADER_SUBSCRIPTION_KEY, props.key())
+        .defaultHeader(HEADER_SUBSCRIPTION_REGION, props.region())
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .build();
+  }
 }

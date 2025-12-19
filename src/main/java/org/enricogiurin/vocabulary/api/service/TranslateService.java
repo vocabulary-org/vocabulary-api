@@ -20,31 +20,24 @@ package org.enricogiurin.vocabulary.api.service;
  * #L%
  */
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.enricogiurin.vocabulary.api.conf.AzureTranslatorProperties;
-import org.enricogiurin.vocabulary.api.exception.TranslationFailedException;
-import org.enricogiurin.vocabulary.api.model.AzureTranslateRequestItem;
+import org.enricogiurin.vocabulary.api.component.AzureTranslator;
 import org.enricogiurin.vocabulary.api.model.TranslateRequest;
 import org.enricogiurin.vocabulary.api.model.TranslateResponse;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientResponseException;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TranslateService {
-    private final RestClient translatorRestClient;
-    private final AzureTranslatorProperties props;
+
+  private final AzureTranslator azureTranslator;
 
 
     public TranslateResponse translate(TranslateRequest request) {
-        List<AzureTranslateResponseItem> azure = callAzure(request);
+      List<AzureTranslator.AzureTranslateResponseItem> azure = azureTranslator.translate(request);
 
         List<TranslateResponse.Translation> translations = azure.stream()
                 .flatMap(item -> item.translations().stream())
@@ -54,34 +47,4 @@ public class TranslateService {
     }
 
 
-    private List<AzureTranslateResponseItem> callAzure(TranslateRequest request) {
-        try {
-            return translatorRestClient.post()
-                    .uri(b -> {
-                        b
-                                .queryParam("api-version", "3.0")
-                                .queryParam("from", request.from());
-                        request.to().forEach(lang -> b.queryParam("to", lang));
-                        return b.build();
-                    })
-                    .header("Ocp-Apim-Subscription-Key", props.key())
-                    .header("Ocp-Apim-Subscription-Region", props.region())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(List.of(new AzureTranslateRequestItem(request.text())))
-                    .retrieve()
-                    .body(new ParameterizedTypeReference<>() {
-                    });
-        } catch (RestClientResponseException ex) {
-            // Optional: wrap into your own exception type
-            throw new TranslationFailedException(
-                    "Azure Translator call failed: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString(),
-                    ex
-            );
-        }
-    }
-
-    private record AzureTranslateResponseItem(List<AzureTranslation> translations) {
-        private record AzureTranslation(String text, String to) {
-        }
-    }
 }
