@@ -65,3 +65,10 @@ management:
   endpoint:
     env:
       show-values: ALWAYS
+
+translator:
+  azure:
+    #replace this value with yours from Azure
+    key: xxx
+    region: switzerlandnorth
+    url: https://api.cognitive.microsofttranslator.com/translate
