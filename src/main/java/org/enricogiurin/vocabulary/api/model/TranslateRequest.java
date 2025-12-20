@@ -29,8 +29,10 @@ public record TranslateRequest(
     @NotBlank
     @Size(min = 2, max = 100, message = TEXT_CONSTRAINT)
     String text,
-        @NotBlank String from,
-        @NotEmpty List<@NotBlank String> to
+    @NotBlank
+    String from,
+    @NotEmpty
+    List<@NotBlank String> to
 ) {
 
   public static final String TEXT_CONSTRAINT = "text must be between 2  and 100 characters";

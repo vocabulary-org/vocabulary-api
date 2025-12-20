@@ -36,10 +36,10 @@ import org.springframework.web.client.RestClientResponseException;
 @Slf4j
 public class AzureTranslator {
 
-  private static final String API_VERSION_PARAM = "api-version";
-  private static final String API_VERSION = "3.0";
-  private static final String FROM_PARAM = "from";
-  private static final String TO_PARAM = "to";
+  static final String API_VERSION_PARAM = "api-version";
+  static final String API_VERSION = "3.0";
+  static final String FROM_PARAM = "from";
+  static final String TO_PARAM = "to";
 
   private final RestClient translatorRestClient;
 

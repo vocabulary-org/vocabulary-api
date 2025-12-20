@@ -20,7 +20,6 @@ package org.enricogiurin.vocabulary.api.azure;
  * #L%
  */
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -38,11 +37,9 @@ class TranslatorClientConfig {
 
   @Bean
   RestClient translatorRestClient(RestClient.Builder builder,
-      final AzureTranslatorProperties props,
-
-      @Value("${translator.azure.url}") String url) {
+      final AzureTranslatorProperties props) {
     return builder
-        .baseUrl(url)
+        .baseUrl(props.url())
         .defaultHeader(HEADER_SUBSCRIPTION_KEY, props.key())
         .defaultHeader(HEADER_SUBSCRIPTION_REGION, props.region())
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
