@@ -23,7 +23,7 @@ package org.enricogiurin.vocabulary.api.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.enricogiurin.vocabulary.api.component.AzureTranslator;
+import org.enricogiurin.vocabulary.api.azure.AzureTranslator;
 import org.enricogiurin.vocabulary.api.model.TranslateRequest;
 import org.enricogiurin.vocabulary.api.model.TranslateResponse;
 import org.springframework.stereotype.Service;

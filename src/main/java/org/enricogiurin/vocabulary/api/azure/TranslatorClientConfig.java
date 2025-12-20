@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.conf;
+package org.enricogiurin.vocabulary.api.azure;
 
 /*-
  * #%L

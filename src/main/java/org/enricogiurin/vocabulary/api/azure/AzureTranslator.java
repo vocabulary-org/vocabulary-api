@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.component;
+package org.enricogiurin.vocabulary.api.azure;
 
 /*-
  * #%L
@@ -41,9 +41,7 @@ public class AzureTranslator {
   private static final String FROM_PARAM = "from";
   private static final String TO_PARAM = "to";
 
-
   private final RestClient translatorRestClient;
-
 
   public List<AzureTranslator.AzureTranslateResponseItem> translate(TranslateRequest request) {
     try {

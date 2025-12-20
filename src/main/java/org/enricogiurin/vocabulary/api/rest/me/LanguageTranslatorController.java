@@ -27,6 +27,7 @@ import org.enricogiurin.vocabulary.api.model.TranslateRequest;
 import org.enricogiurin.vocabulary.api.model.TranslateResponse;
 import org.enricogiurin.vocabulary.api.service.TranslateService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +41,8 @@ public class LanguageTranslatorController {
     private final TranslateService translateService;
 
     @PostMapping()
-    public ResponseEntity<TranslateResponse> translate(@RequestBody TranslateRequest request) {
+    public ResponseEntity<TranslateResponse> translate(
+        @RequestBody @Validated TranslateRequest request) {
         log.info("translate: {}", request);
         TranslateResponse response = translateService.translate(request);
         return ResponseEntity.ok(response);
