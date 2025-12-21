@@ -23,7 +23,7 @@ package org.enricogiurin.vocabulary.api.azure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "translator.azure")
+@ConfigurationProperties(prefix = "azure.translator")
 public record AzureTranslatorProperties(
         String key,
         String region,

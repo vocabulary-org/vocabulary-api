@@ -54,3 +54,7 @@ INSERT INTO vocabulary.word (id, sentence, translation, description, language_id
                             1000001, '00000000-0000-0000-0000-000000000006')
 ;
 
+
+--test data for translation_usage
+INSERT INTO vocabulary.translation_usage (month, cnt, external_id)
+VALUES (DATE '2025-07-01', 5, '00000000-0000-0000-0000-000000000001');

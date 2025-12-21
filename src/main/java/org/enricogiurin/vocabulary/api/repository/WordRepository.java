@@ -92,9 +92,7 @@ public class WordRepository {
             pageable, this::getSupportedField),
         pageable.getPageSize(), pageable.getOffset());
 
-    List<Word> words = result.fetch(record -> {
-      return map(record);
-    });
+    List<Word> words = result.fetch(this::map);
     int totalRows = Objects.requireNonNullElse(
         result.fetchAny("total_rows", Integer.class), 0);
     return new PageImpl<>(words, pageable, totalRows);

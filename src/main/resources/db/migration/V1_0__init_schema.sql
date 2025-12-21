@@ -45,6 +45,15 @@ CREATE TABLE vocabulary.word
     external_id     UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
+CREATE TABLE vocabulary.translation_usage
+(
+    id              SERIAL,
+    month DATE NOT NULL UNIQUE,
+    cnt BIGINT NOT NULL DEFAULT 0,
+    external_id     UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);
+
+
 
 
 

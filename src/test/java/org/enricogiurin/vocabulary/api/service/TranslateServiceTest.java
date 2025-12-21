@@ -25,23 +25,28 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.azure.AzureTranslator;
 import org.enricogiurin.vocabulary.api.model.TranslateRequest;
 import org.enricogiurin.vocabulary.api.model.TranslateResponse;
 import org.enricogiurin.vocabulary.api.model.TranslateResponse.Translation;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@Import({VocabularyTestConfiguration.class})
+@Transactional
 class TranslateServiceTest {
 
+  @Autowired
   TranslateService translateService;
 
-  @Mock
+  @MockitoBean
   AzureTranslator azureTranslator;
 
   @Test
@@ -64,8 +69,4 @@ class TranslateServiceTest {
         .containsExactly("Hola", "es");
   }
 
-  @BeforeEach
-  void setUp() {
-    this.translateService = new TranslateService(azureTranslator);
-  }
 }

@@ -33,7 +33,6 @@ import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.LanguageReference;
 import org.enricogiurin.vocabulary.api.model.Word;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,10 +54,6 @@ class WordRepositoryCreateUpdateDeleteTest {
   @Autowired
   LanguageRepository languageRepository;
 
-
-  @BeforeEach
-  void setUp() {
-  }
 
   @Test
   void createANewWord() {

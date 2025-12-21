@@ -20,24 +20,45 @@ package org.enricogiurin.vocabulary.api.service;
  * #L%
  */
 
+import java.time.YearMonth;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.azure.AzureTranslator;
 import org.enricogiurin.vocabulary.api.model.TranslateRequest;
 import org.enricogiurin.vocabulary.api.model.TranslateResponse;
+import org.enricogiurin.vocabulary.api.repository.TranslationUsageRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class TranslateService {
 
   private final AzureTranslator azureTranslator;
+  private final TranslationUsageRepository translationUsageRepository;
+  private final long monthlyMaxTranslations;
+
+  public TranslateService(
+      AzureTranslator azureTranslator,
+      TranslationUsageRepository translationUsageRepository,
+      @Value("${application.translation.monthly-max-translations}") long monthlyMaxTranslations
+  ) {
+    this.azureTranslator = azureTranslator;
+    this.translationUsageRepository = translationUsageRepository;
+    this.monthlyMaxTranslations = monthlyMaxTranslations;
+  }
 
 
     public TranslateResponse translate(TranslateRequest request) {
+
       List<AzureTranslator.AzureTranslateResponseItem> azure = azureTranslator.translate(request);
+      YearMonth now = YearMonth.now();
+      long cnt = translationUsageRepository.incrementMonthlyCounter(now);
+      log.info("translation usage for {} is equal to {}", now, cnt);
+      if (cnt >= monthlyMaxTranslations) {
+        log.warn("reached peek of translation usage for {}", now);
+        //TODO - do something dunno disabling
+      }
 
         List<TranslateResponse.Translation> translations = azure.stream()
                 .flatMap(item -> item.translations().stream())
