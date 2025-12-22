@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,7 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(VocabularyTestConfiguration.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
-class LanguageTranslatorControllerTest {
+class LanguageTranslateControllerTest {
 
   @Autowired
   MockMvc mvc;
@@ -118,5 +119,13 @@ class LanguageTranslatorControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message", containsString(TranslateRequest.TEXT_CONSTRAINT)))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+  }
+
+  @Test
+  void isTranslationQuotaReached() throws Exception {
+    mvc.perform(get(basePath + "/quota-reached"))
+        .andExpect(status().isOk())
+        .andExpect(content().string("false"));
+
   }
 }

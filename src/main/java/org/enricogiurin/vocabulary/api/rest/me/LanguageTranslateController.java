@@ -28,6 +28,7 @@ import org.enricogiurin.vocabulary.api.model.TranslateResponse;
 import org.enricogiurin.vocabulary.api.service.TranslateService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,15 +38,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${application.api.user-path}/translate")
 @RequiredArgsConstructor
 @Slf4j
-public class LanguageTranslatorController {
+public class LanguageTranslateController {
     private final TranslateService translateService;
 
     @PostMapping()
     public ResponseEntity<TranslateResponse> translate(
         @RequestBody @Validated TranslateRequest request) {
-        log.info("translate: {}", request);
-        TranslateResponse response = translateService.translate(request);
-        return ResponseEntity.ok(response);
+      log.info("translate: {}", request);
+      TranslateResponse response = translateService.translate(request);
+      return ResponseEntity.ok(response);
     }
+
+  @GetMapping("quota-reached")
+  public ResponseEntity<Boolean> isTranslationQuotaReached() {
+    return ResponseEntity.ok(translateService.isQuotaReached());
+  }
 
 }

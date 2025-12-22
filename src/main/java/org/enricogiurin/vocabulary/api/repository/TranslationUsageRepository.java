@@ -25,6 +25,7 @@ import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.TRANSLATION
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -41,19 +42,32 @@ public class TranslationUsageRepository {
   @Transactional(readOnly = false)
   public long incrementMonthlyCounter(YearMonth yearMonth) {
     LocalDate month = yearMonth.atDay(1);
-    Long newCnt = dsl.insertInto(TRANSLATION_USAGE)
-        .set(TRANSLATION_USAGE.MONTH, month)
-        .set(TRANSLATION_USAGE.CNT, 1L)
-        .onConflict(TRANSLATION_USAGE.MONTH)
-        .doUpdate()
-        .set(TRANSLATION_USAGE.CNT, TRANSLATION_USAGE.CNT.plus(1))
-        .returning(TRANSLATION_USAGE.CNT)
-        .fetchOne()
+    Long newCnt = Objects.requireNonNull(dsl.insertInto(TRANSLATION_USAGE)
+            .set(TRANSLATION_USAGE.MONTH, month)
+            .set(TRANSLATION_USAGE.CNT, 1L)
+            .onConflict(TRANSLATION_USAGE.MONTH)
+            .doUpdate()
+            .set(TRANSLATION_USAGE.CNT, TRANSLATION_USAGE.CNT.plus(1))
+            .returning(TRANSLATION_USAGE.CNT)
+            .fetchOne())
         .getCnt();
     log.info("new count for yearMonth: {} is {}", yearMonth, newCnt);
     return newCnt != null ? newCnt : 0L;
-
   }
+
+  @Transactional(readOnly = false)
+  public void set(YearMonth yearMonth, long value) {
+    LocalDate month = yearMonth.atDay(1);
+    dsl.insertInto(TRANSLATION_USAGE)
+        .set(TRANSLATION_USAGE.MONTH, month)
+        .set(TRANSLATION_USAGE.CNT, value)
+        .onConflict(TRANSLATION_USAGE.MONTH)
+        .doUpdate()
+        .set(TRANSLATION_USAGE.CNT, value)
+        .returning(TRANSLATION_USAGE.CNT)
+        .fetchOne();
+  }
+
 
   public long getCurrentMonthCount(YearMonth yearMonth) {
     LocalDate month = yearMonth.atDay(1);
