@@ -1,0 +1,57 @@
+package org.enricogiurin.vocabulary.api.rest.me;
+
+/*-
+ * #%L
+ * Vocabulary API
+ * %%
+ * Copyright (C) 2024 - 2025 Vocabulary Team
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.enricogiurin.vocabulary.api.model.TranslateRequest;
+import org.enricogiurin.vocabulary.api.model.TranslateResponse;
+import org.enricogiurin.vocabulary.api.service.TranslateService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("${application.api.user-path}/translate")
+@RequiredArgsConstructor
+@Slf4j
+public class LanguageTranslateController {
+    private final TranslateService translateService;
+
+    @PostMapping()
+    public ResponseEntity<TranslateResponse> translate(
+        @RequestBody @Validated TranslateRequest request) {
+      log.info("translate: {}", request);
+      TranslateResponse response = translateService.translate(request);
+      return ResponseEntity.ok(response);
+    }
+
+  @GetMapping("quota-reached")
+  public ResponseEntity<Boolean> isTranslationQuotaReached() {
+    return ResponseEntity.ok(translateService.isQuotaReached());
+  }
+
+}

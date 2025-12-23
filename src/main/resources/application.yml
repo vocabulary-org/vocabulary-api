@@ -49,6 +49,8 @@ application:
     user-path: ${application.api.base-path}/me
     public-path: ${application.api.base-path}/public
 
+  translation:
+    monthly-max-translations: 30000
 
 
 
@@ -65,3 +67,9 @@ management:
   endpoint:
     env:
       show-values: ALWAYS
+
+azure:
+  translator:
+    key: ${AZURE_TRANSLATOR_KEY}
+    region: switzerlandnorth
+    url: https://api.cognitive.microsofttranslator.com/translate

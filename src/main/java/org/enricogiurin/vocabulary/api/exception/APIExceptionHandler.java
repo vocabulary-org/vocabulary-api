@@ -75,6 +75,15 @@ class APIExceptionHandler extends ResponseEntityExceptionHandler {
         new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
   }
 
+  @ExceptionHandler(QuotaExceededException.class)
+  public ResponseEntity<Object> handleQuotaExceeded(QuotaExceededException e,
+      NativeWebRequest request) {
+    log.error(e.getMessage(), e);
+    return super.handleExceptionInternal(e,
+        buildErrorResponse(e.getMessage(), e, request, HttpStatus.TOO_MANY_REQUESTS.value()),
+        new HttpHeaders(), HttpStatus.TOO_MANY_REQUESTS, request);
+  }
+
 
   @Override
   public ResponseEntity<Object> handleMethodArgumentNotValid(
