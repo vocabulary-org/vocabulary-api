@@ -50,7 +50,7 @@ application:
     public-path: ${application.api.base-path}/public
 
   translation:
-    monthly-max-translations: 15 #do not commit this
+    monthly-max-translations: 30000
 
 
 
