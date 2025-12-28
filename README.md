@@ -134,7 +134,7 @@ docker compose -f docker-compose-vocabulary-api.yaml up
 
 ## Developer Notes
 * [Developer Notes](docs/developer-notes.md)
-* [Hetzner Notes](docs/docker-hetzner.md)
+* [Hetzner Notes](docs/api-hetzner.md)
 
 
 ## Oauth login

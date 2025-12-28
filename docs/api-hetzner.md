@@ -79,6 +79,19 @@ for each subdomain (auth, api) into a directory that Nginx (running in Docker)
 can access as a mounted volume.
 
 Make the certificate files readable by all users using **chmod**. 
+### Protecting API with Cloudflare
+- signup with [Cloudflare](https://www.cloudflare.com/en-gb/)
+- register the domain (myvocabulary.net) in CloudFlare
+- Change the DNS nameserver in godaddy (provider of myvocabulary.net) with those provided by Cloudflare.
+
+![CloudFlare NameServers](images/godaddy-nameservers.png)
+
+![cloudflare DNS](images/cloudflare-dns.png)
+
+Verify the correct protection:
+```shell
+curl -I https://api.myvocabulary.net
+```
 
 
 ## Connecting to the remote DB in Hetzner
