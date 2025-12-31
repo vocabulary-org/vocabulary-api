@@ -32,6 +32,15 @@ CREATE TABLE vocabulary.language
     active      BOOLEAN           NOT NULL        DEFAULT TRUE,
     external_id UUID              NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
+-- define the user language pair preference
+CREATE TABLE vocabulary.user_languages
+(
+    id          SERIAL,
+    user_id         integer                NOT NULL UNIQUE,
+    language_id     integer                NOT NULL,
+    language_to_id  integer                NOT NULL,
+    external_id UUID              NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);
 
 CREATE TABLE vocabulary.word
 (

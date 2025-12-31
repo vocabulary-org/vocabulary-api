@@ -77,6 +77,14 @@ public class WordRepository {
         .map(this::map);
   }
 
+  /**
+   * Both wordId and userId are required to guarantee that the authenticated user can access only
+   * words that belong to them.
+   *
+   * @param wordId
+   * @param userId
+   * @return
+   */
   public Optional<Word> findById(Integer wordId, Integer userId) {
     return getSelect(userId)
         .and(WORD.ID.eq(wordId))
