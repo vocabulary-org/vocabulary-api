@@ -21,6 +21,10 @@ package org.enricogiurin.vocabulary.api.service;
  */
 
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.model.Language;
+import org.enricogiurin.vocabulary.api.model.LanguageReference;
+import org.enricogiurin.vocabulary.api.model.Word;
+import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +37,9 @@ import org.springframework.transaction.annotation.Transactional;
 //TODO - complete it
 class WordServiceTest {
 
+  @Autowired
+  LanguageRepository languageRepository;
+
 
   @Autowired
   WordService wordService;
@@ -40,6 +47,13 @@ class WordServiceTest {
 
   @Test
   void createNewWord() {
+    Language english = languageRepository.findByName("English").orElseThrow();
+    Language german = languageRepository.findByName("German").orElseThrow();
+
+    Word newWord = new Word(null, "dog", "der Hund", "my dog",
+        new LanguageReference(english.uuid(), null),
+        new LanguageReference(german.uuid(), null));
+    Word newWord1 = wordService.createNewWord(newWord, "f95cb50f-5f3b-4b71-9f8b-3495d47622cf");
   }
 
   @Test
