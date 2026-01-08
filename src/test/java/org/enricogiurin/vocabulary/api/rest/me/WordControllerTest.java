@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
+import org.enricogiurin.vocabulary.api.security.CurrentUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,20 +49,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class WordControllerTest {
 
+  static final int USER_ENRICO_ID = 1000000;
+
+
   static UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
   @Autowired
   MockMvc mvc;
 
   @MockitoBean
-  PrincipalAccessor accessor;
+  CurrentUser currentUser;
 
   @Value("${application.api.user-path}/words")
   String basePath;
 
   @BeforeEach
   void setUp() {
-    when(accessor.getSubject()).thenReturn("f95cb50f-5f3b-4b71-9f8b-3495d47622cf");
+    when(currentUser.getUserId()).thenReturn(USER_ENRICO_ID);
   }
 
 

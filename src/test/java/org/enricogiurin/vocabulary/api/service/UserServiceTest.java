@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
+import org.enricogiurin.vocabulary.api.service.UserService.UserCreationAttributes;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,22 +46,24 @@ class UserServiceTest {
 
 
   @Test
-  void findUserIdByKeycloakId() {
-    //given
+  void findOrCreate() {
+
     userRepository.findUserIdByKeycloakId(KEYCLOAK_ID).orElseThrow();
     //when
-    Integer userIdByKeycloakId = userService.findUserIdByKeycloakId(KEYCLOAK_ID);
+    Integer userIdByKeycloakId = userService.findOrCreateUserIdByKeycloakId(KEYCLOAK_ID,
+        new UserCreationAttributes("enrico"));
     //then
     assertThat(userIdByKeycloakId).isEqualTo(1000000);
   }
 
   @Test
-  void findUserIdByKeycloakId_notExisting() {
+  void findOrCreate_notExisting() {
     //given
     assertThat(userRepository.findUserIdByKeycloakId(KEYCLOAK_ID_NEW))
         .isEmpty();
     //when
-    userService.findUserIdByKeycloakId(KEYCLOAK_ID_NEW);
+    userService.findOrCreateUserIdByKeycloakId(KEYCLOAK_ID_NEW,
+        new UserCreationAttributes("enrico"));
     //then
     userRepository.findUserIdByKeycloakId(KEYCLOAK_ID_NEW).orElseThrow();
 

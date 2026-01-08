@@ -20,7 +20,6 @@ package org.enricogiurin.vocabulary.api.service;
  * #L%
  */
 
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataNotFoundException;
@@ -29,6 +28,7 @@ import org.enricogiurin.vocabulary.api.model.UserLanguages;
 import org.enricogiurin.vocabulary.api.repository.UserLanguagesRepository;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,23 +38,31 @@ public class UserService {
   private final UserLanguagesRepository userLanguagesRepository;
   private final UserRepository userRepository;
 
-  public Optional<UserLanguages> userLanguages(String subject) {
-    Integer userId = findUserIdByKeycloakId(subject);
-    return userLanguagesRepository.findByUserId(userId);
+  public UserLanguages userLanguages(Integer userId) {
+    return userLanguagesRepository.findByUserId(userId)
+        .orElseGet(() -> new UserLanguages(null, null, null));
   }
 
-  Integer findUserIdByKeycloakId(String subject) {
-    return userRepository.findUserIdByKeycloakId(subject)
+  @Transactional
+  public Integer findOrCreateUserIdByKeycloakId(String keycloakId,
+      UserCreationAttributes userCreationAttributes) {
+    return userRepository.findUserIdByKeycloakId(keycloakId)
         .orElseGet(() ->
         {
           userRepository.add(User.builder()
-              .keycloakId(subject)
+              .keycloakId(keycloakId)
+              .username(userCreationAttributes.username())
               .build());
-          log.info("created new user having keycloakId: {}", subject);
-          return userRepository.findUserIdByKeycloakId(subject)
+          log.info("created new user having keycloakId: {}", keycloakId);
+          return userRepository.findUserIdByKeycloakId(keycloakId)
               .orElseThrow(
-                  () -> new DataNotFoundException("can't find user having keycloakId: " + subject));
+                  () -> new DataNotFoundException(
+                      "can't find user having keycloakId: " + keycloakId));
         });
+  }
+
+  public record UserCreationAttributes(String username) {
+
   }
 
 }
