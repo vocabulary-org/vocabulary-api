@@ -49,6 +49,8 @@ class KeycloakClientServiceTest {
 
   private static final String USER_EMAIL = "john.doe@example.com";
   private static final String TEST_REALM_JSON = "keycloak/test-realm.json";
+  private static final String REALM = "vocabulary";
+  private static final String NEW_USERNAME = "john-doe";
 
   @Container
   static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer()
@@ -62,10 +64,11 @@ class KeycloakClientServiceTest {
   UserRepository userRepository;
 
   KeycloakClientService keycloakClientService;
+  Keycloak keycloakAdminClient;
 
   @BeforeEach
   void setUp() {
-    Keycloak keycloakAdminClient = KEYCLOAK_CONTAINER.getKeycloakAdminClient();
+    this.keycloakAdminClient = KEYCLOAK_CONTAINER.getKeycloakAdminClient();
     this.keycloakClientService = new KeycloakClientService(keycloakAdminClient, userRepository, "",
         true);
   }
@@ -83,12 +86,11 @@ class KeycloakClientServiceTest {
         .isEqualTo("test-user");
   }
 
-  //to evaluate also if user is present in the KC test container
   @Test
   void createNewUser() {
     //given
     KeycloakUser user = KeycloakUser.builder()
-        .username("johndoe")
+        .username(NEW_USERNAME)
         .firstName("John")
         .lastName("Doe")
         .email(USER_EMAIL)
@@ -98,6 +100,12 @@ class KeycloakClientServiceTest {
     String keycloakId = keycloakClientService.createNewUser(user);
 
     //then
+    List<UserRepresentation> users =
+        keycloakAdminClient
+            .realm(REALM)
+            .users()
+            .searchByUsername(NEW_USERNAME, true);
+    assertThat(users).hasSize(1);
     userRepository.findUserIdByKeycloakId(keycloakId).orElseThrow();
   }
 
