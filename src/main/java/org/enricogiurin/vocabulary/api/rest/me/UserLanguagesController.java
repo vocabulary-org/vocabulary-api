@@ -29,6 +29,7 @@ import org.enricogiurin.vocabulary.api.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -53,9 +54,9 @@ public class UserLanguagesController {
   }
 
   @PutMapping
-  public ResponseEntity<UserLanguages> storeUserLanguages() {
-    UserLanguages userLanguages = userService.userLanguages(currentUser.getUserId());
-    return ResponseEntity.ok(userLanguages);
+  public ResponseEntity<UserLanguages> storeUserLanguages(@RequestBody UserLanguages userLanguages) {
+    UserLanguages result = userService.saveUserLanguages(userLanguages, currentUser.getUserId());
+    return ResponseEntity.ok(result);
   }
 
 
