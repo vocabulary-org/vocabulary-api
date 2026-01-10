@@ -29,8 +29,6 @@ import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.exception.DataConflictException;
 import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
@@ -39,35 +37,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 
 @SpringBootTest
 @Import({VocabularyTestConfiguration.class})
 @Transactional
+@Testcontainers
 class KeycloakClientServiceTest {
 
   private static final String USER_EMAIL = "john.doe@example.com";
   private static final String TEST_REALM_JSON = "keycloak/test-realm.json";
+
+  @Container
   static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer()
       .withAdminUsername("admin")
       .withAdminPassword("pwd")
       .withRealmImportFiles(TEST_REALM_JSON)
+      .useTls()
       .withReuse(true);
 
   @Autowired
   UserRepository userRepository;
 
   KeycloakClientService keycloakClientService;
-
-  @BeforeAll
-  public static void beforeAll() {
-    KEYCLOAK_CONTAINER.start();
-  }
-
-  @AfterAll
-  public static void afterAll() {
-    KEYCLOAK_CONTAINER.stop();
-  }
 
   @BeforeEach
   void setUp() {
@@ -120,8 +114,5 @@ class KeycloakClientServiceTest {
     //when-then
     assertThatExceptionOfType(DataConflictException.class)
         .isThrownBy(() -> keycloakClientService.createNewUser(user));
-
-
   }
-
 }

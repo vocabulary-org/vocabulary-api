@@ -245,10 +245,10 @@
 				<configuration>
 					<image>
 						<name>vocabulary/vocabulary-api:latest</name>
-                        <env>
-                            <!-- Ask Paketo to use Java 21 instead of 22 -->
-                            <BP_JVM_VERSION>21.*</BP_JVM_VERSION>
-                        </env>
+            <env>
+                <!-- Ask Paketo to use Java 21 instead of 22 -->
+                <BP_JVM_VERSION>21.*</BP_JVM_VERSION>
+            </env>
 					</image>
 				</configuration>
 			</plugin>

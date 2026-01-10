@@ -43,6 +43,10 @@ public class UserService {
         .orElseGet(() -> new UserLanguages(null, null, null));
   }
 
+  public UserLanguages saveUserLanguages(UserLanguages userLanguages, Integer userId) {
+    return userLanguagesRepository.createOrUpdate(userLanguages, userId);
+  }
+
   @Transactional
   public Integer findOrCreateUserIdByKeycloakId(String keycloakId,
       UserCreationAttributes userCreationAttributes) {
@@ -62,7 +66,6 @@ public class UserService {
   }
 
   public record UserCreationAttributes(String username) {
-
   }
 
 }

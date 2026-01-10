@@ -32,7 +32,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
-import org.enricogiurin.vocabulary.api.exception.DataNotFoundException;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.UserLanguagesRecord;
 import org.enricogiurin.vocabulary.api.model.LanguageReference;
 import org.enricogiurin.vocabulary.api.model.UserLanguages;
@@ -70,37 +69,47 @@ public class UserLanguagesRepository {
         .map(this::map);
   }
 
-  @Transactional(readOnly = false)
-  public UserLanguages create(UserLanguages userLanguages, Integer userId) {
-    UserLanguagesRecord userLanguagesRecord = dsl.newRecord(USER_LANGUAGES);
-    userLanguagesRecord.setUserId(userId);
-    Integer languageId = getLanguageId(userLanguages.language());
-    userLanguagesRecord.setLanguageId(languageId);
-    Integer languageToId = getLanguageId(userLanguages.languageTo());
-    userLanguagesRecord.setLanguageToId(languageToId);
-    userLanguagesRecord.insert();
-    return findById(userLanguagesRecord.getId()).orElseThrow(
-        () -> new DataExecutionException("failed to create userLanguages "));
+  @Transactional
+  public UserLanguages createOrUpdate(UserLanguages userLanguages, Integer userId) {
+
+    UserLanguagesRecord record = dsl.selectFrom(USER_LANGUAGES)
+        .where(USER_LANGUAGES.USER_ID.eq(userId))
+        .fetchOptional()
+        .orElse(null);
+
+    final boolean isCreate = (record == null);
+
+    if (isCreate) {
+      record = dsl.newRecord(USER_LANGUAGES);
+      record.setUserId(userId);
+    }
+
+    // language
+    if (userLanguages.language() != null && userLanguages.language().uuid() != null) {
+      record.setLanguageId(getLanguageId(userLanguages.language()));
+    } else if (isCreate) {
+      throw new IllegalArgumentException("language is required when creating UserLanguages");
+    }
+
+    // languageTo
+    if (userLanguages.languageTo() != null && userLanguages.languageTo().uuid() != null) {
+      record.setLanguageToId(getLanguageId(userLanguages.languageTo()));
+    } else if (isCreate) {
+      throw new IllegalArgumentException("languageTo is required when creating UserLanguages");
+    }
+
+    if (isCreate) {
+      record.insert();
+    } else {
+      record.update();
+    }
+
+    final String op = isCreate ? "create" : "update";
+    return findById(record.getId())
+        .orElseThrow(() -> new DataExecutionException("failed to " + op + " userLanguages"));
   }
 
-  @Transactional(readOnly = false)
-  public UserLanguages update(UserLanguages userLanguages, UUID uuid) {
-    UserLanguagesRecord userLanguagesRecord = dsl.selectFrom(USER_LANGUAGES)
-        .where(USER_LANGUAGES.EXTERNAL_ID.eq(uuid))
-        .fetchOptional()
-        .orElseThrow(() -> new DataNotFoundException("record not found - uuid: " + uuid));
-    if (userLanguages.language() != null && userLanguages.language().uuid() != null) {
-      Integer languageId = getLanguageId(userLanguages.language());
-      userLanguagesRecord.setLanguageId(languageId);
-    }
-    if (userLanguages.languageTo() != null && userLanguages.languageTo().uuid() != null) {
-      Integer languageToId = getLanguageId(userLanguages.languageTo());
-      userLanguagesRecord.setLanguageToId(languageToId);
-    }
-    userLanguagesRecord.update();
-    return findById(userLanguagesRecord.getId()).orElseThrow(
-        () -> new DataExecutionException("failed to update userLanguages"));
-  }
+
 
   private SelectOnConditionStep<Record3<UUID, LanguageReference, LanguageReference>> select() {
     var L_FROM = LANGUAGE.as("l_from");

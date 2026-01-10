@@ -138,7 +138,25 @@ docker compose -f docker-compose-vocabulary-api.yaml up
 
 
 ## Oauth login
+Adding Google Oauth2.0 as identity provider.  
+[Google Cloud Console](https://console.cloud.google.com/)
+
 [Keycloak Social Logins - Integrate Google](https://www.youtube.com/watch?v=RUXY5xqpq0A&list=PLaY-ehgC8dNOnVZxgKKY5kwjezQmQChSG&index=16&t=379s)
+
+### Configure Default Group for New Users (Keycloak)
+
+To automatically assign a group to every newly created user:
+
+1. Open **Keycloak Admin Console**
+2. Navigate to  
+   **Realm Settings → User registration**
+3. In **Default Group**, click **Add a group**
+4. Select the group (e.g. `/vocabulary-users`)
+5. Save the configuration
+
+✅ Every new user (Google login, username/password, etc.) will now be automatically added to this group.
+
+
 
 
 ## References
