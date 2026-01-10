@@ -49,8 +49,9 @@ public class UserLanguagesController {
 
   @GetMapping
   public ResponseEntity<UserLanguages> getUserLanguages() {
-    UserLanguages userLanguages = userService.userLanguages(currentUser.getUserId());
-    return ResponseEntity.ok(userLanguages);
+    return userService.userLanguages(currentUser.getUserId())
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @PutMapping
@@ -58,6 +59,5 @@ public class UserLanguagesController {
     UserLanguages result = userService.saveUserLanguages(userLanguages, currentUser.getUserId());
     return ResponseEntity.ok(result);
   }
-
 
 }

@@ -32,7 +32,6 @@ import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.enricogiurin.vocabulary.api.security.CurrentUser;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +48,8 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
 class UserLanguagesControllerTest {
-  static final int USER_ENRICO_ID = 1000000;
+  static final int USER_WITH_US_ID = 1000000;
+  static final int USER_WITHOUT_UL_ID = 1000001;
 
   @Autowired
   MockMvc mvc;
@@ -63,14 +63,10 @@ class UserLanguagesControllerTest {
   @MockitoBean
   CurrentUser currentUser;
 
-  @BeforeEach
-  void setUp() {
-    when(currentUser.getUserId()).thenReturn(USER_ENRICO_ID);
-  }
-
 
   @Test
   void getUserLanguages() throws Exception {
+    when(currentUser.getUserId()).thenReturn(USER_WITH_US_ID);
     mvc.perform(get(basePath ).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -80,7 +76,15 @@ class UserLanguagesControllerTest {
   }
 
   @Test
+  void getUserLanguages_notFound() throws Exception {
+    when(currentUser.getUserId()).thenReturn(USER_WITHOUT_UL_ID);
+    mvc.perform(get(basePath ).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
   void storeUserLanguages() throws Exception {
+    when(currentUser.getUserId()).thenReturn(USER_WITH_US_ID);
     Language spanish = languageRepository.findByName("Spanish").orElseThrow();
     Language russian = languageRepository.findByName("Russian").orElseThrow();
     final String body =

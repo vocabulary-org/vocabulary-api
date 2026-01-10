@@ -20,6 +20,7 @@ package org.enricogiurin.vocabulary.api.service;
  * #L%
  */
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataNotFoundException;
@@ -38,9 +39,8 @@ public class UserService {
   private final UserLanguagesRepository userLanguagesRepository;
   private final UserRepository userRepository;
 
-  public UserLanguages userLanguages(Integer userId) {
-    return userLanguagesRepository.findByUserId(userId)
-        .orElseGet(() -> new UserLanguages(null, null, null));
+  public Optional<UserLanguages> userLanguages(Integer userId) {
+    return userLanguagesRepository.findByUserId(userId);
   }
 
   public UserLanguages saveUserLanguages(UserLanguages userLanguages, Integer userId) {
