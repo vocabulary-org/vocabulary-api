@@ -9,9 +9,9 @@ package org.enricogiurin.vocabulary.api.rest.me;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ package org.enricogiurin.vocabulary.api.rest.me;
  */
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -48,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
 class UserLanguagesControllerTest {
+
   static final int USER_WITH_US_ID = 1000000;
   static final int USER_WITHOUT_UL_ID = 1000001;
 
@@ -67,7 +69,7 @@ class UserLanguagesControllerTest {
   @Test
   void getUserLanguages() throws Exception {
     when(currentUser.getUserId()).thenReturn(USER_WITH_US_ID);
-    mvc.perform(get(basePath ).contentType(MediaType.APPLICATION_JSON))
+    mvc.perform(get(basePath).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.uuid", is("00000000-0000-0000-0000-000000000001")))
@@ -78,9 +80,14 @@ class UserLanguagesControllerTest {
   @Test
   void getUserLanguages_notFound() throws Exception {
     when(currentUser.getUserId()).thenReturn(USER_WITHOUT_UL_ID);
-    mvc.perform(get(basePath ).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
+    mvc.perform(get(basePath).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.uuid").value(nullValue()))
+        .andExpect(jsonPath("$.language").value(nullValue()))
+        .andExpect(jsonPath("$.languageTo").value(nullValue()));
   }
+
 
   @Test
   void storeUserLanguages() throws Exception {

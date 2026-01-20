@@ -51,7 +51,7 @@ public class UserLanguagesController {
   public ResponseEntity<UserLanguages> getUserLanguages() {
     return userService.userLanguages(currentUser.getUserId())
         .map(ResponseEntity::ok)
-        .orElseGet(() -> ResponseEntity.notFound().build());
+        .orElseGet(() -> ResponseEntity.ok(UserLanguages.empty()));
   }
 
   @PutMapping

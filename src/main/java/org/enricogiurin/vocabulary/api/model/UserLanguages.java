@@ -24,4 +24,9 @@ import java.util.UUID;
 
 public record UserLanguages(UUID uuid, LanguageReference language, LanguageReference languageTo) {
 
+  public static UserLanguages empty() {
+    return new UserLanguages(null, null, null);
+  }
+
+
 }
