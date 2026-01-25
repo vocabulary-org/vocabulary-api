@@ -20,8 +20,11 @@ CREATE TABLE vocabulary.user
     id          SERIAL,
     keycloakId  character varying(256) NOT NULL UNIQUE,
     username    character varying(256), -- only for audit purpose
-    email       character varying(256), -- only for audit purpose
+    email       character varying(256), -- only for audit purpose,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
     external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
+
 );
 
 CREATE TABLE vocabulary.language
@@ -51,6 +54,8 @@ CREATE TABLE vocabulary.word
     language_id     integer                NOT NULL,
     language_to_id  integer                NOT NULL,
     user_id         integer                NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
     external_id     UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 

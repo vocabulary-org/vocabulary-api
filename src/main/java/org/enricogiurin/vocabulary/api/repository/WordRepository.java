@@ -29,6 +29,7 @@ import static org.jooq.impl.DSL.row;
 
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -169,6 +170,7 @@ public class WordRepository {
     if (word.description() != null) {
       wordRecord.setDescription(word.description());
     }
+    wordRecord.setUpdatedAt(OffsetDateTime.now());
     wordRecord.update();
     return findById(wordRecord.getId(), userId).orElseThrow(
         () -> new DataExecutionException("failed to update word: " + uuid));
