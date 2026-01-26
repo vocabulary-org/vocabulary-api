@@ -4,14 +4,14 @@ package org.enricogiurin.vocabulary.api.rest.me;
  * #%L
  * Vocabulary API
  * %%
- * Copyright (C) 2024 - 2025 Vocabulary Team
+ * Copyright (C) 2024 - 2026 Vocabulary Team
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,18 +20,19 @@ package org.enricogiurin.vocabulary.api.rest.me;
  * #L%
  */
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.model.Language;
+import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.enricogiurin.vocabulary.api.security.CurrentUser;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,57 +48,65 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(VocabularyTestConfiguration.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
-class WordControllerTest {
+class UserLanguagesControllerTest {
 
-  static final int USER_ENRICO_ID = 1000000;
-
-
-  static UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+  static final int USER_WITH_US_ID = 1000000;
+  static final int USER_WITHOUT_UL_ID = 1000001;
 
   @Autowired
   MockMvc mvc;
 
+  @Autowired
+  LanguageRepository languageRepository;
+
+  @Value("${application.api.user-path}/user-languages")
+  String basePath;
+
   @MockitoBean
   CurrentUser currentUser;
 
-  @Value("${application.api.user-path}/words")
-  String basePath;
 
-  @BeforeEach
-  void setUp() {
-    when(currentUser.getUserId()).thenReturn(USER_ENRICO_ID);
+  @Test
+  void getUserLanguages() throws Exception {
+    when(currentUser.getUserId()).thenReturn(USER_WITH_US_ID);
+    mvc.perform(get(basePath).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.uuid", is("00000000-0000-0000-0000-000000000001")))
+        .andExpect(jsonPath("$.language.name", is("Italian")))
+        .andExpect(jsonPath("$.languageTo.name", is("English")));
+  }
+
+  @Test
+  void getUserLanguages_notFound() throws Exception {
+    when(currentUser.getUserId()).thenReturn(USER_WITHOUT_UL_ID);
+    mvc.perform(get(basePath).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.uuid").value(nullValue()))
+        .andExpect(jsonPath("$.language").value(nullValue()))
+        .andExpect(jsonPath("$.languageTo").value(nullValue()));
   }
 
 
   @Test
-  void findAllEnrico() throws Exception {
-    mvc.perform(get(basePath)
+  void storeUserLanguages() throws Exception {
+    when(currentUser.getUserId()).thenReturn(USER_WITH_US_ID);
+    Language spanish = languageRepository.findByName("Spanish").orElseThrow();
+    Language russian = languageRepository.findByName("Russian").orElseThrow();
+    final String body =
+        """
+            {
+              "language":   {"uuid": "%s"},
+              "languageTo": {"uuid": "%s"}
+            }""".formatted(spanish.uuid(), russian.uuid());
+    mvc.perform(put(basePath)
             .contentType(MediaType.APPLICATION_JSON)
-            .param("page", "0")
-            .param("size", String.valueOf(Integer.MAX_VALUE)))
+            .content(body))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.content").isArray())
-        .andExpect(jsonPath("$.content", hasSize(5)))
-        .andExpect(jsonPath("$.content[0].sentence", is("cat")))
-        .andExpect(jsonPath("$.content[4].sentence", is("tomcat")))
-
-        .andExpect(jsonPath("$.page.totalPages", is(1)))
-        .andExpect(jsonPath("$.page.totalElements", is(5)))
-        .andExpect(jsonPath("$.page.size", is(Integer.MAX_VALUE)))
-        .andExpect(jsonPath("$.page.number", is(0)));
+        .andExpect(jsonPath("$.uuid", is("00000000-0000-0000-0000-000000000001")))
+        .andExpect(jsonPath("$.language.name", is("Spanish")))
+        .andExpect(jsonPath("$.languageTo.name", is("Russian")));
   }
-
-
-  @Test
-  void findByUuid() throws Exception {
-    mvc.perform(get(basePath + "/" + HELLO_UUID).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.sentence", is("Hello")))
-        .andExpect(jsonPath("$.translation", is("Salve")))
-        .andExpect(jsonPath("$.language.name", is("English")))
-        .andExpect(jsonPath("$.languageTo.name", is("Italian")));
-  }
-
 }

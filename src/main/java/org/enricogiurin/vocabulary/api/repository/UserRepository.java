@@ -24,6 +24,7 @@ package org.enricogiurin.vocabulary.api.repository;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.USER;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -107,7 +108,8 @@ public class UserRepository {
     userRecord.setUsername(user.username());
     userRecord.setEmail(user.email());
     userRecord.setKeycloakid(user.keycloakId());
-    userRecord.insert();
+    userRecord.setUpdatedAt(OffsetDateTime.now());
+    userRecord.update();
     return findById(userRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to update user[uuid]: " + uuid));
   }

@@ -33,6 +33,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -57,6 +58,7 @@ class SecurityConfiguration {
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http,
       KeycloakJwtTokenConverter keycloakJwtTokenConverter,
+      UserProvisioningFilter userProvisioningFilter,
       @Value("${application.api.public-path}") String pubUrl,
       @Value("${application.api.admin-path}") String adminUrl,
       @Value("${application.api.user-path}") String userUrl)
@@ -74,6 +76,7 @@ class SecurityConfiguration {
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakJwtTokenConverter)))
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+        .addFilterBefore(userProvisioningFilter, AuthorizationFilter.class)
         .build();
   }
 

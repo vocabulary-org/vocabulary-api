@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,7 +37,7 @@ import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
-import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
+import org.enricogiurin.vocabulary.api.security.CurrentUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,14 +69,15 @@ class WordControllerCreateUpdateDeleteTest {
   LanguageRepository languageRepository;
 
   @MockitoBean
-  PrincipalAccessor accessor;
+  CurrentUser currentUser;
+
   @Value("${application.api.user-path}/words")
   String basePath;
 
 
   @BeforeEach
   void setUp() {
-    when(accessor.getSubject()).thenReturn("f95cb50f-5f3b-4b71-9f8b-3495d47622cf");
+    when(currentUser.getUserId()).thenReturn(USER_ENRICO_ID);
   }
 
   @Test
@@ -119,7 +119,7 @@ class WordControllerCreateUpdateDeleteTest {
                    "language": {"uuid": "%s"},
                    "languageTo": {"uuid": "%s"}
                 }""".formatted(spanish.uuid(), russian.uuid())))
-        .andDo(print())   // <--
+        //.andDo(print())   // <--
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message", containsString(Word.SENTENCE_NOT_NULL_CONSTRAINT)))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));

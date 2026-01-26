@@ -29,8 +29,6 @@ import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.exception.DataConflictException;
 import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
@@ -39,39 +37,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 
 @SpringBootTest
 @Import({VocabularyTestConfiguration.class})
 @Transactional
+@Testcontainers
 class KeycloakClientServiceTest {
 
   private static final String USER_EMAIL = "john.doe@example.com";
   private static final String TEST_REALM_JSON = "keycloak/test-realm.json";
+  private static final String REALM = "vocabulary";
+  private static final String NEW_USERNAME = "john-doe";
+
+  @Container
   static final KeycloakContainer KEYCLOAK_CONTAINER = new KeycloakContainer()
       .withAdminUsername("admin")
       .withAdminPassword("pwd")
       .withRealmImportFiles(TEST_REALM_JSON)
+      .useTls()
       .withReuse(true);
 
   @Autowired
   UserRepository userRepository;
 
   KeycloakClientService keycloakClientService;
-
-  @BeforeAll
-  public static void beforeAll() {
-    KEYCLOAK_CONTAINER.start();
-  }
-
-  @AfterAll
-  public static void afterAll() {
-    KEYCLOAK_CONTAINER.stop();
-  }
+  Keycloak keycloakAdminClient;
 
   @BeforeEach
   void setUp() {
-    Keycloak keycloakAdminClient = KEYCLOAK_CONTAINER.getKeycloakAdminClient();
+    this.keycloakAdminClient = KEYCLOAK_CONTAINER.getKeycloakAdminClient();
     this.keycloakClientService = new KeycloakClientService(keycloakAdminClient, userRepository, "",
         true);
   }
@@ -89,12 +86,11 @@ class KeycloakClientServiceTest {
         .isEqualTo("test-user");
   }
 
-  //to evaluate also if user is present in the KC test container
   @Test
   void createNewUser() {
     //given
     KeycloakUser user = KeycloakUser.builder()
-        .username("johndoe")
+        .username(NEW_USERNAME)
         .firstName("John")
         .lastName("Doe")
         .email(USER_EMAIL)
@@ -104,6 +100,12 @@ class KeycloakClientServiceTest {
     String keycloakId = keycloakClientService.createNewUser(user);
 
     //then
+    List<UserRepresentation> users =
+        keycloakAdminClient
+            .realm(REALM)
+            .users()
+            .searchByUsername(NEW_USERNAME, true);
+    assertThat(users).hasSize(1);
     userRepository.findUserIdByKeycloakId(keycloakId).orElseThrow();
   }
 
@@ -120,8 +122,5 @@ class KeycloakClientServiceTest {
     //when-then
     assertThatExceptionOfType(DataConflictException.class)
         .isThrownBy(() -> keycloakClientService.createNewUser(user));
-
-
   }
-
 }

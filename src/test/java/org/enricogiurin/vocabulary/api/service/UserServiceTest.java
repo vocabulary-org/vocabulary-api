@@ -9,9 +9,9 @@ package org.enricogiurin.vocabulary.api.service;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
+import org.enricogiurin.vocabulary.api.service.UserService.UserCreationAttributes;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,32 +34,36 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Import({VocabularyTestConfiguration.class})
 @Transactional
-class WordServiceTest {
+class UserServiceTest {
 
   static final String KEYCLOAK_ID = "f95cb50f-5f3b-4b71-9f8b-3495d47622cf";
   static final String KEYCLOAK_ID_NEW = "aaa";
+
   @Autowired
-  WordService wordService;
+  UserService userService;
   @Autowired
-  private UserRepository userRepository;
+  UserRepository userRepository;
+
 
   @Test
-  void findUserIdByKeycloakId() {
-    //given
+  void findOrCreate() {
+
     userRepository.findUserIdByKeycloakId(KEYCLOAK_ID).orElseThrow();
     //when
-    Integer userIdByKeycloakId = wordService.findUserIdByKeycloakId(KEYCLOAK_ID);
+    Integer userIdByKeycloakId = userService.findOrCreateUserIdByKeycloakId(KEYCLOAK_ID,
+        new UserCreationAttributes("enrico"));
     //then
     assertThat(userIdByKeycloakId).isEqualTo(1000000);
   }
 
   @Test
-  void findUserIdByKeycloakId_notExisting() {
+  void findOrCreate_notExisting() {
     //given
     assertThat(userRepository.findUserIdByKeycloakId(KEYCLOAK_ID_NEW))
         .isEmpty();
     //when
-    wordService.findUserIdByKeycloakId(KEYCLOAK_ID_NEW);
+    userService.findOrCreateUserIdByKeycloakId(KEYCLOAK_ID_NEW,
+        new UserCreationAttributes("enrico"));
     //then
     userRepository.findUserIdByKeycloakId(KEYCLOAK_ID_NEW).orElseThrow();
 

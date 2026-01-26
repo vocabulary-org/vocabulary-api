@@ -27,8 +27,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
-import org.enricogiurin.vocabulary.api.security.PrincipalAccessor;
-import org.enricogiurin.vocabulary.api.service.WordService;
+import org.enricogiurin.vocabulary.api.security.CurrentUser;
 import org.enricogiurin.vocabulary.api.validation.ValidationGroups;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -53,22 +52,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class WordController {
 
-  private final WordService wordService;
-  private final PrincipalAccessor principalAccessor;
+  private final WordRepository wordRepository;
+  private final CurrentUser currentUser;
 
   @GetMapping
   ResponseEntity<Page<Word>> find(
       @ParameterObject Searchable filter,
       @ParameterObject @SortDefault(sort = WordRepository.SENTENCE_ALIAS, direction = Direction.ASC) Pageable pagination) {
-    String keycloakId = getKeycloakId();
-    Page<Word> page = wordService.find(filter, pagination, keycloakId);
+
+    Page<Word> page = wordRepository.find(filter, pagination, currentUser.getUserId());
     return ResponseEntity.ok(page);
   }
 
   @GetMapping("/{uuid}")
   ResponseEntity<Word> findByUuid(@PathVariable UUID uuid) {
-    String keycloakId = getKeycloakId();
-    Word result = wordService.findByExternalId(uuid, keycloakId)
+    Word result = wordRepository.findByExternalId(uuid, currentUser.getUserId())
         .orElseThrow(
             () -> new DataNotFoundException("can't find Word having uuid: " + uuid));
     return ResponseEntity.ok(result);
@@ -76,27 +74,21 @@ public class WordController {
 
   @PostMapping
   ResponseEntity<Word> add( @Validated(ValidationGroups.Post.class) @RequestBody Word word) {
-    String keycloakId = getKeycloakId();
-    Word savedProperty = wordService.createNewWord(word, keycloakId);
+    Word savedProperty = wordRepository.create(word, currentUser.getUserId());
     return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{uuid}")
   ResponseEntity<Word> update(@PathVariable UUID uuid,   @Validated(ValidationGroups.Patch.class) @RequestBody Word wordToUpdate) {
-    String keycloakId = getKeycloakId();
-    Word updatedProperty = wordService.updateAnExistingWord(uuid, wordToUpdate, keycloakId);
+    Word updatedProperty = wordRepository.update(uuid, wordToUpdate, currentUser.getUserId());
     return ResponseEntity.ok(updatedProperty);
   }
 
   @DeleteMapping("/{uuid}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void delete(@PathVariable UUID uuid) {
-    String keycloakId = getKeycloakId();
-    wordService.deleteAnExistingWord(uuid, keycloakId);
+    wordRepository.delete(uuid, currentUser.getUserId());
   }
 
-  private String getKeycloakId() {
-    return principalAccessor.getSubject();
-  }
 
 }
