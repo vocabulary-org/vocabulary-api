@@ -79,8 +79,8 @@ class WordControllerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.content").isArray())
         .andExpect(jsonPath("$.content", hasSize(5)))
-        .andExpect(jsonPath("$.content[0].sentence", is("cat")))
-        .andExpect(jsonPath("$.content[4].sentence", is("tomcat")))
+        .andExpect(jsonPath("$.content[0].sentence", is("Latte")))
+        .andExpect(jsonPath("$.content[4].sentence", is("Hello")))
 
         .andExpect(jsonPath("$.page.totalPages", is(1)))
         .andExpect(jsonPath("$.page.totalElements", is(5)))

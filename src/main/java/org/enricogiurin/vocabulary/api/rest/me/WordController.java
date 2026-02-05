@@ -58,7 +58,7 @@ public class WordController {
   @GetMapping
   ResponseEntity<Page<Word>> find(
       @ParameterObject Searchable filter,
-      @ParameterObject @SortDefault(sort = WordRepository.SENTENCE_ALIAS, direction = Direction.ASC) Pageable pagination) {
+      @ParameterObject @SortDefault(sort = WordRepository.UPDATED_AT, direction = Direction.DESC) Pageable pagination) {
 
     Page<Word> page = wordRepository.find(filter, pagination, currentUser.getUserId());
     return ResponseEntity.ok(page);
