@@ -66,6 +66,7 @@ public class WordRepository {
   public static final String LANGUAGE_ALIAS = "language";
   public static final String LANGUAGE_TO_ALIAS = "languageTo";
   public static final String DESCRIPTION_ALIAS = "description";
+  public static final String UPDATED_AT = "updatedAt";
 
 
   private final DSLContext dsl;
@@ -229,6 +230,7 @@ public class WordRepository {
       case TRANSLATION_ALIAS -> WORD.TRANSLATION;
       case LANGUAGE_ALIAS -> WORD.fkWordLanguage().NAME;
       case LANGUAGE_TO_ALIAS -> WORD.fkWordLanguageTo().NAME;
+      case UPDATED_AT -> WORD.UPDATED_AT;
 
       default -> throw new IllegalArgumentException(
           "Unexpected value for filter/sort field: " + field);
