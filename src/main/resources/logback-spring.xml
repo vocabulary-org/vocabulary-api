@@ -26,30 +26,29 @@
     </encoder>
   </appender>
 
-  <logger name="org.enricogiurin.vocabulary.api" level="debug" additivity="false" >
-    <appender-ref ref="CONSOLE" />
+  <logger name="org.enricogiurin.vocabulary.api" level="debug" additivity="false">
+    <appender-ref ref="CONSOLE"/>
   </logger>
 
 
-
-  <logger name="com.yourrents.services.common.util.exception" level="trace" additivity="false" >
-    <appender-ref ref="CONSOLE" />
+  <logger name="com.yourrents.services.common.util.exception" level="trace" additivity="false">
+    <appender-ref ref="CONSOLE"/>
   </logger>
 
   <logger name="org.springframework" level="debug" additivity="false">
-    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="CONSOLE"/>
   </logger>
 
   <logger name="org.jooq.tools.LoggerListener" level="debug" additivity="false">
-    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="CONSOLE"/>
   </logger>
 
   <logger name="org.jooq" level="INFO" additivity="false">
-    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="CONSOLE"/>
   </logger>
 
   <root level="error">
-    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="CONSOLE"/>
   </root>
 
   <!-- DOCKER: info-level, file logs (also keep console if you prefer Docker logs) -->
@@ -60,5 +59,40 @@
     <logger name="org.enricogiurin" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
   </springProfile>
+
+
+  <!-- profile used when running docker in Hetzner -->
+  <springProfile name="hetzner">
+
+    <appender name="EXTERNAL_API_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+      <file>/app/logs/vocabulary-api.log</file>
+
+      <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <fileNamePattern>/app/logs/vocabulary-api.%d{yyyy-MM-dd}.log</fileNamePattern>
+        <totalSizeCap>5GB</totalSizeCap>
+      </rollingPolicy>
+
+      <encoder>
+        <pattern>
+          %d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread]
+          %replace(%logger){'org\.enricogiurin\.vocabulary\.api','o.e.v.a'}.%method:%line - %msg%n
+        </pattern>
+
+      </encoder>
+    </appender>
+
+    <root level="ERROR">
+      <appender-ref ref="EXTERNAL_API_FILE"/>
+      <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- Spring logs at INFO, and because additivity is true by default,
+         they will flow to ROOT -> EXTERNAL_API_FILE -->
+    <logger name="org.springframework" level="INFO"/>
+
+    <logger name="org.enricogiurin.vocabulary.api" level="DEBUG"/>
+
+  </springProfile>
+
 
 </configuration>
