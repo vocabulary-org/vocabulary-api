@@ -174,7 +174,7 @@ User: <your-postgres-user>
 Password: <your-postgres-password>
 ```
 
-## Check the logs
+## Check the Docker logs
 ### Keycloak log
 ```shell
 docker logs -f docker-hetzner-keycloak-1
@@ -184,4 +184,9 @@ docker logs -f docker-hetzner-keycloak-1
 ```shell
 docker logs -f docker-hetzner-vocabulary-api-1
 ```
-
+## External logs (mounted)
+### Configuration
+```shell
+mkdir -p /home/enrico/vocabulary/logs
+chmod 777 /home/enrico/vocabulary/logs
+```
