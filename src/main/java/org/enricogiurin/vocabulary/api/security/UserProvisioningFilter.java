@@ -25,26 +25,38 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import lombok.RequiredArgsConstructor;
 import org.enricogiurin.vocabulary.api.service.UserService;
 import org.enricogiurin.vocabulary.api.service.UserService.UserCreationAttributes;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-@RequiredArgsConstructor
+
 public class UserProvisioningFilter extends OncePerRequestFilter {
 
   private final PrincipalAccessor principalAccessor;
 
   private final UserService userService;
   private final CurrentUser currentUser;
+  private final String publicPath;
+
+  public UserProvisioningFilter(PrincipalAccessor principalAccessor, UserService userService,
+      CurrentUser currentUser,
+      @Value("${application.api.public-path}") String publicPath) {
+    super();
+    this.principalAccessor = principalAccessor;
+    this.userService = userService;
+    this.currentUser = currentUser;
+    this.publicPath = publicPath;
+  }
 
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getRequestURI();
-    return path.startsWith("/actuator")
+    return path.startsWith(publicPath) ||
+        path.startsWith("/actuator")
         || path.startsWith("/swagger-ui")
         || path.startsWith("/v3/api-docs");
   }
