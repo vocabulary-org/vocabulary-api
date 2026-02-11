@@ -181,7 +181,7 @@ public class WordRepository {
    * Delete a word
    *
    * @return true if the word has been deleted, false otherwise
-   * @throws DataNotFoundException if the city does not exist
+   * @throws DataNotFoundException if the word does not exist
    */
   @Transactional(readOnly = false)
   public boolean delete(UUID uuid, Integer userId) {

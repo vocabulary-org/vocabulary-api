@@ -114,6 +114,19 @@ public class UserRepository {
         () -> new DataExecutionException("failed to update user[uuid]: " + uuid));
   }
 
+  /**
+   * Delete the user
+   *
+   * @return true if the user has been deleted, false otherwise
+   * @throws DataNotFoundException if the user does not exist
+   */
+  @Transactional(readOnly = false)
+  public boolean delete(Integer userId) {
+    return dsl.deleteFrom(USER)
+        .where(USER.ID.eq(userId))
+        .execute() > 0;
+  }
+
   private SelectJoinStep<Record4<UUID, String, String, String>> getSelect() {
     return dsl.select(
             USER.EXTERNAL_ID.as(UUID_ALIAS),
