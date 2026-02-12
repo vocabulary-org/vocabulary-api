@@ -28,8 +28,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.enricogiurin.vocabulary.api.exception.DataConflictException;
 import org.enricogiurin.vocabulary.api.exception.KeycloakException;
 import org.enricogiurin.vocabulary.api.model.KeycloakUser;
-import org.enricogiurin.vocabulary.api.model.User;
-import org.enricogiurin.vocabulary.api.repository.UserRepository;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.GroupsResource;
@@ -56,17 +54,14 @@ public class KeycloakClientService {
   static final String ACTION_UPDATE_PASSWORD = "UPDATE_PASSWORD";
 
   private final Keycloak keycloakClient;
-  private final UserRepository userRepository;
   private final String redirectUri;
   private final boolean skipEmail;
 
 
   KeycloakClientService(final Keycloak keycloakClient,
-      final UserRepository userRepository,
       @Value("${application.spa.url}") final String redirectUri,
       @Value("${application.keycloak-client-service.skip-email:false}") final boolean skipEmail) {
     this.keycloakClient = keycloakClient;
-    this.userRepository = userRepository;
     this.redirectUri = redirectUri;
     this.skipEmail = skipEmail;
   }
@@ -104,12 +99,36 @@ public class KeycloakClientService {
     final String password = randomPassword();
     setPasswordRenew(userResource, password);
     setGroup(userResource);
-    saveUser(userResource);
     sendActionsEmail(userResource);
     log.info("user: {} - userId: {} has been successfully created",
         userRepresentation.getUsername(), userId);
     return userId;
   }
+
+  /**
+   * Deletes a user from Keycloak.
+   *
+   * <p>Note: this only removes the identity from Keycloak. Application data stored in the
+   * Vocabulary DB must be deleted separately (ideally in the same business operation).</p>
+   *
+   * @param keycloakUserId the Keycloak user id (UUID as string)
+   */
+  public void deleteUserFromKeycloak(final String keycloakUserId) {
+    try {
+      keycloakClient.realm(REALM_VOCABULARY)
+          .users()
+          .get(keycloakUserId)
+          .remove();
+      log.info("Keycloak user {} deleted from realm {}", keycloakUserId, REALM_VOCABULARY);
+    } catch (Exception ex) {
+      log.warn("Failed to delete Keycloak user {} from realm {}",
+          keycloakUserId, REALM_VOCABULARY, ex);
+      throw new KeycloakException("Error while deleting user in Keycloak: " + keycloakUserId);
+    }
+  }
+  /*
+   ************************ Internal methods *******************************************
+   */
 
   UserRepresentation getUserRepresentation(KeycloakUser user) {
     UserRepresentation userRepresentation = new UserRepresentation();
@@ -138,18 +157,6 @@ public class KeycloakClientService {
         .orElseThrow(() -> new RuntimeException("Group not found: " + GROUP_USERS));
     userResource.joinGroup(group.getId());
   }
-
-  void saveUser(UserResource userResource) {
-    UserRepresentation userRepresentation = userResource.toRepresentation();
-    User newUser = User.builder()
-        .email(userRepresentation.getEmail())
-        .username(userRepresentation.getUsername())
-        .keycloakId(userRepresentation.getId())
-        .build();
-    User added = userRepository.add(newUser);
-    log.info("Inserted user: {}", added);
-  }
-
 
   void sendActionsEmail(UserResource userResource) {
     if (skipEmail) {

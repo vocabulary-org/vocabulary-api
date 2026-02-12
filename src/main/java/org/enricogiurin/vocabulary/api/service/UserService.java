@@ -24,6 +24,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataNotFoundException;
+import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.model.UserLanguages;
 import org.enricogiurin.vocabulary.api.repository.UserLanguagesRepository;
@@ -38,6 +39,7 @@ public class UserService {
 
   private final UserLanguagesRepository userLanguagesRepository;
   private final UserRepository userRepository;
+  private final KeycloakClientService keycloakClientService;
 
   public Optional<UserLanguages> userLanguages(Integer userId) {
     return userLanguagesRepository.findByUserId(userId);
@@ -48,7 +50,7 @@ public class UserService {
   }
 
   @Transactional
-  public Integer findOrCreateUserIdByKeycloakId(String keycloakId,
+  public Integer findOrSaveUserIdByKeycloakId(String keycloakId,
       UserCreationAttributes userCreationAttributes) {
     return userRepository.findUserIdByKeycloakId(keycloakId)
         .orElseGet(() ->
@@ -63,6 +65,29 @@ public class UserService {
                   () -> new DataNotFoundException(
                       "can't find user having keycloakId: " + keycloakId));
         });
+  }
+
+  @Transactional
+  public String createNewUser(KeycloakUser user) {
+    String keycloakId = keycloakClientService.createNewUser(user);
+    User newUser = User.builder()
+        .email(user.email())
+        .username(user.username())
+        .keycloakId(keycloakId)
+        .build();
+    User added = userRepository.add(newUser);
+    log.info("Inserted user: {}", added);
+    return keycloakId;
+  }
+
+  @Transactional
+  public void deleteUserByKeycloakId(String keycloakId) {
+    keycloakClientService.deleteUserFromKeycloak(keycloakId);
+    Integer userId = userRepository.findUserIdByKeycloakId(keycloakId)
+        .orElseThrow(
+            () -> new DataNotFoundException(
+                "can't find user having keycloakId: " + keycloakId));
+    userRepository.delete(userId);
   }
 
   public record UserCreationAttributes(String username) {

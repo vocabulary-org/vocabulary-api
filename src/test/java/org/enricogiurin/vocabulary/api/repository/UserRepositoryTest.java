@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 class UserRepositoryTest {
 
   private static final String KEYCLOAK_ID = "f95cb50f-5f3b-4b71-9f8b-3495d47622cf";
+  private static final Integer USER_ID = 1000000;
 
 
   @Autowired
@@ -49,7 +50,7 @@ class UserRepositoryTest {
   @Test
   void findById() {
     //when
-    User user = userRepository.findById(1000000).orElseThrow();
+    User user = userRepository.findById(USER_ID).orElseThrow();
     //then
     assertThat(user).isNotNull();
     assertThat(user.username()).isEqualTo("enrico");
@@ -84,7 +85,7 @@ class UserRepositoryTest {
 
   @Test
   void update() {
-    User oldUser = userRepository.findById(1000000).orElseThrow();
+    User oldUser = userRepository.findById(USER_ID).orElseThrow();
     User user = new User(null, "John", "a@google.com", "aaa");
     User result = userRepository.update(oldUser.uuid(), user);
     assertThat(result).isNotNull();
@@ -98,6 +99,13 @@ class UserRepositoryTest {
     Integer userId = userRepository.findUserIdByKeycloakId(
         "f95cb50f-5f3b-4b71-9f8b-3495d47622cf").orElseThrow();
     assertThat(userId).isNotNull();
-    assertThat(userId).isEqualTo(1000000);
+    assertThat(userId).isEqualTo(USER_ID);
+  }
+
+  @Test
+  void delete() {
+    userRepository.findById(USER_ID).orElseThrow();
+    boolean isDeleted = userRepository.delete(USER_ID);
+    assertThat(isDeleted).isTrue();
   }
 }

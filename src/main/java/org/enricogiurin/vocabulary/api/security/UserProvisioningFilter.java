@@ -71,9 +71,10 @@ public class UserProvisioningFilter extends OncePerRequestFilter {
     if (subject != null) {
       UserCreationAttributes userCreationAttributes = new UserCreationAttributes(
           principalAccessor.getUsername());
-      Integer userIdByKeycloakId = userService.findOrCreateUserIdByKeycloakId(subject,
+      Integer userIdByKeycloakId = userService.findOrSaveUserIdByKeycloakId(subject,
           userCreationAttributes);
       currentUser.setUserId(userIdByKeycloakId);
+      currentUser.setSubject(subject);
     }
     filterChain.doFilter(request, response);
   }

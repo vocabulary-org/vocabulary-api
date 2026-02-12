@@ -57,7 +57,7 @@ public class UserRepository {
   private final DSLContext dsl;
 
 
-  Optional<User> findById(Integer id) {
+  public Optional<User> findById(Integer id) {
     return getSelect()
         .where(USER.ID.eq(id))
         .fetchOptional()
@@ -112,6 +112,19 @@ public class UserRepository {
     userRecord.update();
     return findById(userRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to update user[uuid]: " + uuid));
+  }
+
+  /**
+   * Delete the user
+   *
+   * @return true if the user has been deleted, false otherwise
+   * @throws DataNotFoundException if the user does not exist
+   */
+  @Transactional(readOnly = false)
+  public boolean delete(Integer userId) {
+    return dsl.deleteFrom(USER)
+        .where(USER.ID.eq(userId))
+        .execute() > 0;
   }
 
   private SelectJoinStep<Record4<UUID, String, String, String>> getSelect() {

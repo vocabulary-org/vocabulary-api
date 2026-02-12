@@ -31,7 +31,8 @@ ALTER TABLE ONLY vocabulary.user_languages
 -- fk constraints
 -- fk word
 ALTER TABLE ONLY vocabulary.word
-    ADD CONSTRAINT fk_word_user FOREIGN KEY (user_id) REFERENCES vocabulary.user(id);
+    ADD CONSTRAINT fk_word_user FOREIGN KEY (user_id) REFERENCES vocabulary.user(id) ON DELETE CASCADE;
+
 
 ALTER TABLE ONLY vocabulary.word
     ADD CONSTRAINT fk_word_language FOREIGN KEY (language_id) REFERENCES vocabulary.language(id);
@@ -41,7 +42,7 @@ ALTER TABLE ONLY vocabulary.word
 
 -- fk user_languages
 ALTER TABLE ONLY vocabulary.user_languages
-    ADD CONSTRAINT fk_user_languages_user FOREIGN KEY (user_id) REFERENCES vocabulary.user(id);
+    ADD CONSTRAINT fk_user_languages_user FOREIGN KEY (user_id) REFERENCES vocabulary.user(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY vocabulary.user_languages
     ADD CONSTRAINT fk_user_languages_language FOREIGN KEY (language_id) REFERENCES vocabulary.language(id);
