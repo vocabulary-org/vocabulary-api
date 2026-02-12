@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.security;
+package org.enricogiurin.vocabulary.api.rest.me;
 
 /*-
  * #%L
@@ -20,20 +20,6 @@ package org.enricogiurin.vocabulary.api.security;
  * #L%
  */
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.RequestScope;
-
-@Component
-@RequestScope
-@NoArgsConstructor
-@Getter
-@Setter
-public class CurrentUser {
-
-  private Integer userId;
-  private String subject;
+public record Message(String message) {
 
 }

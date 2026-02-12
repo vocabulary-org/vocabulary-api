@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.pub;
+package org.enricogiurin.vocabulary.api.rest.me;
 
 /*-
  * #%L
@@ -23,38 +23,30 @@ package org.enricogiurin.vocabulary.api.rest.pub;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.enricogiurin.vocabulary.api.model.KeycloakUser;
-import org.enricogiurin.vocabulary.api.rest.admin.KeycloakUserResponse;
+import org.enricogiurin.vocabulary.api.security.CurrentUser;
 import org.enricogiurin.vocabulary.api.service.UserService;
-import org.enricogiurin.vocabulary.api.validation.ValidationGroups;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("${application.api.public-path}/users")
+@RequestMapping("${application.api.user-path}/users")
 @RequiredArgsConstructor
 @Slf4j
-public class RegisterUserController {
+public class UserController {
 
   private final UserService userService;
+  private final CurrentUser currentUser;
 
 
-  @PostMapping()
-  public ResponseEntity<KeycloakUserResponse> createNewKeycloakUser(
-      @Validated(ValidationGroups.Post.class) @RequestBody KeycloakUser keycloakUser) {
-    log.info("Creating new user: {}", keycloakUser);
-    userService.createNewUser(keycloakUser);
-    return ResponseEntity
-        .status(HttpStatus.CREATED)
-        .body(KeycloakUserResponse.builder()
-            .username(keycloakUser.username())
-            .build());
+  @DeleteMapping()
+  public ResponseEntity<Message> deleteUser() {
+
+    log.info("Request to delete user with subject: {}", currentUser.getSubject());
+    userService.deleteUserByKeycloakId(currentUser.getSubject());
+    return ResponseEntity.noContent().build(); // 204
   }
 
 }

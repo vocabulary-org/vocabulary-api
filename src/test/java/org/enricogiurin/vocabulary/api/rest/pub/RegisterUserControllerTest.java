@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.exception.DataConflictException;
 import org.enricogiurin.vocabulary.api.model.KeycloakUser;
-import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
+import org.enricogiurin.vocabulary.api.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +61,7 @@ class RegisterUserControllerTest {
   String basePath;
 
   @MockitoBean
-  KeycloakClientService keycloakClientService;
+  UserService keycloakClientService;
 
 
   @Test

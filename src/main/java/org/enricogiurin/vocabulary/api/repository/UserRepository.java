@@ -57,7 +57,7 @@ public class UserRepository {
   private final DSLContext dsl;
 
 
-  Optional<User> findById(Integer id) {
+  public Optional<User> findById(Integer id) {
     return getSelect()
         .where(USER.ID.eq(id))
         .fetchOptional()
