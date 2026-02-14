@@ -15,7 +15,9 @@ services:
       SB_SECURITY_ISSUER_URI: ${SB_SECURITY_ISSUER_URI}
       AZURE_TRANSLATOR_KEY: ${AZURE_TRANSLATOR_KEY}
     volumes:
-      - /home/enrico/vocabulary/logs:/app/logs
+      - ./config:/config:ro
+      - ./logs:/app/logs
+
     ports:
       - 9090:9090
     networks:
