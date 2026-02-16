@@ -67,7 +67,7 @@ class UserServiceTest {
         new UserCreationAttributes("enrico"));
     //then
     assertThat(userIdByKeycloakId).isEqualTo(1000000);
-    verify(keycloakClientService, never()).createNewUser(any());
+    verify(keycloakClientService, never()).createNewUser(any(), any());
   }
 
   @Test
@@ -80,7 +80,7 @@ class UserServiceTest {
         new UserCreationAttributes("enrico"));
     //then
     userRepository.findUserIdByKeycloakId(NEW_USER_KEYCLOAK_ID).orElseThrow();
-    verify(keycloakClientService, never()).createNewUser(any());
+    verify(keycloakClientService, never()).createNewUser(any(), any());
 
   }
 
@@ -96,14 +96,14 @@ class UserServiceTest {
         .email(USER_EMAIL)
         .isAdmin(false)
         .build();
-    when(keycloakClientService.createNewUser(user)).thenReturn(NEW_USER_KEYCLOAK_ID);
+    when(keycloakClientService.createNewUser(any(), any())).thenReturn(NEW_USER_KEYCLOAK_ID);
 
     //when
-    String keyCloakId = userService.createNewUser(user);
+    String keyCloakId = userService.createNewUser(user, null);
 
     //then
     assertThat(keyCloakId).isEqualTo(NEW_USER_KEYCLOAK_ID);
-    verify(keycloakClientService).createNewUser(user);
+    verify(keycloakClientService).createNewUser(user, null);
     Integer userId = userRepository.findUserIdByKeycloakId(NEW_USER_KEYCLOAK_ID).orElseThrow();
     User newUser = userRepository.findById(userId).orElseThrow();
     assertThat(newUser)

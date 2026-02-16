@@ -69,7 +69,12 @@ public class UserService {
 
   @Transactional
   public String createNewUser(KeycloakUser user) {
-    String keycloakId = keycloakClientService.createNewUser(user);
+    return createNewUser(user, null);
+  }
+
+  @Transactional
+  public String createNewUser(KeycloakUser user, String origin) {
+    String keycloakId = keycloakClientService.createNewUser(user, origin);
     User newUser = User.builder()
         .email(user.email())
         .username(user.username())

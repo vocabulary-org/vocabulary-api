@@ -82,11 +82,10 @@ class RegisterUserControllerTest {
         .andExpect(jsonPath("$.username", is(username)))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     ArgumentCaptor<KeycloakUser> captor = ArgumentCaptor.forClass(KeycloakUser.class);
-    verify(keycloakClientService).createNewUser(captor.capture());
+    verify(keycloakClientService).createNewUser(captor.capture(), any());
     KeycloakUser captured = captor.getValue();
     assertThat(captured.username()).isEqualTo(username);
     assertThat(captured.isAdmin()).isFalse();
-    verify(keycloakClientService).createNewUser(any());
 
   }
 
@@ -94,7 +93,7 @@ class RegisterUserControllerTest {
   void createNewUser_conflict() throws Exception {
     final String username = "mario-rossi";
 
-    doThrow(DataConflictException.class).when(keycloakClientService).createNewUser(any());
+    doThrow(DataConflictException.class).when(keycloakClientService).createNewUser(any(), any());
     mvc.perform(post(basePath)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -108,7 +107,7 @@ class RegisterUserControllerTest {
                 """.formatted(username)))
         .andExpect(status().isConflict())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
-    verify(keycloakClientService).createNewUser(any());
+    verify(keycloakClientService).createNewUser(any(), any());
   }
 
   @Test
@@ -129,6 +128,6 @@ class RegisterUserControllerTest {
         .andExpect(jsonPath("$.message", containsString(KeycloakUser.EMAIL_CONSTRAINT)))
         .andExpect(jsonPath("$.message", containsString(KeycloakUser.FIRST_NAME_CONSTRAINT)))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
-    verify(keycloakClientService, never()).createNewUser(any());
+    verify(keycloakClientService, never()).createNewUser(any(), any());
   }
 }
