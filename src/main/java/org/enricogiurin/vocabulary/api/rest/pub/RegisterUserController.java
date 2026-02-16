@@ -27,6 +27,7 @@ import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.rest.admin.KeycloakUserResponse;
 import org.enricogiurin.vocabulary.api.service.UserService;
 import org.enricogiurin.vocabulary.api.validation.ValidationGroups;
+import org.springframework.lang.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -49,7 +50,7 @@ public class RegisterUserController {
   @PostMapping()
   public ResponseEntity<KeycloakUserResponse> createNewKeycloakUser(
       @Validated(ValidationGroups.Post.class) @RequestBody KeycloakUser keycloakUser,
-      @RequestHeader(value = "Origin", required = false) String origin) {
+      @RequestHeader(value = "Origin", required = false) @Nullable String origin) {
     log.info("Creating new user: {}", keycloakUser);
     userService.createNewUser(keycloakUser, origin);
     return ResponseEntity

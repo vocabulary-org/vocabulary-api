@@ -29,6 +29,7 @@ import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.model.UserLanguages;
 import org.enricogiurin.vocabulary.api.repository.UserLanguagesRepository;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,7 +74,7 @@ public class UserService {
   }
 
   @Transactional
-  public String createNewUser(KeycloakUser user, String origin) {
+  public String createNewUser(KeycloakUser user, @Nullable String origin) {
     String keycloakId = keycloakClientService.createNewUser(user, origin);
     User newUser = User.builder()
         .email(user.email())
