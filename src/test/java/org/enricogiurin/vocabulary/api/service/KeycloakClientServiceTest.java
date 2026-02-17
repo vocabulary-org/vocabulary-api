@@ -65,8 +65,8 @@ class KeycloakClientServiceTest {
   @BeforeEach
   void setUp() {
     this.keycloakAdminClient = KEYCLOAK_CONTAINER.getKeycloakAdminClient();
-    this.keycloakClientService = new KeycloakClientService(keycloakAdminClient, "",
-        true);
+    this.keycloakClientService = new KeycloakClientService(keycloakAdminClient,
+        "http://localhost:4200", "http://localhost:4200", true);
   }
 
 
@@ -93,7 +93,7 @@ class KeycloakClientServiceTest {
         .isAdmin(false)
         .build();
     //when
-    String keycloakId = keycloakClientService.createNewUser(user);
+    String keycloakId = keycloakClientService.createNewUser(user, null);
 
     //then
     List<UserRepresentation> users =
@@ -117,7 +117,7 @@ class KeycloakClientServiceTest {
         .build();
     //when-then
     assertThatExceptionOfType(DataConflictException.class)
-        .isThrownBy(() -> keycloakClientService.createNewUser(user));
+        .isThrownBy(() -> keycloakClientService.createNewUser(user, null));
   }
 
   @Test

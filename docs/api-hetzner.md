@@ -190,3 +190,28 @@ docker logs -f docker-hetzner-vocabulary-api-1
 mkdir -p /home/enrico/vocabulary/logs
 chmod 777 /home/enrico/vocabulary/logs
 ```
+
+## 🔐 Fix: 400 Bad Request (Invalid redirect_uri)
+
+### Problem
+Keycloak returned **400 Bad Request** during login from:
+
+https://www.myvocabulary.net
+
+### Fix
+
+In **Keycloak Admin Console**:
+
+Clients → `vocabulary-rest-api` → Settings
+
+Add to **Valid Redirect URIs**:
+
+https://www.myvocabulary.net/*
+
+(Optional but recommended) Add to **Web Origins**:
+
+https://www.myvocabulary.net
+
+Save.
+
+This resolves the 400 error caused by an unregistered `redirect_uri`.

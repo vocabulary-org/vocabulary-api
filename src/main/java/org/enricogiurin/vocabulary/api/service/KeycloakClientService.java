@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.service;
 
 
 import jakarta.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -37,6 +38,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,14 +57,19 @@ public class KeycloakClientService {
 
   private final Keycloak keycloakClient;
   private final String redirectUri;
+  private final List<String> allowedRedirectUris;
   private final boolean skipEmail;
 
 
   KeycloakClientService(final Keycloak keycloakClient,
       @Value("${application.spa.url}") final String redirectUri,
+      @Value("${application.cors.allowed-origins}") final String allowedOrigins,
       @Value("${application.keycloak-client-service.skip-email:false}") final boolean skipEmail) {
     this.keycloakClient = keycloakClient;
     this.redirectUri = redirectUri;
+    this.allowedRedirectUris = Arrays.stream(allowedOrigins.split(","))
+        .map(String::trim)
+        .toList();
     this.skipEmail = skipEmail;
   }
 
@@ -76,6 +83,11 @@ public class KeycloakClientService {
 
   @Transactional
   public String createNewUser(KeycloakUser user) {
+    return createNewUser(user, null);
+  }
+
+  @Transactional
+  public String createNewUser(KeycloakUser user, @Nullable String origin) {
     UserRepresentation userRepresentation = getUserRepresentation(user);
     UsersResource usersResource = keycloakClient.realm(REALM_VOCABULARY).users();
     final String userId;
@@ -99,7 +111,7 @@ public class KeycloakClientService {
     final String password = randomPassword();
     setPasswordRenew(userResource, password);
     setGroup(userResource);
-    sendActionsEmail(userResource);
+    sendActionsEmail(userResource, origin);
     log.info("user: {} - userId: {} has been successfully created",
         userRepresentation.getUsername(), userId);
     return userId;
@@ -158,14 +170,27 @@ public class KeycloakClientService {
     userResource.joinGroup(group.getId());
   }
 
-  void sendActionsEmail(UserResource userResource) {
+  void sendActionsEmail(UserResource userResource, String origin) {
     if (skipEmail) {
       log.warn("email to the user won't be sent out!");
       return;
     }
+    String redirectUri = resolveRedirectUri(origin);
     userResource.executeActionsEmail(
         CLIENT_ID, redirectUri, LIFESPAN_IN_SECS,
         List.of(ACTION_VERIFY_EMAIL, ACTION_UPDATE_PASSWORD));
+  }
+
+  String resolveRedirectUri(String origin) {
+    if (origin != null) {
+      for (String uri : allowedRedirectUris) {
+        if (uri.equals(origin)) {
+          return uri;
+        }
+      }
+      log.warn("Origin '{}' not in allowed redirect URIs, falling back to default", origin);
+    }
+    return redirectUri;
   }
 
   String randomPassword() {
