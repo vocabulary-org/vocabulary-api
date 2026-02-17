@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.service;
 
 
 import jakarta.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -62,11 +63,13 @@ public class KeycloakClientService {
 
   KeycloakClientService(final Keycloak keycloakClient,
       @Value("${application.spa.url}") final String redirectUri,
-      @Value("${application.cors.allowed-origins}") final List<String> allowedRedirectUris,
+      @Value("${application.cors.allowed-origins}") final String allowedOrigins,
       @Value("${application.keycloak-client-service.skip-email:false}") final boolean skipEmail) {
     this.keycloakClient = keycloakClient;
     this.redirectUri = redirectUri;
-    this.allowedRedirectUris = allowedRedirectUris;
+    this.allowedRedirectUris = Arrays.stream(allowedOrigins.split(","))
+        .map(String::trim)
+        .toList();
     this.skipEmail = skipEmail;
   }
 

@@ -66,7 +66,7 @@ class KeycloakClientServiceTest {
   void setUp() {
     this.keycloakAdminClient = KEYCLOAK_CONTAINER.getKeycloakAdminClient();
     this.keycloakClientService = new KeycloakClientService(keycloakAdminClient,
-        "http://localhost:4200", List.of("http://localhost:4200"), true);
+        "http://localhost:4200", "http://localhost:4200", true);
   }
 
 
