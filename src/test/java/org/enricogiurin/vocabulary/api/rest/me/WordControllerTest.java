@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -70,7 +71,7 @@ class WordControllerTest {
 
 
   @Test
-  void findAllEnrico() throws Exception {
+  void findAll_Enrico() throws Exception {
     mvc.perform(get(basePath)
             .contentType(MediaType.APPLICATION_JSON)
             .param("page", "0")
@@ -84,6 +85,30 @@ class WordControllerTest {
 
         .andExpect(jsonPath("$.page.totalPages", is(1)))
         .andExpect(jsonPath("$.page.totalElements", is(5)))
+        .andExpect(jsonPath("$.page.size", is(Integer.MAX_VALUE)))
+        .andExpect(jsonPath("$.page.number", is(0)));
+  }
+
+  @Test
+  void findAll_Enrico_English() throws Exception {
+    mvc.perform(get(basePath)
+            .contentType(MediaType.APPLICATION_JSON)
+            .param("page", "0")
+            .param("size", String.valueOf(Integer.MAX_VALUE))
+            .param("filter.k.field", "languageTo")
+            .param("filter.k.operator", "eq")
+            .param("filter.k.value", "German")
+        )
+        .andExpect(status().isOk())
+        .andDo(print())  //leave commented
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content", hasSize(1)))
+        .andExpect(jsonPath("$.content[0].sentence", is("Latte")))
+        .andExpect(jsonPath("$.content[0].translation", is("die Milk")))
+
+        .andExpect(jsonPath("$.page.totalPages", is(1)))
+        .andExpect(jsonPath("$.page.totalElements", is(1)))
         .andExpect(jsonPath("$.page.size", is(Integer.MAX_VALUE)))
         .andExpect(jsonPath("$.page.number", is(0)));
   }
