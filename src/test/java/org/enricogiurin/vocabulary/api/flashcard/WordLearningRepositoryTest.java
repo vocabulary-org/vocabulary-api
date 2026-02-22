@@ -115,10 +115,15 @@ class WordLearningRepositoryTest {
   }
 
   @Test
-  void review_throwsDataNotFoundExceptionWhenNoLearningRecord() {
+  void review_createsNewRecordWhenNoLearningRecordExists() {
     WordReviewResult input = new WordReviewResult(CAT_UUID, WordReviewResultType.RIGHT);
-    assertThrows(DataNotFoundException.class,
-        () -> wordLearningRepository.review(input));
+    WordLearning result = wordLearningRepository.review(input);
+    assertThat(result, notNullValue());
+    assertThat(result.wordView().sentence(), equalTo("cat"));
+    assertThat(result.rightCount(), equalTo(1));
+    assertThat(result.wrongCount(), equalTo(0));
+    assertThat(result.skipCount(), equalTo(0));
+    assertThat(result.reviewResult(), equalTo(WordReviewResultType.RIGHT));
   }
 
   @Test

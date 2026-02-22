@@ -122,7 +122,7 @@ class FlashcardControllerTest {
 
   @Test
   void findByWordUuid_notFound() throws Exception {
-    mvc.perform(get(basePath + "/words/" + CAT_UUID)
+    mvc.perform(get(basePath + "/words/" + NON_EXISTENT_UUID)
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }

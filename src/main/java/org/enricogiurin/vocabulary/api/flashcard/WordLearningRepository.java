@@ -35,7 +35,6 @@ import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.ReviewResult;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordLearningRecord;
 import org.jooq.DSLContext;
-import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Record8;
 import org.jooq.SelectOnConditionStep;
@@ -74,11 +73,19 @@ public class WordLearningRepository {
   @Transactional(readOnly = false)
   public WordLearning review(WordReviewResult wordReviewResult) {
     UUID wordUuid = wordReviewResult.wordUuid();
+    Integer wordId = dsl.select(WORD.ID).from(WORD)
+        .where(WORD.EXTERNAL_ID.eq(wordUuid))
+        .fetchOptional(WORD.ID)
+        .orElseThrow(() -> new DataNotFoundException("Word not found: " + wordUuid));
     WordLearningRecord record = dsl.selectFrom(WORD_LEARNING)
-        .where(WORD_LEARNING.WORD_ID.eq(
-            dsl.select(WORD.ID).from(WORD).where(WORD.EXTERNAL_ID.eq(wordUuid))))
+        .where(WORD_LEARNING.WORD_ID.eq(wordId))
         .fetchOptional()
-        .orElseThrow(() -> new DataNotFoundException("WordLearning not found for word: " + wordUuid));
+        .orElseGet(() -> {
+          WordLearningRecord newRecord = dsl.newRecord(WORD_LEARNING);
+          newRecord.setWordId(wordId);
+          newRecord.insert();
+          return newRecord;
+        });
     switch (wordReviewResult.wordReviewResultType()) {
       case RIGHT -> record.setRightCount(record.getRightCount() + 1);
       case WRONG -> record.setWrongCount(record.getWrongCount() + 1);
@@ -126,16 +133,6 @@ public class WordLearningRepository {
             WORD_LEARNING.LAST_RESULT.as(REVIEW_RESULT_ALIAS))
         .from(WORD_LEARNING)
         .join(WORD).on(WORD.ID.eq(WORD_LEARNING.WORD_ID));
-  }
-
-  private Field<?> getSupportedField(String field) {
-    return switch (field) {
-      case UUID_ALIAS -> WORD_LEARNING.EXTERNAL_ID;
-      case SENTENCE_ALIAS -> WORD.SENTENCE;
-      case REVIEW_RESULT_ALIAS -> WORD_LEARNING.LAST_RESULT;
-      default -> throw new IllegalArgumentException(
-          "Unexpected value for filter/sort field: " + field);
-    };
   }
 
   private WordLearning map(Record record) {
