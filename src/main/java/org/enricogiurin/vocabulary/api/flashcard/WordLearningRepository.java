@@ -20,11 +20,13 @@ package org.enricogiurin.vocabulary.api.flashcard;
  * #L%
  */
 
+import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.LANGUAGE;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.WORD;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.WORD_LEARNING;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +39,7 @@ import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Record8;
 import org.jooq.SelectOnConditionStep;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,6 +88,30 @@ public class WordLearningRepository {
     record.setUpdatedAt(OffsetDateTime.now());
     record.update();
     return findByWordExternalId(wordUuid).orElseThrow();
+  }
+
+  public List<WordView> findWordsForReview(UUID languageUuid, UUID languageToUuid, Integer userId, int limit) {
+    var lFrom = LANGUAGE.as("l_from");
+    var lTo = LANGUAGE.as("l_to");
+    return dsl.select(
+            WORD.EXTERNAL_ID,
+            WORD.SENTENCE,
+            WORD.TRANSLATION)
+        .from(WORD)
+        .leftJoin(WORD_LEARNING).on(WORD_LEARNING.WORD_ID.eq(WORD.ID))
+        .join(lFrom).on(lFrom.ID.eq(WORD.LANGUAGE_ID))
+        .join(lTo).on(lTo.ID.eq(WORD.LANGUAGE_TO_ID))
+        .where(lFrom.EXTERNAL_ID.eq(languageUuid))
+        .and(lTo.EXTERNAL_ID.eq(languageToUuid))
+        .and(WORD.USER_ID.eq(userId))
+        .orderBy(
+            DSL.when(WORD_LEARNING.ID.isNull(), 0).otherwise(1).asc(),
+            WORD_LEARNING.WRONG_COUNT.desc().nullsLast())
+        .limit(limit)
+        .fetch(r -> new WordView(
+            r.get(WORD.EXTERNAL_ID),
+            r.get(WORD.SENTENCE),
+            r.get(WORD.TRANSLATION)));
   }
 
   private SelectOnConditionStep<Record8<UUID, UUID, String, String, Integer, Integer, Integer, ReviewResult>> select() {

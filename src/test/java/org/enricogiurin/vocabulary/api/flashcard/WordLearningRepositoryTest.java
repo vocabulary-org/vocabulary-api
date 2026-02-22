@@ -21,15 +21,21 @@ package org.enricogiurin.vocabulary.api.flashcard;
  */
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.model.Language;
+import org.enricogiurin.vocabulary.api.repository.LanguageRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,6 +47,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class WordLearningRepositoryTest {
 
+  static final int USER_ENRICO_ID = 1000000;
+  static final int USER_LUCIO_ID = 1000001;
   static final UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
   static final UUID MY_HOUSE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000002");
   static final UUID CAT_UUID = UUID.fromString("00000000-0000-0000-0000-000000000003");
@@ -48,6 +56,8 @@ class WordLearningRepositoryTest {
 
   @Autowired
   WordLearningRepository wordLearningRepository;
+  @Autowired
+  LanguageRepository languageRepository;
 
   @Test
   void findByWordExternalId_returnsWordLearning() {
@@ -109,5 +119,47 @@ class WordLearningRepositoryTest {
     WordReviewResult input = new WordReviewResult(CAT_UUID, WordReviewResultType.RIGHT);
     assertThrows(DataNotFoundException.class,
         () -> wordLearningRepository.review(input));
+  }
+
+  @Test
+  void findWordsForReview_returnsUnreviewedFirstThenWorstWrongCount() {
+    UUID enUuid = languageRepository.findByName("English").orElseThrow().uuid();
+    UUID itUuid = languageRepository.findByName("Italian").orElseThrow().uuid();
+    List<WordView> result = wordLearningRepository.findWordsForReview(enUuid, itUuid, USER_ENRICO_ID, 10);
+    assertThat(result, hasSize(4));
+    // first two are unreviewed (cat, tomcat) in any order
+    assertThat(result.subList(0, 2).stream().map(WordView::sentence).toList(),
+        containsInAnyOrder("cat", "tomcat"));
+    // last two are reviewed ordered by wrongCount desc
+    assertThat(result.subList(2, 4).stream().map(WordView::sentence).toList(),
+        contains("my house", "Hello"));
+  }
+
+  @Test
+  void findWordsForReview_respectsLimit() {
+    UUID enUuid = languageRepository.findByName("English").orElseThrow().uuid();
+    UUID itUuid = languageRepository.findByName("Italian").orElseThrow().uuid();
+    List<WordView> result = wordLearningRepository.findWordsForReview(enUuid, itUuid, USER_ENRICO_ID, 2);
+    assertThat(result, hasSize(2));
+    assertThat(result.stream().map(WordView::sentence).toList(),
+        containsInAnyOrder("cat", "tomcat"));
+  }
+
+  @Test
+  void findWordsForReview_filtersbyLanguage() {
+    UUID enUuid = languageRepository.findByName("English").orElseThrow().uuid();
+    UUID deUuid = languageRepository.findByName("German").orElseThrow().uuid();
+    List<WordView> result = wordLearningRepository.findWordsForReview(enUuid, deUuid, USER_ENRICO_ID, 10);
+    assertThat(result, hasSize(1));
+    assertThat(result.getFirst().sentence(), equalTo("Latte"));
+  }
+
+  @Test
+  void findWordsForReview_excludesOtherUser() {
+    UUID enUuid = languageRepository.findByName("English").orElseThrow().uuid();
+    UUID itUuid = languageRepository.findByName("Italian").orElseThrow().uuid();
+    List<WordView> result = wordLearningRepository.findWordsForReview(enUuid, itUuid, USER_LUCIO_ID, 10);
+    assertThat(result, hasSize(1));
+    assertThat(result.getFirst().sentence(), equalTo("Hello"));
   }
 }
