@@ -21,8 +21,8 @@ CREATE TABLE vocabulary.user
     keycloakId  character varying(256) NOT NULL UNIQUE,
     username    character varying(256), -- only for audit purpose
     email       character varying(256), -- only for audit purpose,
-    created_at timestamptz NOT NULL DEFAULT now(),
-    updated_at timestamptz NOT NULL DEFAULT now(),
+    created_at  timestamptz            NOT NULL        DEFAULT now(),
+    updated_at  timestamptz            NOT NULL        DEFAULT now(),
     external_id UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 
 );
@@ -38,34 +38,56 @@ CREATE TABLE vocabulary.language
 -- define the user language pair preference
 CREATE TABLE vocabulary.user_languages
 (
-    id          SERIAL,
-    user_id         integer                NOT NULL UNIQUE,
-    language_id     integer                NOT NULL,
-    language_to_id  integer                NOT NULL,
-    external_id UUID              NOT NULL UNIQUE DEFAULT gen_random_uuid()
+    id             SERIAL,
+    user_id        integer NOT NULL UNIQUE,
+    language_id    integer NOT NULL,
+    language_to_id integer NOT NULL,
+    external_id    UUID    NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
 CREATE TABLE vocabulary.word
 (
-    id              SERIAL,
-    sentence        character varying(256) NOT NULL,
-    translation     TEXT                   NOT NULL,
-    description     TEXT,
-    language_id     integer                NOT NULL,
-    language_to_id  integer                NOT NULL,
-    user_id         integer                NOT NULL,
-    created_at timestamptz NOT NULL DEFAULT now(),
-    updated_at timestamptz NOT NULL DEFAULT now(),
-    external_id     UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
+    id             SERIAL,
+    sentence       character varying(256) NOT NULL,
+    translation    TEXT                   NOT NULL,
+    description    TEXT,
+    language_id    integer                NOT NULL,
+    language_to_id integer                NOT NULL,
+    user_id        integer                NOT NULL,
+    created_at     timestamptz            NOT NULL        DEFAULT now(),
+    updated_at     timestamptz            NOT NULL        DEFAULT now(),
+    external_id    UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
 CREATE TABLE vocabulary.translation_usage
 (
-    id              SERIAL,
-    month DATE NOT NULL UNIQUE,
-    cnt BIGINT NOT NULL DEFAULT 0,
-    external_id     UUID                   NOT NULL UNIQUE DEFAULT gen_random_uuid()
+    id          SERIAL,
+    month       DATE   NOT NULL UNIQUE,
+    cnt         BIGINT NOT NULL        DEFAULT 0,
+    external_id UUID   NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
+
+CREATE TYPE vocabulary.review_result AS ENUM (
+    'RIGHT',
+    'WRONG',
+    'SKIP'
+);
+
+CREATE TABLE vocabulary.word_learning
+(
+    id          SERIAL,
+    word_id     integer     NOT NULL,
+    -- Learning counters
+    right_count integer     NOT NULL DEFAULT 0,
+    wrong_count integer     NOT NULL DEFAULT 0,
+    skip_count  integer     NOT NULL DEFAULT 0,
+    last_result vocabulary.review_result NULL,
+    -- Audit fields (optional but recommended)
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    external_id UUID        NOT NULL UNIQUE DEFAULT gen_random_uuid()
+);
+
 
 
 

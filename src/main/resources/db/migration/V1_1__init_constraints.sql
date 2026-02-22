@@ -27,18 +27,23 @@ ALTER TABLE ONLY vocabulary.language
 ALTER TABLE ONLY vocabulary.user_languages
     ADD CONSTRAINT user_languages_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY vocabulary.word_learning
+    ADD CONSTRAINT word_learning_pkey PRIMARY KEY (id);
+
 
 -- fk constraints
 -- fk word
 ALTER TABLE ONLY vocabulary.word
     ADD CONSTRAINT fk_word_user FOREIGN KEY (user_id) REFERENCES vocabulary.user(id) ON DELETE CASCADE;
 
-
 ALTER TABLE ONLY vocabulary.word
     ADD CONSTRAINT fk_word_language FOREIGN KEY (language_id) REFERENCES vocabulary.language(id);
 
 ALTER TABLE ONLY vocabulary.word
     ADD CONSTRAINT fk_word_language_to FOREIGN KEY (language_to_id) REFERENCES vocabulary.language(id);
+
+ALTER TABLE ONLY vocabulary.word_learning
+    ADD CONSTRAINT fk_word_learning_word FOREIGN KEY (word_id) REFERENCES vocabulary.word(id) ON DELETE CASCADE;
 
 -- fk user_languages
 ALTER TABLE ONLY vocabulary.user_languages
@@ -49,5 +54,7 @@ ALTER TABLE ONLY vocabulary.user_languages
 
 ALTER TABLE ONLY vocabulary.user_languages
     ADD CONSTRAINT fk_user_languages_language_to FOREIGN KEY (language_to_id) REFERENCES vocabulary.language(id);
+
+
 
 
