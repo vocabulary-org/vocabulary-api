@@ -53,6 +53,7 @@ class WordLearningRepositoryTest {
   void findByWordExternalId_returnsWordLearning() {
     WordLearning result = wordLearningRepository.findByWordExternalId(HELLO_UUID).orElseThrow();
     assertThat(result, notNullValue());
+    assertThat(result.wordView().uuid(), equalTo(HELLO_UUID));
     assertThat(result.wordView().sentence(), equalTo("Hello"));
     assertThat(result.wordView().translation(), equalTo("Salve"));
     assertThat(result.rightCount(), equalTo(5));

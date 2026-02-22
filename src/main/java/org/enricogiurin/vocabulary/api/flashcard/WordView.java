@@ -20,6 +20,8 @@ package org.enricogiurin.vocabulary.api.flashcard;
  * #L%
  */
 
-public record WordView(String sentence, String translation) {
+import java.util.UUID;
+
+public record WordView(UUID uuid, String sentence, String translation) {
 
 }

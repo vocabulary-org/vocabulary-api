@@ -35,7 +35,7 @@ import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordLearni
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
-import org.jooq.Record7;
+import org.jooq.Record8;
 import org.jooq.SelectOnConditionStep;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class WordLearningRepository {
 
   public static final String UUID_ALIAS = "uuid";
+  public static final String WORD_UUID_ALIAS = "wordUuid";
   public static final String SENTENCE_ALIAS = "sentence";
   public static final String TRANSLATION_ALIAS = "translation";
   public static final String RIGHT_COUNT_ALIAS = "rightCount";
@@ -86,9 +87,10 @@ public class WordLearningRepository {
     return findByWordExternalId(wordUuid).orElseThrow();
   }
 
-  private SelectOnConditionStep<Record7<UUID, String, String, Integer, Integer, Integer, ReviewResult>> select() {
+  private SelectOnConditionStep<Record8<UUID, UUID, String, String, Integer, Integer, Integer, ReviewResult>> select() {
     return dsl.select(
             WORD_LEARNING.EXTERNAL_ID.as(UUID_ALIAS),
+            WORD.EXTERNAL_ID.as(WORD_UUID_ALIAS),
             WORD.SENTENCE.as(SENTENCE_ALIAS),
             WORD.TRANSLATION.as(TRANSLATION_ALIAS),
             WORD_LEARNING.RIGHT_COUNT.as(RIGHT_COUNT_ALIAS),
@@ -117,6 +119,7 @@ public class WordLearningRepository {
     return WordLearning.builder()
         .uuid(record.get(UUID_ALIAS, UUID.class))
         .wordView(new WordView(
+            record.get(WORD_UUID_ALIAS, UUID.class),
             record.get(SENTENCE_ALIAS, String.class),
             record.get(TRANSLATION_ALIAS, String.class)))
         .rightCount(record.get(RIGHT_COUNT_ALIAS, Integer.class))
