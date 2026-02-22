@@ -24,6 +24,6 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record WordLearning(UUID uuid, WordView wordView, int rightCount, int wrongCount, int skipCount, WordReviewResult reviewResult) {
+public record WordLearning(UUID uuid, WordView wordView, int rightCount, int wrongCount, int skipCount, WordReviewResultType reviewResult) {
 
 }

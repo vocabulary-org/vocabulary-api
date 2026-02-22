@@ -20,8 +20,8 @@ package org.enricogiurin.vocabulary.api.flashcard;
  * #L%
  */
 
-import java.util.UUID;
-
-public record WordReviewResult(UUID wordUuid, WordReviewResultType wordReviewResultType) {
-
+public enum WordReviewResultType {
+  RIGHT,
+  WRONG,
+  SKIP
 }

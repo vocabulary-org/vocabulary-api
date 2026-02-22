@@ -58,7 +58,7 @@ class WordLearningRepositoryTest {
     assertThat(result.rightCount(), equalTo(5));
     assertThat(result.wrongCount(), equalTo(2));
     assertThat(result.skipCount(), equalTo(1));
-    assertThat(result.reviewResult(), equalTo(WordReviewResult.RIGHT));
+    assertThat(result.reviewResult(), equalTo(WordReviewResultType.RIGHT));
   }
 
   @Test
@@ -71,5 +71,42 @@ class WordLearningRepositoryTest {
   void findByWordExternalId_throwsDataNotFoundExceptionForNonExistentWord() {
     assertThrows(DataNotFoundException.class,
         () -> wordLearningRepository.findByWordExternalId(NON_EXISTENT_UUID));
+  }
+
+  @Test
+  void review_incrementsRightCount() {
+    WordReviewResult input = new WordReviewResult(HELLO_UUID, WordReviewResultType.RIGHT);
+    WordLearning result = wordLearningRepository.review(input);
+    assertThat(result.rightCount(), equalTo(6));
+    assertThat(result.wrongCount(), equalTo(2));
+    assertThat(result.skipCount(), equalTo(1));
+    assertThat(result.reviewResult(), equalTo(WordReviewResultType.RIGHT));
+  }
+
+  @Test
+  void review_incrementsWrongCount() {
+    WordReviewResult input = new WordReviewResult(HELLO_UUID, WordReviewResultType.WRONG);
+    WordLearning result = wordLearningRepository.review(input);
+    assertThat(result.rightCount(), equalTo(5));
+    assertThat(result.wrongCount(), equalTo(3));
+    assertThat(result.skipCount(), equalTo(1));
+    assertThat(result.reviewResult(), equalTo(WordReviewResultType.WRONG));
+  }
+
+  @Test
+  void review_incrementsSkipCount() {
+    WordReviewResult input = new WordReviewResult(HELLO_UUID, WordReviewResultType.SKIP);
+    WordLearning result = wordLearningRepository.review(input);
+    assertThat(result.rightCount(), equalTo(5));
+    assertThat(result.wrongCount(), equalTo(2));
+    assertThat(result.skipCount(), equalTo(2));
+    assertThat(result.reviewResult(), equalTo(WordReviewResultType.SKIP));
+  }
+
+  @Test
+  void review_throwsDataNotFoundExceptionWhenNoLearningRecord() {
+    WordReviewResult input = new WordReviewResult(CAT_UUID, WordReviewResultType.RIGHT);
+    assertThrows(DataNotFoundException.class,
+        () -> wordLearningRepository.review(input));
   }
 }

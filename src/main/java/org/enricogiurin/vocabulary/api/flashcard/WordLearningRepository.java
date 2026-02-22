@@ -24,12 +24,14 @@ import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.WORD;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.WORD_LEARNING;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.ReviewResult;
+import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordLearningRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -65,6 +67,25 @@ public class WordLearningRepository {
         .map(this::map);
   }
 
+  @Transactional(readOnly = false)
+  public WordLearning review(WordReviewResult wordReviewResult) {
+    UUID wordUuid = wordReviewResult.wordUuid();
+    WordLearningRecord record = dsl.selectFrom(WORD_LEARNING)
+        .where(WORD_LEARNING.WORD_ID.eq(
+            dsl.select(WORD.ID).from(WORD).where(WORD.EXTERNAL_ID.eq(wordUuid))))
+        .fetchOptional()
+        .orElseThrow(() -> new DataNotFoundException("WordLearning not found for word: " + wordUuid));
+    switch (wordReviewResult.wordReviewResultType()) {
+      case RIGHT -> record.setRightCount(record.getRightCount() + 1);
+      case WRONG -> record.setWrongCount(record.getWrongCount() + 1);
+      case SKIP -> record.setSkipCount(record.getSkipCount() + 1);
+    }
+    record.setLastResult(ReviewResult.valueOf(wordReviewResult.wordReviewResultType().name()));
+    record.setUpdatedAt(OffsetDateTime.now());
+    record.update();
+    return findByWordExternalId(wordUuid).orElseThrow();
+  }
+
   private SelectOnConditionStep<Record7<UUID, String, String, Integer, Integer, Integer, ReviewResult>> select() {
     return dsl.select(
             WORD_LEARNING.EXTERNAL_ID.as(UUID_ALIAS),
@@ -90,8 +111,8 @@ public class WordLearningRepository {
 
   private WordLearning map(Record record) {
     ReviewResult lastResult = record.get(REVIEW_RESULT_ALIAS, ReviewResult.class);
-    WordReviewResult reviewResult = lastResult != null
-        ? WordReviewResult.valueOf(lastResult.getLiteral())
+    WordReviewResultType reviewResult = lastResult != null
+        ? WordReviewResultType.valueOf(lastResult.getLiteral())
         : null;
     return WordLearning.builder()
         .uuid(record.get(UUID_ALIAS, UUID.class))
