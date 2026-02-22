@@ -83,6 +83,9 @@ public class WordLearningRepository {
         .orElseGet(() -> {
           WordLearningRecord newRecord = dsl.newRecord(WORD_LEARNING);
           newRecord.setWordId(wordId);
+          newRecord.setRightCount(0);
+          newRecord.setWrongCount(0);
+          newRecord.setSkipCount(0);
           newRecord.insert();
           return newRecord;
         });

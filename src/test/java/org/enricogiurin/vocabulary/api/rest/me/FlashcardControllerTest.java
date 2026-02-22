@@ -145,6 +145,25 @@ class FlashcardControllerTest {
   }
 
   @Test
+  void review_createsNewRecordWhenNoLearningRecordExists() throws Exception {
+    mvc.perform(post(basePath + "/review")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                  "wordUuid": "%s",
+                  "wordReviewResultType": "WRONG"
+                }
+                """.formatted(CAT_UUID)))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.wordView.sentence", is("cat")))
+        .andExpect(jsonPath("$.rightCount", is(0)))
+        .andExpect(jsonPath("$.wrongCount", is(1)))
+        .andExpect(jsonPath("$.skipCount", is(0)))
+        .andExpect(jsonPath("$.reviewResult", is("WRONG")));
+  }
+
+  @Test
   void review_notFound() throws Exception {
     mvc.perform(post(basePath + "/review")
             .contentType(MediaType.APPLICATION_JSON)
