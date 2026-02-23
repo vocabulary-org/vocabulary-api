@@ -51,6 +51,7 @@ public class LanguageTranslateController {
 
   @GetMapping("quota-reached")
   public ResponseEntity<Boolean> isTranslationQuotaReached() {
+    log.info("GET /translate/quota-reached");
     return ResponseEntity.ok(translateService.isQuotaReached());
   }
 

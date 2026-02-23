@@ -132,6 +132,22 @@ docker compose -f docker-compose-vocabulary-api.yaml up
 ```
 
 
+## Unit Tests
+
+Run the full test suite:
+```shell
+mvn test
+```
+
+### Skipping slow Keycloak tests
+
+Tests tagged with `keycloak` (e.g. `KeycloakClientServiceTest`) spin up a Testcontainers Keycloak instance and can be slow.
+To skip them, activate the `skip-keycloak` Maven profile:
+
+```shell
+mvn test -P skip-keycloak
+```
+
 ## Developer Notes
 * [Developer Notes](docs/developer-notes.md)
 * [Hetzner Notes](docs/api-hetzner.md)

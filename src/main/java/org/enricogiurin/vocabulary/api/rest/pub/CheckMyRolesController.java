@@ -39,6 +39,7 @@ class CheckMyRolesController {
 
   @GetMapping
   ResponseEntity<List<String>> roles(Authentication authentication) {
+    log.info("GET /roles - principal: {}", authentication != null ? authentication.getName() : "anonymous");
     if(authentication==null){
       log.warn("user not authenticated");
       return ResponseEntity.ok(List.of());

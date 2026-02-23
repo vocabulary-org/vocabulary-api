@@ -24,6 +24,7 @@ import com.yourrents.services.common.util.exception.DataNotFoundException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.flashcard.WordLearning;
 import org.enricogiurin.vocabulary.api.flashcard.WordLearningRepository;
 import org.enricogiurin.vocabulary.api.flashcard.WordReviewResult;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${application.api.user-path}/flashcards")
 @RequiredArgsConstructor
+@Slf4j
 public class FlashcardController {
 
   private final WordLearningRepository wordLearningRepository;
@@ -51,6 +53,8 @@ public class FlashcardController {
       @RequestParam UUID language,
       @RequestParam UUID languageTo,
       @RequestParam(defaultValue = "10") int limit) {
+    log.info("GET /flashcards/words - subject: {}, language: {}, languageTo: {}, limit: {}",
+        currentUser.getSubject(), language, languageTo, limit);
     List<WordView> words = wordLearningRepository.findWordsForReview(
         language, languageTo, currentUser.getUserId(), limit);
     return ResponseEntity.ok(words);
@@ -58,6 +62,7 @@ public class FlashcardController {
 
   @GetMapping("/words/{wordUuid}")
   ResponseEntity<WordLearning> findByWordUuid(@PathVariable UUID wordUuid) {
+    log.info("GET /flashcards/words/{} - subject: {}", wordUuid, currentUser.getSubject());
     WordLearning result = wordLearningRepository.findByWordExternalId(wordUuid)
         .orElseThrow(() -> new DataNotFoundException(
             "No learning record found for word: " + wordUuid));
@@ -66,6 +71,8 @@ public class FlashcardController {
 
   @PostMapping("/review")
   ResponseEntity<WordLearning> review(@RequestBody WordReviewResult wordReviewResult) {
+    log.info("POST /flashcards/review - subject: {}, wordUuid: {}, result: {}",
+        currentUser.getSubject(), wordReviewResult.wordUuid(), wordReviewResult.wordReviewResultType());
     WordLearning result = wordLearningRepository.review(wordReviewResult);
     return ResponseEntity.ok(result);
   }

@@ -49,6 +49,7 @@ public class UserLanguagesController {
 
   @GetMapping
   public ResponseEntity<UserLanguages> getUserLanguages() {
+    log.info("GET /user-languages - subject: {}", currentUser.getSubject());
     return userService.userLanguages(currentUser.getUserId())
         .map(ResponseEntity::ok)
         .orElseGet(() -> ResponseEntity.ok(UserLanguages.empty()));
@@ -56,6 +57,7 @@ public class UserLanguagesController {
 
   @PutMapping
   public ResponseEntity<UserLanguages> storeUserLanguages(@RequestBody UserLanguages userLanguages) {
+    log.info("PUT /user-languages - subject: {}", currentUser.getSubject());
     UserLanguages result = userService.saveUserLanguages(userLanguages, currentUser.getUserId());
     return ResponseEntity.ok(result);
   }

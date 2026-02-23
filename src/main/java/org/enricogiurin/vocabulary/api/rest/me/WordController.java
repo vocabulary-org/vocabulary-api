@@ -25,6 +25,7 @@ import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.enricogiurin.vocabulary.api.repository.WordRepository;
 import org.enricogiurin.vocabulary.api.security.CurrentUser;
@@ -50,6 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${application.api.user-path}/words")
 @RequiredArgsConstructor
+@Slf4j
 public class WordController {
 
   private final WordRepository wordRepository;
@@ -59,13 +61,14 @@ public class WordController {
   ResponseEntity<Page<Word>> find(
       @ParameterObject Searchable filter,
       @ParameterObject @SortDefault(sort = WordRepository.UPDATED_AT, direction = Direction.DESC) Pageable pagination) {
-
+    log.info("GET /words - subject: {}, filter: {}, pagination: {}", currentUser.getSubject(), filter, pagination);
     Page<Word> page = wordRepository.find(filter, pagination, currentUser.getUserId());
     return ResponseEntity.ok(page);
   }
 
   @GetMapping("/{uuid}")
   ResponseEntity<Word> findByUuid(@PathVariable UUID uuid) {
+    log.info("GET /words/{} - subject: {}", uuid, currentUser.getSubject());
     Word result = wordRepository.findByExternalId(uuid, currentUser.getUserId())
         .orElseThrow(
             () -> new DataNotFoundException("can't find Word having uuid: " + uuid));
@@ -74,12 +77,14 @@ public class WordController {
 
   @PostMapping
   ResponseEntity<Word> add( @Validated(ValidationGroups.Post.class) @RequestBody Word word) {
+    log.info("POST /words - subject: {}", currentUser.getSubject());
     Word savedProperty = wordRepository.create(word, currentUser.getUserId());
     return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{uuid}")
   ResponseEntity<Word> update(@PathVariable UUID uuid,   @Validated(ValidationGroups.Patch.class) @RequestBody Word wordToUpdate) {
+    log.info("PATCH /words/{} - subject: {}", uuid, currentUser.getSubject());
     Word updatedProperty = wordRepository.update(uuid, wordToUpdate, currentUser.getUserId());
     return ResponseEntity.ok(updatedProperty);
   }
@@ -87,6 +92,7 @@ public class WordController {
   @DeleteMapping("/{uuid}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void delete(@PathVariable UUID uuid) {
+    log.info("DELETE /words/{} - subject: {}", uuid, currentUser.getSubject());
     wordRepository.delete(uuid, currentUser.getUserId());
   }
 

@@ -127,17 +127,18 @@ class WordLearningRepositoryTest {
   }
 
   @Test
-  void findWordsForReview_returnsUnreviewedFirstThenWorstWrongCount() {
+  void findWordsForReview_ordersUnreviewedFirstThenSkipDescWrongDescRightAsc() {
     UUID enUuid = languageRepository.findByName("English").orElseThrow().uuid();
     UUID itUuid = languageRepository.findByName("Italian").orElseThrow().uuid();
     List<WordView> result = wordLearningRepository.findWordsForReview(enUuid, itUuid, USER_ENRICO_ID, 10);
     assertThat(result, hasSize(4));
-    // first two are unreviewed (cat, tomcat) in any order
+    // 1) unreviewed words come first (cat, tomcat — no WORD_LEARNING record), in any order
     assertThat(result.subList(0, 2).stream().map(WordView::sentence).toList(),
         containsInAnyOrder("cat", "tomcat"));
-    // last two are reviewed ordered by wrongCount desc
-    assertThat(result.subList(2, 4).stream().map(WordView::sentence).toList(),
-        contains("my house", "Hello"));
+    // 2) Hello: skip=1 → highest skip count among reviewed words
+    assertThat(result.get(2).sentence(), equalTo("Hello"));
+    // 3) my house: skip=0, wrong=3 → no skip, falls back to wrong count desc
+    assertThat(result.get(3).sentence(), equalTo("my house"));
   }
 
   @Test
