@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.rest.admin;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
@@ -32,12 +33,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${application.api.admin-path}/keycloak/user")
 @RequiredArgsConstructor
+@Slf4j
 public class KeycloakUserController {
 
   private final KeycloakClientService keycloakAdminService;
 
   @GetMapping()
   public ResponseEntity<List<UserRepresentation>> list() {
+    log.info("GET /keycloak/user");
     List<UserRepresentation> list = keycloakAdminService.userList();
     return ResponseEntity.ok(list);
   }

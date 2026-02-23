@@ -116,7 +116,9 @@ public class WordLearningRepository {
         .and(WORD.USER_ID.eq(userId))
         .orderBy(
             DSL.when(WORD_LEARNING.ID.isNull(), 0).otherwise(1).asc(),
-            WORD_LEARNING.WRONG_COUNT.desc().nullsLast())
+            WORD_LEARNING.SKIP_COUNT.desc().nullsLast(),
+            WORD_LEARNING.WRONG_COUNT.desc().nullsLast(),
+            WORD_LEARNING.RIGHT_COUNT.asc().nullsLast())
         .limit(limit)
         .fetch(r -> new WordView(
             r.get(WORD.EXTERNAL_ID),

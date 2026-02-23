@@ -29,6 +29,7 @@ import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.exception.DataConflictException;
 import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -43,6 +44,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Import({VocabularyTestConfiguration.class})
 @Transactional
 @Testcontainers
+@Tag("keycloak")
 class KeycloakClientServiceTest {
 
   private static final String USER_EMAIL = "john.doe@example.com";
