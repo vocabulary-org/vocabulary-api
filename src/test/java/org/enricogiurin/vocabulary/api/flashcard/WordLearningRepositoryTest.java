@@ -127,7 +127,7 @@ class WordLearningRepositoryTest {
   }
 
   @Test
-  void findWordsForReview_ordersUnreviewedFirstThenSkipDescWrongDescRightAsc() {
+  void findWordsForReview_returnsUnreviewedFirstThenSplitBySkipAndWrong() {
     UUID enUuid = languageRepository.findByName("English").orElseThrow().uuid();
     UUID itUuid = languageRepository.findByName("Italian").orElseThrow().uuid();
     List<WordView> result = wordLearningRepository.findWordsForReview(enUuid, itUuid, USER_ENRICO_ID, 10);

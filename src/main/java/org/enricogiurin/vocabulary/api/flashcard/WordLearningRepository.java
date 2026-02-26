@@ -34,6 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.ReviewResult;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordLearningRecord;
+import java.util.ArrayList;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record8;
@@ -103,10 +105,9 @@ public class WordLearningRepository {
   public List<WordView> findWordsForReview(UUID languageUuid, UUID languageToUuid, Integer userId, int limit) {
     var lFrom = LANGUAGE.as("l_from");
     var lTo = LANGUAGE.as("l_to");
-    return dsl.select(
-            WORD.EXTERNAL_ID,
-            WORD.SENTENCE,
-            WORD.TRANSLATION)
+
+    // Step 1: words never reviewed (no word_learning record) — highest priority
+    List<WordView> unreviewed = dsl.select(WORD.EXTERNAL_ID, WORD.SENTENCE, WORD.TRANSLATION)
         .from(WORD)
         .leftJoin(WORD_LEARNING).on(WORD_LEARNING.WORD_ID.eq(WORD.ID))
         .join(lFrom).on(lFrom.ID.eq(WORD.LANGUAGE_ID))
@@ -114,16 +115,55 @@ public class WordLearningRepository {
         .where(lFrom.EXTERNAL_ID.eq(languageUuid))
         .and(lTo.EXTERNAL_ID.eq(languageToUuid))
         .and(WORD.USER_ID.eq(userId))
-        .orderBy(
-            DSL.when(WORD_LEARNING.ID.isNull(), 0).otherwise(1).asc(),
-            WORD_LEARNING.SKIP_COUNT.desc().nullsLast(),
-            WORD_LEARNING.WRONG_COUNT.desc().nullsLast(),
-            WORD_LEARNING.RIGHT_COUNT.asc().nullsLast())
-        .limit(limit)
-        .fetch(r -> new WordView(
-            r.get(WORD.EXTERNAL_ID),
-            r.get(WORD.SENTENCE),
-            r.get(WORD.TRANSLATION)));
+        .and(WORD_LEARNING.ID.isNull())
+        .fetch(r -> new WordView(r.get(WORD.EXTERNAL_ID), r.get(WORD.SENTENCE), r.get(WORD.TRANSLATION)));
+
+    if (unreviewed.size() >= limit) {
+      return unreviewed.subList(0, limit);
+    }
+
+    int remaining = limit - unreviewed.size();
+    int skipSlots = (remaining + 1) / 2;
+    int wrongSlots = remaining - skipSlots;
+
+    // Step 2: half from words with highest skip_count (words the user avoids)
+    List<WordView> topSkip = dsl.select(WORD.EXTERNAL_ID, WORD.SENTENCE, WORD.TRANSLATION)
+        .from(WORD)
+        .join(WORD_LEARNING).on(WORD_LEARNING.WORD_ID.eq(WORD.ID))
+        .join(lFrom).on(lFrom.ID.eq(WORD.LANGUAGE_ID))
+        .join(lTo).on(lTo.ID.eq(WORD.LANGUAGE_TO_ID))
+        .where(lFrom.EXTERNAL_ID.eq(languageUuid))
+        .and(lTo.EXTERNAL_ID.eq(languageToUuid))
+        .and(WORD.USER_ID.eq(userId))
+        .orderBy(WORD_LEARNING.SKIP_COUNT.desc())
+        .limit(skipSlots)
+        .fetch(r -> new WordView(r.get(WORD.EXTERNAL_ID), r.get(WORD.SENTENCE), r.get(WORD.TRANSLATION)));
+
+    // Step 3: half from words with highest wrong_count (words the user gets wrong), excluding skip words
+    List<WordView> topWrong = List.of();
+    if (wrongSlots > 0) {
+      List<UUID> skipUuids = topSkip.stream().map(WordView::uuid).toList();
+      Condition wrongCondition = lFrom.EXTERNAL_ID.eq(languageUuid)
+          .and(lTo.EXTERNAL_ID.eq(languageToUuid))
+          .and(WORD.USER_ID.eq(userId));
+      if (!skipUuids.isEmpty()) {
+        wrongCondition = wrongCondition.and(WORD.EXTERNAL_ID.notIn(skipUuids));
+      }
+      topWrong = dsl.select(WORD.EXTERNAL_ID, WORD.SENTENCE, WORD.TRANSLATION)
+          .from(WORD)
+          .join(WORD_LEARNING).on(WORD_LEARNING.WORD_ID.eq(WORD.ID))
+          .join(lFrom).on(lFrom.ID.eq(WORD.LANGUAGE_ID))
+          .join(lTo).on(lTo.ID.eq(WORD.LANGUAGE_TO_ID))
+          .where(wrongCondition)
+          .orderBy(WORD_LEARNING.WRONG_COUNT.desc())
+          .limit(wrongSlots)
+          .fetch(r -> new WordView(r.get(WORD.EXTERNAL_ID), r.get(WORD.SENTENCE), r.get(WORD.TRANSLATION)));
+    }
+
+    List<WordView> result = new ArrayList<>(unreviewed);
+    result.addAll(topSkip);
+    result.addAll(topWrong);
+    return result;
   }
 
   private SelectOnConditionStep<Record8<UUID, UUID, String, String, Integer, Integer, Integer, ReviewResult>> select() {
