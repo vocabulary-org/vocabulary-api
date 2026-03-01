@@ -21,10 +21,12 @@ package org.enricogiurin.vocabulary.api.rest.pub;
  */
 
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.rest.admin.KeycloakUserResponse;
+import org.enricogiurin.vocabulary.api.service.TurnstileService;
 import org.enricogiurin.vocabulary.api.service.UserService;
 import org.enricogiurin.vocabulary.api.validation.ValidationGroups;
 import org.springframework.lang.Nullable;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @RestController
@@ -45,12 +48,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class RegisterUserController {
 
   private final UserService userService;
+  private final Optional<TurnstileService> turnstileService;
 
 
   @PostMapping()
   public ResponseEntity<KeycloakUserResponse> createNewKeycloakUser(
       @Validated(ValidationGroups.Post.class) @RequestBody KeycloakUser keycloakUser,
-      @RequestHeader(value = "Origin", required = false) @Nullable String origin) {
+      @RequestHeader(value = "Origin", required = false) @Nullable String origin,
+      @RequestHeader(value = "CF-Turnstile-Response", required = false) @Nullable String turnstileToken) {
+    turnstileService.ifPresent(service -> {
+      if (!service.verify(turnstileToken)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "CAPTCHA verification failed");
+      }
+    });
     log.info("Creating new user: {}", keycloakUser);
     userService.createNewUser(keycloakUser, origin);
     return ResponseEntity
