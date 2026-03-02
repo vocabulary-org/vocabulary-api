@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.pub;
+package org.enricogiurin.vocabulary.api.rest.me;
 
 /*-
  * #%L
@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${application.api.public-path}/roles")
+@RequestMapping("${application.api.user-path}/roles")
 @RequiredArgsConstructor
 @Slf4j
 class CheckMyRolesController {
