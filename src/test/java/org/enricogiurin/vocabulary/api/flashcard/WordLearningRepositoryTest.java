@@ -50,7 +50,6 @@ class WordLearningRepositoryTest {
   static final int USER_ENRICO_ID = 1000000;
   static final int USER_LUCIO_ID = 1000001;
   static final UUID HELLO_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
-  static final UUID MY_HOUSE_UUID = UUID.fromString("00000000-0000-0000-0000-000000000002");
   static final UUID CAT_UUID = UUID.fromString("00000000-0000-0000-0000-000000000003");
   static final UUID NON_EXISTENT_UUID = UUID.fromString("00000000-0000-0000-0000-999999999999");
 
@@ -127,7 +126,7 @@ class WordLearningRepositoryTest {
   }
 
   @Test
-  void findWordsForReview_returnsUnreviewedFirstThenSplitBySkipAndWrong() {
+  void findWordsForReview_returnsUnreviewedFirstThenOrdersByTotalCountAndRightCountAsc() {
     UUID enUuid = languageRepository.findByName("English").orElseThrow().uuid();
     UUID itUuid = languageRepository.findByName("Italian").orElseThrow().uuid();
     List<WordView> result = wordLearningRepository.findWordsForReview(enUuid, itUuid, USER_ENRICO_ID, 10);
@@ -135,10 +134,10 @@ class WordLearningRepositoryTest {
     // 1) unreviewed words come first (cat, tomcat — no WORD_LEARNING record), in any order
     assertThat(result.subList(0, 2).stream().map(WordView::sentence).toList(),
         containsInAnyOrder("cat", "tomcat"));
-    // 2) Hello: skip=1 → highest skip count among reviewed words
-    assertThat(result.get(2).sentence(), equalTo("Hello"));
-    // 3) my house: skip=0, wrong=3 → no skip, falls back to wrong count desc
-    assertThat(result.get(3).sentence(), equalTo("my house"));
+    // 2) my house: total_count=3, right=0 → lowest total, lowest right → comes first
+    assertThat(result.get(2).sentence(), equalTo("my house"));
+    // 3) Hello: total_count=8, right=5 → higher total, higher right → comes last
+    assertThat(result.get(3).sentence(), equalTo("Hello"));
   }
 
   @Test

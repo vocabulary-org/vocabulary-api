@@ -26,6 +26,7 @@ import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.WORD_LEARNI
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.jooq.CustomJooqUtils;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.ReviewResult;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.WordLearningRecord;
-import java.util.ArrayList;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -58,6 +58,8 @@ public class WordLearningRepository {
   public static final String WRONG_COUNT_ALIAS = "wrongCount";
   public static final String SKIP_COUNT_ALIAS = "skipCount";
   public static final String REVIEW_RESULT_ALIAS = "reviewResult";
+
+  static final int COOLDOWN_HOURS = 24;
 
   private final DSLContext dsl;
   private final CustomJooqUtils jooqUtils;
@@ -97,7 +99,7 @@ public class WordLearningRepository {
       case SKIP -> record.setSkipCount(record.getSkipCount() + 1);
     }
     record.setLastResult(ReviewResult.valueOf(wordReviewResult.wordReviewResultType().name()));
-    record.setUpdatedAt(OffsetDateTime.now());
+    record.setLastReviewedAt(OffsetDateTime.now());
     record.update();
     return findByWordExternalId(wordUuid).orElseThrow();
   }
@@ -123,46 +125,61 @@ public class WordLearningRepository {
     }
 
     int remaining = limit - unreviewed.size();
-    int skipSlots = (remaining + 1) / 2;
-    int wrongSlots = remaining - skipSlots;
+    List<UUID> excludeUuids = unreviewed.stream().map(WordView::uuid).toList();
+    OffsetDateTime cooldownThreshold = OffsetDateTime.now().minusHours(COOLDOWN_HOURS);
+    var totalCount = WORD_LEARNING.RIGHT_COUNT.plus(WORD_LEARNING.WRONG_COUNT).plus(WORD_LEARNING.SKIP_COUNT);
 
-    // Step 2: half from words with highest skip_count (words the user avoids)
-    List<WordView> topSkip = dsl.select(WORD.EXTERNAL_ID, WORD.SENTENCE, WORD.TRANSLATION)
+    Condition reviewedBase = lFrom.EXTERNAL_ID.eq(languageUuid)
+        .and(lTo.EXTERNAL_ID.eq(languageToUuid))
+        .and(WORD.USER_ID.eq(userId));
+    if (!excludeUuids.isEmpty()) {
+      reviewedBase = reviewedBase.and(WORD.EXTERNAL_ID.notIn(excludeUuids));
+    }
+
+    // Step 2: reviewed words outside the cooldown window — ordered by total_count ASC, right_count ASC
+    List<WordView> cooledDown = dsl.select(WORD.EXTERNAL_ID, WORD.SENTENCE, WORD.TRANSLATION)
         .from(WORD)
         .join(WORD_LEARNING).on(WORD_LEARNING.WORD_ID.eq(WORD.ID))
         .join(lFrom).on(lFrom.ID.eq(WORD.LANGUAGE_ID))
         .join(lTo).on(lTo.ID.eq(WORD.LANGUAGE_TO_ID))
-        .where(lFrom.EXTERNAL_ID.eq(languageUuid))
-        .and(lTo.EXTERNAL_ID.eq(languageToUuid))
-        .and(WORD.USER_ID.eq(userId))
-        .orderBy(WORD_LEARNING.SKIP_COUNT.desc())
-        .limit(skipSlots)
+        .where(reviewedBase)
+        .and(WORD_LEARNING.LAST_REVIEWED_AT.le(cooldownThreshold))
+        .orderBy(totalCount.asc(), WORD_LEARNING.RIGHT_COUNT.asc())
+        .limit(remaining)
         .fetch(r -> new WordView(r.get(WORD.EXTERNAL_ID), r.get(WORD.SENTENCE), r.get(WORD.TRANSLATION)));
 
-    // Step 3: half from words with highest wrong_count (words the user gets wrong), excluding skip words
-    List<WordView> topWrong = List.of();
-    if (wrongSlots > 0) {
-      List<UUID> skipUuids = topSkip.stream().map(WordView::uuid).toList();
-      Condition wrongCondition = lFrom.EXTERNAL_ID.eq(languageUuid)
-          .and(lTo.EXTERNAL_ID.eq(languageToUuid))
-          .and(WORD.USER_ID.eq(userId));
-      if (!skipUuids.isEmpty()) {
-        wrongCondition = wrongCondition.and(WORD.EXTERNAL_ID.notIn(skipUuids));
-      }
-      topWrong = dsl.select(WORD.EXTERNAL_ID, WORD.SENTENCE, WORD.TRANSLATION)
-          .from(WORD)
-          .join(WORD_LEARNING).on(WORD_LEARNING.WORD_ID.eq(WORD.ID))
-          .join(lFrom).on(lFrom.ID.eq(WORD.LANGUAGE_ID))
-          .join(lTo).on(lTo.ID.eq(WORD.LANGUAGE_TO_ID))
-          .where(wrongCondition)
-          .orderBy(WORD_LEARNING.WRONG_COUNT.desc())
-          .limit(wrongSlots)
-          .fetch(r -> new WordView(r.get(WORD.EXTERNAL_ID), r.get(WORD.SENTENCE), r.get(WORD.TRANSLATION)));
+    if (cooledDown.size() >= remaining) {
+      List<WordView> result = new ArrayList<>(unreviewed);
+      result.addAll(cooledDown);
+      return result;
     }
 
+    // Step 3: fallback — fill remaining slots with recently reviewed words (least recent first)
+    int stillRemaining = remaining - cooledDown.size();
+    List<UUID> alreadySelected = new ArrayList<>(excludeUuids);
+    cooledDown.stream().map(WordView::uuid).forEach(alreadySelected::add);
+
+    Condition fallbackCondition = lFrom.EXTERNAL_ID.eq(languageUuid)
+        .and(lTo.EXTERNAL_ID.eq(languageToUuid))
+        .and(WORD.USER_ID.eq(userId))
+        .and(WORD_LEARNING.LAST_REVIEWED_AT.gt(cooldownThreshold));
+    if (!alreadySelected.isEmpty()) {
+      fallbackCondition = fallbackCondition.and(WORD.EXTERNAL_ID.notIn(alreadySelected));
+    }
+
+    List<WordView> recentFallback = dsl.select(WORD.EXTERNAL_ID, WORD.SENTENCE, WORD.TRANSLATION)
+        .from(WORD)
+        .join(WORD_LEARNING).on(WORD_LEARNING.WORD_ID.eq(WORD.ID))
+        .join(lFrom).on(lFrom.ID.eq(WORD.LANGUAGE_ID))
+        .join(lTo).on(lTo.ID.eq(WORD.LANGUAGE_TO_ID))
+        .where(fallbackCondition)
+        .orderBy(WORD_LEARNING.LAST_REVIEWED_AT.asc(), totalCount.asc())
+        .limit(stillRemaining)
+        .fetch(r -> new WordView(r.get(WORD.EXTERNAL_ID), r.get(WORD.SENTENCE), r.get(WORD.TRANSLATION)));
+
     List<WordView> result = new ArrayList<>(unreviewed);
-    result.addAll(topSkip);
-    result.addAll(topWrong);
+    result.addAll(cooledDown);
+    result.addAll(recentFallback);
     return result;
   }
 
