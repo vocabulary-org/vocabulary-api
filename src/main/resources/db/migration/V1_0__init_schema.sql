@@ -82,9 +82,10 @@ CREATE TABLE vocabulary.word_learning
     wrong_count integer     NOT NULL DEFAULT 0,
     skip_count  integer     NOT NULL DEFAULT 0,
     last_result vocabulary.review_result NULL,
+    last_reviewed_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     -- Audit fields (optional but recommended)
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+
     external_id UUID        NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 

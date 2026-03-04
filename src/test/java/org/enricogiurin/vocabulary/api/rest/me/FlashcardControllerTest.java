@@ -87,9 +87,9 @@ class FlashcardControllerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$", hasSize(4)))
-        // last two are reviewed: Hello (skip=1) before my house (skip=0, wrong=3)
-        .andExpect(jsonPath("$[2].sentence", is("Hello")))
-        .andExpect(jsonPath("$[3].sentence", is("my house")));
+        // last two are reviewed: my house (total=3, right=0) before Hello (total=8, right=5)
+        .andExpect(jsonPath("$[2].sentence", is("my house")))
+        .andExpect(jsonPath("$[3].sentence", is("Hello")));
   }
 
   @Test

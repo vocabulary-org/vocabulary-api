@@ -79,10 +79,10 @@ VALUES (1000000, 1000000,
         '00000000-0000-0000-0000-000000000001');
 
 -- test data for word_learning
--- 'Hello' has a learning record with RIGHT as last result
--- 'my house' has a learning record with WRONG as last result
+-- 'Hello' has a learning record with RIGHT as last result, reviewed 10 days ago (outside 24h cooldown)
+-- 'my house' has a learning record with WRONG as last result, reviewed 10 days ago (outside 24h cooldown)
 -- 'cat' has no learning record
-INSERT INTO vocabulary.word_learning (id, word_id, right_count, wrong_count, skip_count, last_result, external_id)
+INSERT INTO vocabulary.word_learning (id, word_id, right_count, wrong_count, skip_count, last_result, last_reviewed_at, external_id)
 VALUES
-    (1000000, 1000000, 5, 2, 1, 'RIGHT'::vocabulary.review_result, '00000000-0000-0001-0000-000000000001'),
-    (1000001, 1000001, 0, 3, 0, 'WRONG'::vocabulary.review_result, '00000000-0000-0001-0000-000000000002');
+    (1000000, 1000000, 5, 2, 1, 'RIGHT'::vocabulary.review_result, now() - interval '10 days', '00000000-0000-0001-0000-000000000001'),
+    (1000001, 1000001, 0, 3, 0, 'WRONG'::vocabulary.review_result, now() - interval '10 days', '00000000-0000-0001-0000-000000000002');
