@@ -191,6 +191,23 @@ mkdir -p /home/enrico/vocabulary/logs
 chmod 777 /home/enrico/vocabulary/logs
 ```
 
+## OTP Authentication for Keycloak Admin Console
+
+Reference video: [Keycloak OTP / 2FA setup with MS Authenticator](https://www.youtube.com/watch?v=CjYtgHcV_3c)
+
+### Steps
+
+1. **Log in** to the Keycloak Admin Console
+2. Go to **Authentication** → **Required Actions** → find **Configure OTP** and set it as **Default**
+3. Go to **Users** → select the **admin** user → **Required User Actions** → add **Configure OTP**
+4. On next login, Keycloak will prompt OTP enrollment — scan the **QR code** using **Microsoft Authenticator** (or any TOTP app): tap **+** → **Work or school account** → **Scan QR code**
+5. Enter the **6-digit OTP** from the app to complete enrollment
+6. On subsequent logins, enter your password then the **current OTP** from the app
+
+> OTP codes rotate every 30 seconds. Make sure the server clock is synced (NTP).
+
+---
+
 ## 🔐 Fix: 400 Bad Request (Invalid redirect_uri)
 
 ### Problem
