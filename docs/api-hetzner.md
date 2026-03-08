@@ -219,7 +219,7 @@ The API uses a dedicated Keycloak client (`vocabulary-api-admin`) with client cr
    - Enable **Client authentication** → ON
    - Enable **Service accounts roles** → ON
 2. **Credentials tab** → copy the **Client secret**
-3. **Service Account Roles tab** → Assign role → filter by clients → `master-realm` → assign **`manage-users`**
+3. **Service Account Roles tab** → Assign role → filter by clients → `vocabulary-realm` → assign **`manage-users`**
 
 ### Environment variable
 
