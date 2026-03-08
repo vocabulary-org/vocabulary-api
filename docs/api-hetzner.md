@@ -61,7 +61,11 @@ From the [Godaddy](https://www.godaddy.com/en) DNS console.
 
 <img src="images/dns.png" alt="subdomains in DNS" width="600">
 
-### SSL certbot configuration
+### SSL Certificates via Cloudflare
+
+See [ssl-cloudflare-certificates.md](ssl-cloudflare-certificates.md).
+
+### ~~SSL certbot configuration (Deprecated)~~
 Check if the DNS is active.
 ```shell
 dig +short api.myvocabulary.net 
