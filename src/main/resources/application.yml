@@ -32,7 +32,7 @@ application:
   keycloak:
     url: http://localhost:18081
     client-id: 'vocabulary-rest-api'
-    admin-client-id: 'admin-cli'
+    admin-client-id: 'vocabulary-api-admin'
     admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:changeme}
   keycloak-client-service:
     skip-email: false
