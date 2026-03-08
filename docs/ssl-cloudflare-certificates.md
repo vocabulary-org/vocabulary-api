@@ -56,8 +56,8 @@ The same wildcard certificate was installed for both:
 
 Both subdomains share a single certificate directory:
 
-- `nginx-conf/ssl/cloudflare/a.pem` — Cloudflare Origin Certificate
-- `nginx-conf/ssl/cloudflare/pk.pem` — Private Key
+- `nginx-conf/ssl/cloudflare/cert.pem` — Cloudflare Origin Certificate
+- `nginx-conf/ssl/cloudflare/privkey.pem` — Private Key
 
 ## Step 3 - Mount Certificates in Docker
 
@@ -73,8 +73,8 @@ This allows nginx inside Docker to read the certificates for both `auth` and `ap
 Commands used:
 
 ```shell
-docker exec -it vocabulary-nginx-ssl openssl x509 -enddate -noout -in /etc/nginx/ssl/auth/a.pem
-docker exec -it vocabulary-nginx-ssl openssl x509 -enddate -noout -in /etc/nginx/ssl/api/a.pem
+docker exec -it vocabulary-nginx-ssl openssl x509 -enddate -noout -in /etc/nginx/ssl/auth/cert.pem
+docker exec -it vocabulary-nginx-ssl openssl x509 -enddate -noout -in /etc/nginx/ssl/api/cert.pem
 ```
 
 Result for both:
