@@ -17,8 +17,7 @@ application:
     url: ${APPLICATION_SPA_URL}
   keycloak:
     url: ${APPLICATION_KC_URL}
-    username: ${KC_BOOTSTRAP_ADMIN_USERNAME}
-    password: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+    admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:changeme}
 
   cors:
     #allowed-origins: http://localhost:4200,https://gentle-tree-062b47803.1.azurestaticapps.net

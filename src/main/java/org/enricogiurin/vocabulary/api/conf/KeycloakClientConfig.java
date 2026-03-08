@@ -31,20 +31,18 @@ import org.springframework.context.annotation.Configuration;
 public class KeycloakClientConfig {
 
   public static final String REALM = "master";
-  public static final String CLIENT_ID = "admin-cli";
 
   @Bean
   Keycloak keycloak(@Value("${application.keycloak.url}") String keycloakUrl,
-      @Value("${application.keycloak.username}") String username,
-      @Value("${application.keycloak.password}") String password
+      @Value("${application.keycloak.admin-client-id}") String adminClientId,
+      @Value("${application.keycloak.admin-client-secret}") String adminClientSecret
   ) {
     return KeycloakBuilder.builder()
         .serverUrl(keycloakUrl)
         .realm(REALM)
-        .clientId(CLIENT_ID)
-        .grantType(OAuth2Constants.PASSWORD)
-        .username(username)
-        .password(password)
+        .clientId(adminClientId)
+        .clientSecret(adminClientSecret)
+        .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
         .build();
   }
 

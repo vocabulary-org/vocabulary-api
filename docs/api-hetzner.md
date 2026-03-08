@@ -208,6 +208,51 @@ Reference video: [Keycloak OTP / 2FA setup with MS Authenticator](https://www.yo
 
 ---
 
+## Zoho Mail SMTP Configuration in Keycloak
+
+[Zoho Mail](https://mail.zoho.eu)
+
+In the `vocabulary` realm → **Realm Settings** → **Email** tab, configure:
+
+| Field        | Value                        |
+|--------------|------------------------------|
+| Host         | `smtppro.zoho.eu`            |
+| Port         | `587`                        |
+| SSL          | Off                          |
+| StartTLS     | On                           |
+| Authentication | Enabled                    |
+| Username     | `support@myvocabulary.net`   |
+| Password     | *(Zoho app password)*        |
+
+> Use a **Zoho App Password** — generate it from Zoho Account → Security → App Passwords. Do not use your main account password.
+
+Save and use **Test connection** to verify.
+
+---
+
+## Keycloak Admin Client (Service Account)
+
+The API uses a dedicated Keycloak client (`vocabulary-api-admin`) with client credentials to manage users (registration, deletion), instead of username/password auth. This avoids issues with OTP being required on the admin user.
+
+### Setup in Keycloak (master realm)
+
+1. **Clients** → **Create client**
+   - Client ID: `vocabulary-api-admin`
+   - Enable **Client authentication** → ON
+   - Enable **Service accounts roles** → ON
+2. **Credentials tab** → copy the **Client secret**
+3. **Service Account Roles tab** → Assign role → filter by clients → `vocabulary-realm` → assign **`manage-users`**
+
+### Environment variable
+
+Add to your `.env` on the Hetzner server:
+
+```
+KEYCLOAK_ADMIN_CLIENT_SECRET=<client-secret-from-step-2>
+```
+
+---
+
 ## 🔐 Fix: 400 Bad Request (Invalid redirect_uri)
 
 ### Problem
