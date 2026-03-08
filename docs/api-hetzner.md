@@ -208,6 +208,28 @@ Reference video: [Keycloak OTP / 2FA setup with MS Authenticator](https://www.yo
 
 ---
 
+## Zoho Mail SMTP Configuration in Keycloak
+
+[Zoho Mail](https://mail.zoho.eu)
+
+In the `vocabulary` realm → **Realm Settings** → **Email** tab, configure:
+
+| Field        | Value                        |
+|--------------|------------------------------|
+| Host         | `smtppro.zoho.eu`            |
+| Port         | `587`                        |
+| SSL          | Off                          |
+| StartTLS     | On                           |
+| Authentication | Enabled                    |
+| Username     | `support@myvocabulary.net`   |
+| Password     | *(Zoho app password)*        |
+
+> Use a **Zoho App Password** — generate it from Zoho Account → Security → App Passwords. Do not use your main account password.
+
+Save and use **Test connection** to verify.
+
+---
+
 ## Keycloak Admin Client (Service Account)
 
 The API uses a dedicated Keycloak client (`vocabulary-api-admin`) with client credentials to manage users (registration, deletion), instead of username/password auth. This avoids issues with OTP being required on the admin user.
