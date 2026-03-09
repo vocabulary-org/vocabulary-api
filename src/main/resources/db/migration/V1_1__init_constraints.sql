@@ -55,6 +55,18 @@ ALTER TABLE ONLY vocabulary.user_languages
 ALTER TABLE ONLY vocabulary.user_languages
     ADD CONSTRAINT fk_user_languages_language_to FOREIGN KEY (language_to_id) REFERENCES vocabulary.language(id);
 
+ALTER TABLE ONLY vocabulary.tag
+    ADD CONSTRAINT tag_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY vocabulary.tag_keyword
+    ADD CONSTRAINT tag_keyword_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY vocabulary.tag_keyword
+    ADD CONSTRAINT fk_tag_keyword_tag FOREIGN KEY (tag_id) REFERENCES vocabulary.tag (id) ON DELETE CASCADE;
+
+CREATE INDEX idx_tag_keyword_tag_id ON vocabulary.tag_keyword (tag_id);
+CREATE INDEX idx_tag_keyword_keyword ON vocabulary.tag_keyword (keyword);
+
 
 
 
