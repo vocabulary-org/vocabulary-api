@@ -52,7 +52,10 @@ INSERT INTO vocabulary.tag (name) VALUES
 ('EDUCATION'),
 ('FAMILY'),
 ('FOOD'),
-('TRANSPORT');
+('TRANSPORT'),
+('SOCIAL'),
+('FINANCE'),
+('HOLIDAY');
 
 -- IT
 INSERT INTO vocabulary.tag_keyword (tag_id, keyword, weight) VALUES
@@ -362,6 +365,34 @@ INSERT INTO vocabulary.tag_keyword (tag_id, keyword, weight) VALUES
 ((SELECT id FROM vocabulary.tag WHERE name = 'FOOD'), 'tipping', 4),
 ((SELECT id FROM vocabulary.tag WHERE name = 'FOOD'), 'reservation', 4);
 
+-- SOCIAL
+INSERT INTO vocabulary.tag_keyword (tag_id, keyword, weight) VALUES
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'friend', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'date', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'party', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'flirt', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'invite', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'gathering', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'chat', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'relationship', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'crush', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'hangout', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'breakup', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'romance', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'hug', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'kiss', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'gossip', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'compliment', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'acquaintance', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'encounter', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'jealousy', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'affection', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'companionship', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'bond', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'networking', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'celebration', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'SOCIAL'), 'reunion', 5);
+
 -- TRANSPORT
 INSERT INTO vocabulary.tag_keyword (tag_id, keyword, weight) VALUES
 ((SELECT id FROM vocabulary.tag WHERE name = 'TRANSPORT'), 'car', 5),
@@ -389,3 +420,59 @@ INSERT INTO vocabulary.tag_keyword (tag_id, keyword, weight) VALUES
 ((SELECT id FROM vocabulary.tag WHERE name = 'TRANSPORT'), 'seatbelt', 5),
 ((SELECT id FROM vocabulary.tag WHERE name = 'TRANSPORT'), 'overtake', 5),
 ((SELECT id FROM vocabulary.tag WHERE name = 'TRANSPORT'), 'congestion', 5);
+
+-- FINANCE
+INSERT INTO vocabulary.tag_keyword (tag_id, keyword, weight) VALUES
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'bank', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'loan', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'mortgage', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'investment', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'interest', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'dividend', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'stock', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'tax', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'inflation', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'savings', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'debt', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'budget', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'currency', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'exchange', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'profit', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'revenue', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'expense', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'insurance', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'pension', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'portfolio', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'withdrawal', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'deposit', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'cryptocurrency', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'accountant', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'FINANCE'), 'audit', 5);
+
+-- HOLIDAY
+INSERT INTO vocabulary.tag_keyword (tag_id, keyword, weight) VALUES
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'beach', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'sunscreen', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'swimsuit', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'sunbathe', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'resort', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'vacation', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'suitcase', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'sunburn', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'snorkeling', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'tan', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'relaxation', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'umbrella', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'hammock', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'sandcastle', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'pool', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'cocktail', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'charter', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'all-inclusive', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'sightseeing', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'sunglasses', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'postcard', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'shore', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'wave', 4),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'surf', 5),
+((SELECT id FROM vocabulary.tag WHERE name = 'HOLIDAY'), 'getaway', 5);
