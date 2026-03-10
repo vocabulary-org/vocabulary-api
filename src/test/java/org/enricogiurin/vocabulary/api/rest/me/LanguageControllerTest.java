@@ -56,10 +56,8 @@ class LanguageControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$", hasSize(6)))
-        .andExpect(jsonPath("$[0].name").value("English"))
-        .andExpect(jsonPath("$[0].code").value("en"))
-        .andExpect(jsonPath("$[5].name").value("Spanish"))
-        .andExpect(jsonPath("$[5].code").value("es"));
+        .andExpect(jsonPath("$", hasSize(16)))
+        .andExpect(jsonPath("$[0].name").value("Arabic"))
+        .andExpect(jsonPath("$[0].code").value("ar"));
   }
 }

@@ -91,16 +91,17 @@ CREATE TABLE vocabulary.word_learning
 
 CREATE TABLE vocabulary.tag
 (
-    id   SERIAL,
-    name VARCHAR(50) NOT NULL UNIQUE
+    id          SERIAL,
+    name        VARCHAR(50)  NOT NULL UNIQUE,
+    description VARCHAR(200) NOT NULL
 );
 
-CREATE TABLE vocabulary.tag_keyword
+CREATE TABLE vocabulary.word_tag
 (
     id      SERIAL,
+    word_id INTEGER      NOT NULL,
     tag_id  INTEGER      NOT NULL,
-    keyword VARCHAR(100) NOT NULL,
-    weight  SMALLINT     NOT NULL CHECK (weight BETWEEN 1 AND 5)
+    label   VARCHAR(100) NOT NULL
 );
 
 
