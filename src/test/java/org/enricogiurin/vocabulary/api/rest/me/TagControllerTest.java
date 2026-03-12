@@ -63,7 +63,7 @@ class TagControllerTest {
   void suggest_returnsTagSuggestions() throws Exception {
     // given
     String sentence = "domenica vado a venezia in aereo";
-    when(anthropicTagSuggester.suggestTags(eq(sentence), eq("it"), anyList()))
+    when(anthropicTagSuggester.suggestTags(eq(sentence), eq("it")))
         .thenReturn(List.of(
             new TagSuggestion("TRAVEL", "Viaggio"),
             new TagSuggestion("TRANSPORT", "Trasporto"),
@@ -105,7 +105,4 @@ class TagControllerTest {
         .andExpect(status().isBadRequest());
   }
 
-  private static java.util.List<org.enricogiurin.vocabulary.api.model.Tag> anyList() {
-    return org.mockito.ArgumentMatchers.anyList();
-  }
 }

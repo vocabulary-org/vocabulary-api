@@ -26,33 +26,36 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import java.util.List;
-import org.enricogiurin.vocabulary.api.model.Tag;
+import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.TagSuggestion;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
+@SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
+@Import({VocabularyTestConfiguration.class, AnthropicTagSuggesterTest.MockAnthropicClientConfig.class})
 class AnthropicTagSuggesterTest {
 
-  private MockRestServiceServer server;
-  private AnthropicTagSuggester instance;
+
+  @Autowired
+  AnthropicTagSuggester instance;
+
+  @Autowired
+  MockRestServiceServer server;
 
   @BeforeEach
   void setUp() {
-    RestClient.Builder builder = RestClient.builder()
-        .baseUrl("https://mock.anthropic.local");
-
-    server = MockRestServiceServer.bindTo(builder).build();
-
-    AnthropicProperties properties = new AnthropicProperties(
-        "test-api-key",
-        "claude-haiku-4-5-20251001",
-        "https://mock.anthropic.local"
-    );
-    instance = new AnthropicTagSuggester(builder.build(), properties);
+    server.reset();
   }
 
   @Test
@@ -69,22 +72,12 @@ class AnthropicTagSuggesterTest {
         }
         """;
 
-    server.expect(requestTo("https://mock.anthropic.local/v1/messages"))
+    server.expect(requestTo(Matchers.endsWith("/v1/messages")))
         .andExpect(method(HttpMethod.POST))
         .andRespond(withSuccess(claudeResponse, MediaType.APPLICATION_JSON));
 
-    List<Tag> tags = List.of(
-        new Tag("IT", "Computers and technology"),
-        new Tag("TRAVEL", "Trips and tourism"),
-        new Tag("SPORT", "Sports and fitness"),
-        new Tag("TRANSPORT", "Cars, trains, planes"),
-        new Tag("HOLIDAY", "Vacations and leisure"),
-        new Tag("FOOD", "Restaurants and meals")
-    );
-
     // when
-    List<TagSuggestion> result = instance.suggestTags(
-        "domenica vado a venezia in aereo", "it", tags);
+    List<TagSuggestion> result = instance.suggestTags("domenica vado a venezia in aereo", "it");
 
     // then
     assertThat(result).hasSize(3);
@@ -112,17 +105,36 @@ class AnthropicTagSuggesterTest {
         }
         """;
 
-    server.expect(requestTo("https://mock.anthropic.local/v1/messages"))
+    server.expect(requestTo(Matchers.endsWith("/v1/messages")))
         .andExpect(method(HttpMethod.POST))
         .andRespond(withSuccess(claudeResponse, MediaType.APPLICATION_JSON));
 
     // when
-    List<TagSuggestion> result = instance.suggestTags("zzz", "en",
-        List.of(new Tag("IT", "Computers"), new Tag("TRAVEL", "Trips")));
+    List<TagSuggestion> result = instance.suggestTags("zzz", "en");
 
     // then
     assertThat(result).isEmpty();
 
     server.verify();
   }
+
+
+  @TestConfiguration
+  static class MockAnthropicClientConfig {
+
+    private final RestClient.Builder builder = RestClient.builder();
+    private final MockRestServiceServer mockServer = MockRestServiceServer.bindTo(builder).build();
+
+    @Bean
+    @Primary
+    RestClient anthropicRestClient() {
+      return builder.build();
+    }
+
+    @Bean
+    MockRestServiceServer mockRestServiceServer() {
+      return mockServer;
+    }
+  }
+
 }

@@ -24,9 +24,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.anthropic.AnthropicTagSuggester;
-import org.enricogiurin.vocabulary.api.model.Tag;
 import org.enricogiurin.vocabulary.api.model.TagSuggestion;
-import org.enricogiurin.vocabulary.api.repository.TagRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,12 +33,9 @@ import org.springframework.stereotype.Service;
 public class TagService {
 
   private final AnthropicTagSuggester anthropicTagSuggester;
-  private final TagRepository tagRepository;
 
   public List<TagSuggestion> suggestTags(String sentence, String languageCode) {
-    List<Tag> availableTags = tagRepository.findAll();
-    log.info("Suggesting tags for sentence: '{}' language: '{}' using {} available tags",
-        sentence, languageCode, availableTags.size());
-    return anthropicTagSuggester.suggestTags(sentence, languageCode, availableTags);
+    log.info("Suggesting tags for sentence: '{}' language: '{}'", sentence, languageCode);
+    return anthropicTagSuggester.suggestTags(sentence, languageCode);
   }
 }

@@ -21,7 +21,6 @@ package org.enricogiurin.vocabulary.api.service;
  */
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,7 +48,7 @@ class TagServiceTest {
   AnthropicTagSuggester anthropicTagSuggester;
 
   @Test
-  void suggestTags_loadsTagsFromDbAndCallsSuggester() {
+  void suggestTags_delegatesToSuggester() {
     // given
     String sentence = "domenica vado a venezia in aereo";
     List<TagSuggestion> mockSuggestions = List.of(
@@ -57,7 +56,7 @@ class TagServiceTest {
         new TagSuggestion("TRANSPORT", "Trasporto"),
         new TagSuggestion("HOLIDAY", "Vacanza")
     );
-    when(anthropicTagSuggester.suggestTags(eq(sentence), eq("it"), anyList()))
+    when(anthropicTagSuggester.suggestTags(eq(sentence), eq("it")))
         .thenReturn(mockSuggestions);
 
     // when
@@ -69,22 +68,6 @@ class TagServiceTest {
         .containsExactly("TRAVEL", "TRANSPORT", "HOLIDAY");
     assertThat(result).extracting(TagSuggestion::label)
         .containsExactly("Viaggio", "Trasporto", "Vacanza");
-
-    // verify the suggester was called with the sentence and the full list of tags from DB
-    verify(anthropicTagSuggester).suggestTags(eq(sentence), eq("it"), anyList());
-  }
-
-  @Test
-  void suggestTags_passesAllTagsFromDb() {
-    // given
-    String sentence = "I love pizza";
-    when(anthropicTagSuggester.suggestTags(eq(sentence), eq("en"), anyList()))
-        .thenReturn(List.of(new TagSuggestion("FOOD", "Food")));
-
-    // when
-    tagService.suggestTags(sentence, "en");
-
-    // then — verify all 15 predefined tags are passed to the suggester
-    verify(anthropicTagSuggester).suggestTags(eq(sentence), eq("en"), anyList());
+    verify(anthropicTagSuggester).suggestTags(eq(sentence), eq("it"));
   }
 }
