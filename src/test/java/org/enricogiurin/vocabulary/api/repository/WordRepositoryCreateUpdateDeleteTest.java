@@ -60,9 +60,7 @@ class WordRepositoryCreateUpdateDeleteTest {
     Language english = languageRepository.findByName("English").orElseThrow();
     Language german = languageRepository.findByName("German").orElseThrow();
 
-    Word newWord = new Word(null, "dog", "der Hund", "my dog",
-        new LanguageReference(english.uuid(), null),
-        new LanguageReference(german.uuid(), null));
+    Word newWord = new Word(null, "dog", "der Hund", "my dog", new LanguageReference(english.uuid(), null), new LanguageReference(german.uuid(), null), null);
     Word result = wordRepository.create(newWord, USER_ENRICO_ID);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
@@ -99,7 +97,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   @Test
   void updateAnExistingWord() {
     Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
-    Word updateWord = new Word(null, null, "new translation", "new description", null, null);
+    Word updateWord = new Word(null, null, "new translation", "new description", null, null, null);
     Word result = wordRepository.update(word.uuid(), updateWord, USER_ENRICO_ID);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
@@ -111,7 +109,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   @Test
   void updateANotExistingWord() {
     UUID randomUUID = UUID.randomUUID();
-    Word updateWord = new Word(null, null, "new translation", "new description", null, null);
+    Word updateWord = new Word(null, null, "new translation", "new description", null, null, null);
     DataNotFoundException ex = assertThrows(DataNotFoundException.class,
         () -> wordRepository.update(randomUUID, updateWord, USER_ENRICO_ID));
     assertThat(ex.getMessage(), equalTo("Word not found: " + randomUUID));

@@ -22,7 +22,9 @@ package org.enricogiurin.vocabulary.api.repository;
 
 
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.LANGUAGE;
+import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.TAG;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.USER;
+import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.WORD_TAG;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.Word.WORD;
 import static org.jooq.Functions.nullOnAllNull;
 import static org.jooq.impl.DSL.row;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import org.enricogiurin.vocabulary.api.model.TagSuggestion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
@@ -129,6 +132,9 @@ public class WordRepository {
     wordRecord.setDescription(word.description());
     wordRecord.setUserId(userId);
     wordRecord.insert();
+    if (word.tags() != null && !word.tags().isEmpty()) {
+      insertWordTags(wordRecord.getId(), word.tags());
+    }
     return findById(wordRecord.getId(), userId).orElseThrow(
         () -> new DataExecutionException("failed to create word[sentence]: " + word.sentence()));
   }
@@ -197,6 +203,21 @@ public class WordRepository {
   }
 
 
+  private void insertWordTags(Integer wordId, List<TagSuggestion> tags) {
+    tags.forEach(tag -> {
+      Integer tagId = dsl.select(TAG.ID)
+          .from(TAG)
+          .where(TAG.NAME.eq(tag.tag()))
+          .fetchOptional(TAG.ID)
+          .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + tag.tag()));
+      dsl.insertInto(WORD_TAG)
+          .set(WORD_TAG.WORD_ID, wordId)
+          .set(WORD_TAG.TAG_ID, tagId)
+          .set(WORD_TAG.LABEL, tag.label())
+          .execute();
+    });
+  }
+
   private SelectConditionStep<Record6<UUID, String, String, String, LanguageReference, LanguageReference>> getSelect(
       Integer userId) {
     return select()
@@ -244,7 +265,8 @@ public class WordRepository {
         record.get(TRANSLATION_ALIAS, String.class),
         record.get(DESCRIPTION_ALIAS, String.class),
         record.get(LANGUAGE_ALIAS, LanguageReference.class),
-        record.get(LANGUAGE_TO_ALIAS, LanguageReference.class)
+        record.get(LANGUAGE_TO_ALIAS, LanguageReference.class),
+        null
     );
   }
 
