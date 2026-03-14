@@ -18,21 +18,31 @@
 ALTER TABLE ONLY vocabulary.user
     ADD CONSTRAINT user_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY vocabulary.word
-    ADD CONSTRAINT word_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY vocabulary.language
     ADD CONSTRAINT language_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY vocabulary.user_languages
     ADD CONSTRAINT user_languages_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY vocabulary.word
+    ADD CONSTRAINT word_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY vocabulary.translation_usage
+    ADD CONSTRAINT translation_usage_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY vocabulary.word_learning
     ADD CONSTRAINT word_learning_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY vocabulary.tag
+    ADD CONSTRAINT tag_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY vocabulary.word_tag
+    ADD CONSTRAINT word_tag_pkey PRIMARY KEY (id);
+
+
 
 -- fk constraints
--- fk word
+
 ALTER TABLE ONLY vocabulary.word
     ADD CONSTRAINT fk_word_user FOREIGN KEY (user_id) REFERENCES vocabulary.user(id) ON DELETE CASCADE;
 
@@ -54,6 +64,18 @@ ALTER TABLE ONLY vocabulary.user_languages
 
 ALTER TABLE ONLY vocabulary.user_languages
     ADD CONSTRAINT fk_user_languages_language_to FOREIGN KEY (language_to_id) REFERENCES vocabulary.language(id);
+
+ALTER TABLE ONLY vocabulary.word_tag
+    ADD CONSTRAINT fk_word_tag_word FOREIGN KEY (word_id) REFERENCES vocabulary.word (id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY vocabulary.word_tag
+    ADD CONSTRAINT fk_word_tag_tag FOREIGN KEY (tag_id) REFERENCES vocabulary.tag (id) ON DELETE CASCADE;
+
+-- indexes
+ALTER TABLE ONLY vocabulary.word_tag
+    ADD CONSTRAINT word_tag_unique UNIQUE (word_id, tag_id);
+
+CREATE INDEX idx_word_tag_word_id ON vocabulary.word_tag (word_id);
 
 
 

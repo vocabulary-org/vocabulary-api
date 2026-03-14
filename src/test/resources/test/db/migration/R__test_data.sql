@@ -67,6 +67,11 @@ VALUES
      CURRENT_DATE + TIME '14:00');
 
 
+-- test data for word_tag: 'Hello' has TRAVEL and NATURE tags
+INSERT INTO vocabulary.word_tag (word_id, tag_id, label)
+VALUES (1000000, (SELECT id FROM vocabulary.tag WHERE name = 'TRAVEL'), 'Travel'),
+       (1000000, (SELECT id FROM vocabulary.tag WHERE name = 'NATURE'), 'Nature');
+
 --test data for translation_usage
 INSERT INTO vocabulary.translation_usage (month, cnt, external_id)
 VALUES (DATE '2025-07-01', 5, '00000000-0000-0000-0000-000000000001');

@@ -89,6 +89,21 @@ CREATE TABLE vocabulary.word_learning
     external_id UUID        NOT NULL UNIQUE DEFAULT gen_random_uuid()
 );
 
+CREATE TABLE vocabulary.tag
+(
+    id          SERIAL,
+    name        VARCHAR(50)  NOT NULL UNIQUE,
+    description VARCHAR(200) NOT NULL
+);
+
+CREATE TABLE vocabulary.word_tag
+(
+    id      SERIAL,
+    word_id INTEGER      NOT NULL,
+    tag_id  INTEGER      NOT NULL,
+    label   VARCHAR(100) NOT NULL
+);
+
 
 
 

@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.model;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.validation.ValidationGroups;
 
@@ -44,7 +45,9 @@ public record Word(UUID uuid,
                    LanguageReference language,
 
                    @NotNull(message = LANGUAGE_TO_NOT_NULL_CONSTRAINT, groups = ValidationGroups.Post.class)
-                   LanguageReference languageTo) {
+                   LanguageReference languageTo,
+
+                   List<TagSuggestion> tags) {
 
   public static final String SENTENCE_NOT_NULL_CONSTRAINT = "sentence must not be null";
   public static final String SENTENCE_CONSTRAINT = "sentence must be between 1 and 200 characters";

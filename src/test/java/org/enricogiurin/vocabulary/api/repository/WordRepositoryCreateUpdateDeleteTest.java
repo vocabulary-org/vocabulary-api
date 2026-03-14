@@ -23,15 +23,18 @@ package org.enricogiurin.vocabulary.api.repository;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThrows;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.Language;
 import org.enricogiurin.vocabulary.api.model.LanguageReference;
+import org.enricogiurin.vocabulary.api.model.TagSuggestion;
 import org.enricogiurin.vocabulary.api.model.Word;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +63,7 @@ class WordRepositoryCreateUpdateDeleteTest {
     Language english = languageRepository.findByName("English").orElseThrow();
     Language german = languageRepository.findByName("German").orElseThrow();
 
-    Word newWord = new Word(null, "dog", "der Hund", "my dog",
-        new LanguageReference(english.uuid(), null),
-        new LanguageReference(german.uuid(), null));
+    Word newWord = new Word(null, "dog", "der Hund", "my dog", new LanguageReference(english.uuid(), null), new LanguageReference(german.uuid(), null), null);
     Word result = wordRepository.create(newWord, USER_ENRICO_ID);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
@@ -99,7 +100,7 @@ class WordRepositoryCreateUpdateDeleteTest {
   @Test
   void updateAnExistingWord() {
     Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
-    Word updateWord = new Word(null, null, "new translation", "new description", null, null);
+    Word updateWord = new Word(null, null, "new translation", "new description", null, null, null);
     Word result = wordRepository.update(word.uuid(), updateWord, USER_ENRICO_ID);
     assertThat(result, notNullValue());
     assertThat(result.uuid(), notNullValue());
@@ -109,9 +110,46 @@ class WordRepositoryCreateUpdateDeleteTest {
   }
 
   @Test
+  void createANewWordWithTags() {
+    Language english = languageRepository.findByName("English").orElseThrow();
+    Language german = languageRepository.findByName("German").orElseThrow();
+    List<TagSuggestion> tags = List.of(
+        new TagSuggestion("TRAVEL", "Reise"),
+        new TagSuggestion("SPORT", "Sport")
+    );
+    Word newWord = new Word(null, "dog", "der Hund", "my dog",
+        new LanguageReference(english.uuid(), null), new LanguageReference(german.uuid(), null), tags);
+    Word result = wordRepository.create(newWord, USER_ENRICO_ID);
+    assertThat(result.tags(), hasSize(2));
+    assertThat(result.tags().get(0).tag(), equalTo("TRAVEL"));
+    assertThat(result.tags().get(0).label(), equalTo("Reise"));
+    assertThat(result.tags().get(1).tag(), equalTo("SPORT"));
+    assertThat(result.tags().get(1).label(), equalTo("Sport"));
+  }
+
+  @Test
+  void updateAnExistingWordReplacesTags() {
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
+    List<TagSuggestion> newTags = List.of(new TagSuggestion("SPORT", "Sport"));
+    Word updateWord = new Word(null, null, null, null, null, null, newTags);
+    Word result = wordRepository.update(word.uuid(), updateWord, USER_ENRICO_ID);
+    assertThat(result.tags(), hasSize(1));
+    assertThat(result.tags().get(0).tag(), equalTo("SPORT"));
+    assertThat(result.tags().get(0).label(), equalTo("Sport"));
+  }
+
+  @Test
+  void updateAnExistingWordWithEmptyTagsRemovesThem() {
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
+    Word updateWord = new Word(null, null, null, null, null, null, List.of());
+    Word result = wordRepository.update(word.uuid(), updateWord, USER_ENRICO_ID);
+    assertThat(result.tags(), hasSize(0));
+  }
+
+  @Test
   void updateANotExistingWord() {
     UUID randomUUID = UUID.randomUUID();
-    Word updateWord = new Word(null, null, "new translation", "new description", null, null);
+    Word updateWord = new Word(null, null, "new translation", "new description", null, null, null);
     DataNotFoundException ex = assertThrows(DataNotFoundException.class,
         () -> wordRepository.update(randomUUID, updateWord, USER_ENRICO_ID));
     assertThat(ex.getMessage(), equalTo("Word not found: " + randomUUID));

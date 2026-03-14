@@ -44,10 +44,10 @@ class LanguageRepositoryTest {
   @Test
   void findAll() {
     List<Language> languages = languageRepository.findAll();
-    assertThat(languages).hasSize(6);
+    assertThat(languages).hasSize(16);
     assertThat(languages.getFirst().name())
-        .isEqualTo("English");
+        .isEqualTo("Arabic");
     assertThat(languages.getLast().name())
-        .isEqualTo("Spanish");
+        .isEqualTo("Turkish");
   }
 }

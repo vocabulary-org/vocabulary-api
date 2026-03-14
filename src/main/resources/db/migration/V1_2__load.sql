@@ -23,8 +23,37 @@ VALUES ('en', 'English'),
        ('fr', 'French'),
        ('de', 'German'),
        ('it', 'Italian'),
-       ('ru', 'Russian');
+       ('ru', 'Russian'),
+       ('pt', 'Portuguese'),
+       ('zh', 'Chinese'),
+       ('ja', 'Japanese'),
+       ('ar', 'Arabic'),
+       ('hi', 'Hindi'),
+       ('ko', 'Korean'),
+       ('tr', 'Turkish'),
+       ('nl', 'Dutch'),
+       ('pl', 'Polish'),
+       ('sv', 'Swedish');
 
 -- insert a basic user, can be removed via KC admin console
 INSERT INTO vocabulary.user (username, email, keycloakId)
 VALUES ('enrico', 'enrico@user.com', 'ab8d6366-3e74-47f0-9c9b-114215b1b99f');
+
+-- Tags
+INSERT INTO vocabulary.tag (name, description) VALUES
+('IT',        'Computers, software, programming, internet, and technology'),
+('KITCHEN',   'Cooking, recipes, kitchen tools, ingredients, and food preparation'),
+('TRAVEL',    'Trips, flights, hotels, destinations, tourism, and exploration'),
+('SPORT',     'Sports, athletes, competitions, fitness, and physical activity'),
+('HEALTH',    'Medicine, doctors, hospitals, diseases, wellness, and healthcare'),
+('WORK',      'Jobs, office life, meetings, colleagues, career, and business'),
+('SHOPPING',  'Buying, stores, products, prices, discounts, and commerce'),
+('NATURE',    'Animals, plants, landscapes, weather, and the natural world'),
+('EDUCATION', 'Schools, studying, teachers, exams, universities, and learning'),
+('FAMILY',    'Parents, children, relatives, marriage, and family relationships'),
+('FOOD',      'Restaurants, meals, dishes, flavors, cuisine, and dining out'),
+('TRANSPORT', 'Cars, trains, buses, planes, traffic, and getting around'),
+('SOCIAL',    'Friends, relationships, parties, dating, and social interactions'),
+('FINANCE',   'Money, banks, investments, taxes, savings, and financial matters'),
+('HOLIDAY',   'Vacations, beaches, leisure, relaxation, and time off');
+

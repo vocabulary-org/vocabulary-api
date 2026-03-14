@@ -22,10 +22,14 @@ package org.enricogiurin.vocabulary.api.repository;
 
 
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.LANGUAGE;
+import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.TAG;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.USER;
+import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.WORD_TAG;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.Word.WORD;
 import static org.jooq.Functions.nullOnAllNull;
+import static org.jooq.impl.DSL.multiset;
 import static org.jooq.impl.DSL.row;
+import org.jooq.impl.DSL;
 
 import com.yourrents.services.common.searchable.Searchable;
 import com.yourrents.services.common.util.exception.DataNotFoundException;
@@ -34,6 +38,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import org.enricogiurin.vocabulary.api.model.TagSuggestion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
@@ -44,7 +49,7 @@ import org.enricogiurin.vocabulary.api.model.Word;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
-import org.jooq.Record6;
+import org.jooq.Record7;
 import org.jooq.Select;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectOnConditionStep;
@@ -67,6 +72,7 @@ public class WordRepository {
   public static final String LANGUAGE_TO_ALIAS = "languageTo";
   public static final String DESCRIPTION_ALIAS = "description";
   public static final String UPDATED_AT = "updatedAt";
+  public static final String TAGS_ALIAS = "tags";
 
 
   private final DSLContext dsl;
@@ -129,6 +135,9 @@ public class WordRepository {
     wordRecord.setDescription(word.description());
     wordRecord.setUserId(userId);
     wordRecord.insert();
+    if (word.tags() != null && !word.tags().isEmpty()) {
+      insertWordTags(wordRecord.getId(), word.tags());
+    }
     return findById(wordRecord.getId(), userId).orElseThrow(
         () -> new DataExecutionException("failed to create word[sentence]: " + word.sentence()));
   }
@@ -173,6 +182,12 @@ public class WordRepository {
     }
     wordRecord.setUpdatedAt(OffsetDateTime.now());
     wordRecord.update();
+    if (word.tags() != null) {
+      dsl.deleteFrom(WORD_TAG).where(WORD_TAG.WORD_ID.eq(wordRecord.getId())).execute();
+      if (!word.tags().isEmpty()) {
+        insertWordTags(wordRecord.getId(), word.tags());
+      }
+    }
     return findById(wordRecord.getId(), userId).orElseThrow(
         () -> new DataExecutionException("failed to update word: " + uuid));
   }
@@ -197,7 +212,22 @@ public class WordRepository {
   }
 
 
-  private SelectConditionStep<Record6<UUID, String, String, String, LanguageReference, LanguageReference>> getSelect(
+  private void insertWordTags(Integer wordId, List<TagSuggestion> tags) {
+    tags.forEach(tag -> {
+      Integer tagId = dsl.select(TAG.ID)
+          .from(TAG)
+          .where(TAG.NAME.eq(tag.tag()))
+          .fetchOptional(TAG.ID)
+          .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + tag.tag()));
+      dsl.insertInto(WORD_TAG)
+          .set(WORD_TAG.WORD_ID, wordId)
+          .set(WORD_TAG.TAG_ID, tagId)
+          .set(WORD_TAG.LABEL, tag.label())
+          .execute();
+    });
+  }
+
+  private SelectConditionStep<Record7<UUID, String, String, String, LanguageReference, LanguageReference, List<TagSuggestion>>> getSelect(
       Integer userId) {
     return select()
         .join(USER).on(USER.ID.eq(WORD.USER_ID))
@@ -206,7 +236,7 @@ public class WordRepository {
 
 
   //code fixed via CGPT
-  private SelectOnConditionStep<Record6<UUID, String, String, String, LanguageReference, LanguageReference>> select() {
+  private SelectOnConditionStep<Record7<UUID, String, String, String, LanguageReference, LanguageReference, List<TagSuggestion>>> select() {
     var L_FROM = LANGUAGE.as("l_from");
     var L_TO = LANGUAGE.as("l_to");
     return dsl.select(
@@ -217,7 +247,13 @@ public class WordRepository {
             row(L_FROM.EXTERNAL_ID, L_FROM.NAME)
                 .mapping(nullOnAllNull(LanguageReference::new)).as("language"),
             row(L_TO.EXTERNAL_ID, L_TO.NAME)
-                .mapping(nullOnAllNull(LanguageReference::new)).as("languageTo")
+                .mapping(nullOnAllNull(LanguageReference::new)).as("languageTo"),
+            multiset(
+                DSL.select(TAG.NAME, WORD_TAG.LABEL)
+                    .from(WORD_TAG)
+                    .join(TAG).on(TAG.ID.eq(WORD_TAG.TAG_ID))
+                    .where(WORD_TAG.WORD_ID.eq(WORD.ID))
+            ).as(TAGS_ALIAS).convertFrom(r -> r.map(t -> new TagSuggestion(t.value1(), t.value2())))
         )
         .from(WORD)
         .join(L_FROM).on(L_FROM.ID.eq(WORD.LANGUAGE_ID))
@@ -237,6 +273,7 @@ public class WordRepository {
     };
   }
 
+  @SuppressWarnings("unchecked")
   private Word map(Record record) {
     return new Word(
         record.get(UUID_ALIAS, UUID.class),
@@ -244,7 +281,8 @@ public class WordRepository {
         record.get(TRANSLATION_ALIAS, String.class),
         record.get(DESCRIPTION_ALIAS, String.class),
         record.get(LANGUAGE_ALIAS, LanguageReference.class),
-        record.get(LANGUAGE_TO_ALIAS, LanguageReference.class)
+        record.get(LANGUAGE_TO_ALIAS, LanguageReference.class),
+        (List<TagSuggestion>) record.get(TAGS_ALIAS)
     );
   }
 
