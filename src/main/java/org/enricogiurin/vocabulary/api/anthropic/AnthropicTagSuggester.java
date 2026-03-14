@@ -25,7 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.model.TagSuggestion;
 import org.enricogiurin.vocabulary.api.repository.TagRepository;
@@ -44,6 +46,7 @@ public class AnthropicTagSuggester {
   private final ObjectMapper objectMapper;
   private final TagRepository tagRepository;
 
+  @Getter(AccessLevel.PACKAGE)
   private String systemPrompt;
 
   @PostConstruct
@@ -92,9 +95,13 @@ public class AnthropicTagSuggester {
     return parseTagSuggestions(json);
   }
 
-  private List<TagSuggestion> parseTagSuggestions(String json) {
+  List<TagSuggestion> parseTagSuggestions(String json) {
     try {
-      return objectMapper.readValue(json, new TypeReference<>() {});
+      String cleaned = json.strip();
+      if (cleaned.startsWith("```")) {
+        cleaned = cleaned.replaceFirst("^```[a-zA-Z]*\\n?", "").replaceFirst("```$", "").strip();
+      }
+      return objectMapper.readValue(cleaned, new TypeReference<>() {});
     } catch (Exception e) {
       log.error("Failed to parse tag suggestions from JSON: {}", json, e);
       return List.of();

@@ -119,6 +119,49 @@ class AnthropicTagSuggesterTest {
   }
 
 
+  @Test
+  void init_systemPromptContainsAllTags() {
+    assertThat(instance.getSystemPrompt()).isNotBlank();
+    assertThat(instance.getSystemPrompt()).contains("- EDUCATION: Schools, studying, teachers, exams, universities, and learning");
+    assertThat(instance.getSystemPrompt()).contains("- TRAVEL: Trips, flights, hotels, destinations, tourism, and exploration");
+    assertThat(instance.getSystemPrompt()).contains("- FINANCE: Money, banks, investments, taxes, savings, and financial matters");
+  }
+
+  @Test
+  void parseTagSuggestions_plainJson() {
+    String json = """
+        [
+          {"tag": "TRAVEL", "label": "Travel"},
+          {"tag": "NATURE", "label": "Nature"}
+        ]
+        """;
+
+    List<TagSuggestion> result = instance.parseTagSuggestions(json);
+
+    assertThat(result).hasSize(2);
+    assertThat(result.get(0).tag()).isEqualTo("TRAVEL");
+    assertThat(result.get(0).label()).isEqualTo("Travel");
+    assertThat(result.get(1).tag()).isEqualTo("NATURE");
+    assertThat(result.get(1).label()).isEqualTo("Nature");
+  }
+
+  @Test
+  void parseTagSuggestions_withCodeFences() {
+    String json = """
+        ```json
+        [
+          {"tag": "TRAVEL", "label": "Travel"},
+          {"tag": "NATURE", "label": "Nature"}
+        ]
+        ```""";
+
+    List<TagSuggestion> result = instance.parseTagSuggestions(json);
+
+    assertThat(result).hasSize(2);
+    assertThat(result.get(0).tag()).isEqualTo("TRAVEL");
+    assertThat(result.get(1).tag()).isEqualTo("NATURE");
+  }
+
   @TestConfiguration
   static class MockAnthropicClientConfig {
 
