@@ -22,6 +22,7 @@ package org.enricogiurin.vocabulary.api.repository;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.iterableWithSize;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -74,6 +75,16 @@ class WordRepositoryTest {
     assertThat(word, notNullValue());
     assertThat(word.uuid(), equalTo(HELLO_UUID));
     assertThat(word.language().name(), equalTo("English"));
+  }
+
+  @Test
+  void findById_returnsTags() {
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
+    assertThat(word.tags(), hasSize(2));
+    assertThat(word.tags().get(0).tag(), equalTo("TRAVEL"));
+    assertThat(word.tags().get(0).label(), equalTo("Travel"));
+    assertThat(word.tags().get(1).tag(), equalTo("NATURE"));
+    assertThat(word.tags().get(1).label(), equalTo("Nature"));
   }
 
   @Test

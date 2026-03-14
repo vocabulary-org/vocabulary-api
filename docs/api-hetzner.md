@@ -253,6 +253,8 @@ Add to your `.env` on the Hetzner server:
 
 ```
 KEYCLOAK_ADMIN_CLIENT_SECRET=<client-secret-from-step-2>
+AZURE_TRANSLATOR_KEY=<your-azure-translator-key>
+ANTHROPIC_API_KEY=<your-anthropic-api-key>
 ```
 
 ---

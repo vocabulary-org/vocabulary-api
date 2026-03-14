@@ -36,6 +36,16 @@ Assign a domain name to the KeyCloak server `keycloak.local`, by adding the foll
 The Keycloak server is available at <http://keycloak.local:18081>.
 You can access the administration console with the `admin` user and the `pwd` password.
 
+## External API Keys
+
+The application requires the following external API keys when running locally.
+Add them as JVM arguments in your IntelliJ run configuration (**Run → Edit Configurations → VM options**):
+
+```
+-DAZURE_TRANSLATOR_KEY=<your-azure-translator-key>
+-DANTHROPIC_API_KEY=<your-anthropic-api-key>
+```
+
 ## Starting the application locally
 
 ### with NO nginx
