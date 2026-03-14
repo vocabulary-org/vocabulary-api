@@ -139,6 +139,14 @@ class WordRepositoryCreateUpdateDeleteTest {
   }
 
   @Test
+  void updateAnExistingWordWithEmptyTagsRemovesThem() {
+    Word word = wordRepository.findById(HELLO_ID, USER_ENRICO_ID).orElseThrow();
+    Word updateWord = new Word(null, null, null, null, null, null, List.of());
+    Word result = wordRepository.update(word.uuid(), updateWord, USER_ENRICO_ID);
+    assertThat(result.tags(), hasSize(0));
+  }
+
+  @Test
   void updateANotExistingWord() {
     UUID randomUUID = UUID.randomUUID();
     Word updateWord = new Word(null, null, "new translation", "new description", null, null, null);

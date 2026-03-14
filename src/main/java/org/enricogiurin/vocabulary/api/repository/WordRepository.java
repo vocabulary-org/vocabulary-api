@@ -182,9 +182,11 @@ public class WordRepository {
     }
     wordRecord.setUpdatedAt(OffsetDateTime.now());
     wordRecord.update();
-    if (word.tags() != null && !word.tags().isEmpty()) {
+    if (word.tags() != null) {
       dsl.deleteFrom(WORD_TAG).where(WORD_TAG.WORD_ID.eq(wordRecord.getId())).execute();
-      insertWordTags(wordRecord.getId(), word.tags());
+      if (!word.tags().isEmpty()) {
+        insertWordTags(wordRecord.getId(), word.tags());
+      }
     }
     return findById(wordRecord.getId(), userId).orElseThrow(
         () -> new DataExecutionException("failed to update word: " + uuid));
