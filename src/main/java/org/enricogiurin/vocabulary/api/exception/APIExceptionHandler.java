@@ -45,7 +45,7 @@ class APIExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(DataNotFoundException.class)
   public ResponseEntity<Object> dataNotFound(DataNotFoundException e, NativeWebRequest request) {
-    log.error(e.getMessage(), e);
+    logException(e);
     return super.handleExceptionInternal(e,
         buildErrorResponse(e.getMessage(), e, request, HttpStatus.NOT_FOUND.value()),
         new HttpHeaders(), HttpStatus.NOT_FOUND, request);
@@ -53,7 +53,7 @@ class APIExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(DataConflictException.class)
   public ResponseEntity<Object> dataConflict(DataConflictException e, NativeWebRequest request) {
-    log.error(e.getMessage(), e);
+    logException(e);
     return super.handleExceptionInternal(e,
         buildErrorResponse(e.getMessage(), e, request, HttpStatus.CONFLICT.value()),
         new HttpHeaders(), HttpStatus.CONFLICT, request);
@@ -61,7 +61,7 @@ class APIExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(DataExecutionException.class)
   public ResponseEntity<Object> dataExecution(DataExecutionException e, NativeWebRequest request) {
-    log.error(e.getMessage(), e);
+    logException(e);
     return super.handleExceptionInternal(e,
         buildErrorResponse(e.getMessage(), e, request, HttpStatus.INTERNAL_SERVER_ERROR.value()),
         new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
@@ -69,7 +69,7 @@ class APIExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(KeycloakException.class)
   public ResponseEntity<Object> keycloak(KeycloakException e, NativeWebRequest request) {
-    log.error(e.getMessage(), e);
+    logException(e);
     return super.handleExceptionInternal(e,
         buildErrorResponse(e.getMessage(), e, request, HttpStatus.INTERNAL_SERVER_ERROR.value()),
         new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
@@ -78,7 +78,7 @@ class APIExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(QuotaExceededException.class)
   public ResponseEntity<Object> handleQuotaExceeded(QuotaExceededException e,
       NativeWebRequest request) {
-    log.error(e.getMessage(), e);
+    logException(e);
     return super.handleExceptionInternal(e,
         buildErrorResponse(e.getMessage(), e, request, HttpStatus.TOO_MANY_REQUESTS.value()),
         new HttpHeaders(), HttpStatus.TOO_MANY_REQUESTS, request);
@@ -110,6 +110,19 @@ class APIExceptionHandler extends ResponseEntityExceptionHandler {
   /*
    **** helpers ****
    */
+  void logException(Exception e) {
+    StackTraceElement[] stackTrace = e.getStackTrace();
+    if (stackTrace.length > 0) {
+      StackTraceElement origin = stackTrace[0];
+      log.warn("{} at {}.{}:{} - {}",
+          e.getClass().getSimpleName(),
+          origin.getClassName(), origin.getMethodName(), origin.getLineNumber(),
+          e.getMessage());
+    } else {
+      log.warn("{} - {}", e.getClass().getSimpleName(), e.getMessage());
+    }
+  }
+
   private ApiError buildErrorResponse(String message, Exception e, NativeWebRequest request,
       int status) {
     return new ApiError(message, e.getMessage(), status,
