@@ -44,7 +44,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 class SecurityConfiguration {
 
 
-  @Value("${spring.websecurity.debug:true}")
+  @Value("${spring.websecurity.debug:false}")
   private boolean webSecurityDebug;
 
 
