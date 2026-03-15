@@ -25,6 +25,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.service.UserService;
 import org.slf4j.MDC;
 import org.enricogiurin.vocabulary.api.service.UserService.UserCreationAttributes;
@@ -32,8 +33,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Slf4j
 @Component
-
 public class UserProvisioningFilter extends OncePerRequestFilter {
 
   private final PrincipalAccessor principalAccessor;
@@ -68,6 +69,11 @@ public class UserProvisioningFilter extends OncePerRequestFilter {
       HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
+    if (!principalAccessor.isValid()) {
+      log.info("Principal is not a JWT, skipping user provisioning for request: {}", request.getRequestURI());
+      filterChain.doFilter(request, response);
+      return;
+    }
     String subject = principalAccessor.getSubject();
     if (subject != null) {
       MDC.put("username", principalAccessor.getUsername());
