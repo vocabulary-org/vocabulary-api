@@ -178,6 +178,31 @@ User: <your-postgres-user>
 Password: <your-postgres-password>
 ```
 
+## Deploying a new version
+
+Use the `deploy-vocabulary-api.sh` script from the Hetzner server to pull and restart the stack with a specific image version.
+
+```shell
+cd docker-hetzner/scripts
+./deploy-vocabulary-api.sh <version>
+```
+
+Example:
+
+```shell
+./deploy-vocabulary-api.sh 1.0.5
+```
+
+The script will:
+1. Bring down the running compose stack
+2. Remove the existing local image for that version (if any)
+3. Pull `egch/vocabulary-api:<version>` from the registry
+4. Restart the stack with the new image via `IMAGE_TAG=<version> docker compose up -d`
+
+> Run the script from inside `docker-hetzner/scripts/` — the compose file path is relative.
+
+---
+
 ## Check the Docker logs
 ### Keycloak log
 ```shell

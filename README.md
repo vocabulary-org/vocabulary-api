@@ -158,6 +158,24 @@ To skip them, activate the `skip-keycloak` Maven profile:
 mvn test -P skip-keycloak
 ```
 
+## Build and publish the Docker image
+
+Use `scripts/deploy-image.sh` to build the Spring Boot image, tag it, and push it to Docker Hub:
+
+```shell
+./scripts/deploy-image.sh <version>
+```
+
+Example:
+
+```shell
+./scripts/deploy-image.sh 1.0.5
+```
+
+This will run `mvn spring-boot:build-image`, tag the result as `egch/vocabulary-api:<version>`, and push it to Docker Hub.
+
+> See [Hetzner Notes](docs/api-hetzner.md) for the server-side deployment step.
+
 ## Developer Notes
 * [Developer Notes](docs/developer-notes.md)
 * [Hetzner Notes](docs/api-hetzner.md)
