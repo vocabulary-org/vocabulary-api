@@ -26,6 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.enricogiurin.vocabulary.api.service.UserService;
+import org.slf4j.MDC;
 import org.enricogiurin.vocabulary.api.service.UserService.UserCreationAttributes;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -69,6 +70,7 @@ public class UserProvisioningFilter extends OncePerRequestFilter {
 
     String subject = principalAccessor.getSubject();
     if (subject != null) {
+      MDC.put("username", principalAccessor.getUsername());
       UserCreationAttributes userCreationAttributes = new UserCreationAttributes(
           principalAccessor.getUsername());
       Integer userIdByKeycloakId = userService.findOrSaveUserIdByKeycloakId(subject,
@@ -76,7 +78,11 @@ public class UserProvisioningFilter extends OncePerRequestFilter {
       currentUser.setUserId(userIdByKeycloakId);
       currentUser.setSubject(subject);
     }
-    filterChain.doFilter(request, response);
+    try {
+      filterChain.doFilter(request, response);
+    } finally {
+      MDC.remove("username");
+    }
   }
 
 }
