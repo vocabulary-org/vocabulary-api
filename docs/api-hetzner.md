@@ -256,6 +256,17 @@ In the `vocabulary` realm → **Realm Settings** → **Email** tab, configure:
 
 > The username is **not** your Brevo account email. Go to Brevo → **SMTP & API** → **SMTP** tab to find the dedicated SMTP login and key.
 
+### Domain verification in Brevo
+
+Before sending works, verify `myvocabulary.net` in Brevo:
+
+1. Brevo → **Senders & IP** → **Domains** → **Add a domain** → enter `myvocabulary.net`
+2. Brevo will provide DNS records (TXT for verification + DKIM CNAME)
+3. Add those records in **Cloudflare** under `myvocabulary.net` DNS tab
+4. Come back to Brevo and click **Verify**
+
+Once verified, `support@myvocabulary.net` is an allowed sender.
+
 Save and use **Test connection** to verify.
 
 ---
