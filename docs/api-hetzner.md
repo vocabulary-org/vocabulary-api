@@ -271,6 +271,22 @@ Save and use **Test connection** to verify.
 
 ---
 
+## Cloudflare Email Routing (Incoming Mail)
+
+To receive emails sent to `support@myvocabulary.net` in your personal inbox, use Cloudflare Email Routing (free):
+
+1. In Cloudflare → select `myvocabulary.net` → **Email** → **Email Routing**
+2. Click **Enable Email Routing** — Cloudflare automatically adds the required MX records
+3. Under **Routing Rules** → **Custom addresses** → **Create address**
+   - Address: `support`
+   - Action: **Send to** → your personal email (e.g. `enricogiurin@gmail.com`)
+4. Click **Save**
+5. Confirm the verification email sent to your personal inbox
+
+> This is independent of Brevo. Brevo handles **outgoing** mail (Keycloak → users), Cloudflare Email Routing handles **incoming** mail (users → your inbox).
+
+---
+
 ## Keycloak Admin Client (Service Account)
 
 The API uses a dedicated Keycloak client (`vocabulary-api-admin`) with client credentials to manage users (registration, deletion), instead of username/password auth. This avoids issues with OTP being required on the admin user.
