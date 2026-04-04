@@ -237,23 +237,24 @@ Reference video: [Keycloak OTP / 2FA setup with MS Authenticator](https://www.yo
 
 ---
 
-## Zoho Mail SMTP Configuration in Keycloak
+## Brevo SMTP Configuration in Keycloak
 
-[Zoho Mail](https://mail.zoho.eu)
+[Brevo](https://app.brevo.com)
 
 In the `vocabulary` realm → **Realm Settings** → **Email** tab, configure:
 
-| Field        | Value                        |
-|--------------|------------------------------|
-| Host         | `smtppro.zoho.eu`            |
-| Port         | `587`                        |
-| SSL          | Off                          |
-| StartTLS     | On                           |
-| Authentication | Enabled                    |
-| Username     | `support@myvocabulary.net`   |
-| Password     | *(Zoho app password)*        |
+| Field          | Value                                        |
+|----------------|----------------------------------------------|
+| Host           | `smtp-relay.brevo.com`                       |
+| Port           | `587`                                        |
+| From           | `support@myvocabulary.net`                   |
+| SSL            | Off                                          |
+| StartTLS       | On                                           |
+| Authentication | Enabled                                      |
+| Username       | *(Brevo SMTP login — found in SMTP & API tab, looks like `xxxxxxx@smtp-brevo.com`)* |
+| Password       | *(Brevo SMTP key — found in SMTP & API tab)* |
 
-> Use a **Zoho App Password** — generate it from Zoho Account → Security → App Passwords. Do not use your main account password.
+> The username is **not** your Brevo account email. Go to Brevo → **SMTP & API** → **SMTP** tab to find the dedicated SMTP login and key.
 
 Save and use **Test connection** to verify.
 
