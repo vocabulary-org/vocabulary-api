@@ -15,6 +15,7 @@ services:
       AZURE_TRANSLATOR_KEY: ${AZURE_TRANSLATOR_KEY}
       TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
     volumes:
       - ./config:/config:ro
       - ./logs:/app/logs

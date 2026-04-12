@@ -22,6 +22,18 @@ spring:
           jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
 
 
+  mail:
+    host: ${MAIL_HOST:smtp-relay.brevo.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   # Database Flyway migrations
   flyway:
     locations: classpath:/db/migration
@@ -51,6 +63,10 @@ application:
 
   translation:
     monthly-max-translations: 30000
+
+  notification:
+    admin-email: ${NOTIFICATION_ADMIN_EMAIL:enricogiurin@gmail.com}
+    from-email: ${NOTIFICATION_FROM_EMAIL:noreply@myvocabulary.net}
 
 
 
