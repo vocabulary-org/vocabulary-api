@@ -84,17 +84,6 @@ class UserRepositoryTest {
   }
 
   @Test
-  void update() {
-    User oldUser = userRepository.findById(USER_ID).orElseThrow();
-    User user = new User(null, "John", "a@google.com", "aaa");
-    User result = userRepository.update(oldUser.uuid(), user);
-    assertThat(result).isNotNull();
-    assertThat(result.uuid()).isNotNull();
-    assertThat(result.username()).isEqualTo("John");
-    assertThat(result.email()).isEqualTo("a@google.com");
-  }
-
-  @Test
   void findUserIdByKeycloakId() {
     Integer userId = userRepository.findUserIdByKeycloakId(
         "f95cb50f-5f3b-4b71-9f8b-3495d47622cf").orElseThrow();

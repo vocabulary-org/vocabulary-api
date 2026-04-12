@@ -24,7 +24,6 @@ package org.enricogiurin.vocabulary.api.repository;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.USER;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -90,28 +89,6 @@ public class UserRepository {
     userRecord.insert();
     return findById(userRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to create user[username]: " + user.username()));
-  }
-
-
-  /**
-   * Update an existing user
-   *
-   * @return the new created User
-   * @throws DataExecutionException if something unexpected happens
-   */
-  @Transactional(readOnly = false)
-  public User update(UUID uuid, User user) {
-    UserRecord userRecord = dsl.selectFrom(USER)
-        .where(USER.EXTERNAL_ID.eq(uuid))
-        .fetchOptional().orElseThrow(
-            () -> new DataNotFoundException("User not found: " + uuid));
-    userRecord.setUsername(user.username());
-    userRecord.setEmail(user.email());
-    userRecord.setKeycloakid(user.keycloakId());
-    userRecord.setUpdatedAt(OffsetDateTime.now());
-    userRecord.update();
-    return findById(userRecord.getId()).orElseThrow(
-        () -> new DataExecutionException("failed to update user[uuid]: " + uuid));
   }
 
   /**
