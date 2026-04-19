@@ -24,6 +24,7 @@ import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.TAG;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.model.Tag;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
@@ -32,14 +33,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class TagRepository {
 
   private final DSLContext dsl;
 
   public List<Tag> findAll() {
-    return dsl.select(TAG.NAME, TAG.DESCRIPTION)
+    List<Tag> tags = dsl.select(TAG.NAME, TAG.DESCRIPTION)
         .from(TAG)
         .orderBy(TAG.NAME)
         .fetch(r -> new Tag(r.get(TAG.NAME), r.get(TAG.DESCRIPTION)));
+    log.info("Retrieved {} tags from DB", tags.size());
+    return tags;
   }
 }

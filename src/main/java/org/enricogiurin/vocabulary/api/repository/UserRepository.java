@@ -92,26 +92,45 @@ public class UserRepository {
         () -> new DataExecutionException("failed to create user[username]: " + user.username()));
   }
 
-
   /**
-   * Update an existing user
-   *
-   * @return the new created User
-   * @throws DataExecutionException if something unexpected happens
+   * Returns the userId for the given keycloakId, inserting the user if not already present.
+   * Safe under concurrent requests: uses ON CONFLICT DO NOTHING on the insert.
    */
   @Transactional(readOnly = false)
-  public User update(UUID uuid, User user) {
-    UserRecord userRecord = dsl.selectFrom(USER)
-        .where(USER.EXTERNAL_ID.eq(uuid))
-        .fetchOptional().orElseThrow(
-            () -> new DataNotFoundException("User not found: " + uuid));
-    userRecord.setUsername(user.username());
-    userRecord.setEmail(user.email());
-    userRecord.setKeycloakid(user.keycloakId());
-    userRecord.setUpdatedAt(OffsetDateTime.now());
-    userRecord.update();
-    return findById(userRecord.getId()).orElseThrow(
-        () -> new DataExecutionException("failed to update user[uuid]: " + uuid));
+  public Integer findOrInsert(String keycloakId, String username) {
+    Optional<Integer> existing = findUserIdByKeycloakId(keycloakId);
+    if (existing.isPresent()) {
+      return existing.get();
+    }
+    int inserted = dsl.insertInto(USER)
+        .set(USER.KEYCLOAKID, keycloakId)
+        .set(USER.USERNAME, username)
+        .onConflict(USER.KEYCLOAKID)
+        .doNothing()
+        .execute();
+    if (inserted == 1) {
+      log.info("created new user having keycloakId: {}", keycloakId);
+    } else {
+      log.debug("concurrent insert detected, user already exists for keycloakId: {}", keycloakId);
+    }
+    return findUserIdByKeycloakId(keycloakId)
+        .orElseThrow(() -> new DataExecutionException("can't find user having keycloakId: " + keycloakId));
+  }
+
+  /**
+   * Sets last_login to now. Returns true if this is the first login (last_login was NULL).
+   */
+  @Transactional(readOnly = false)
+  public boolean updateLastLogin(String keycloakId) {
+    OffsetDateTime previousLastLogin = dsl.select(USER.LAST_LOGIN)
+        .from(USER)
+        .where(USER.KEYCLOAKID.eq(keycloakId))
+        .fetchOne(USER.LAST_LOGIN);
+    dsl.update(USER)
+        .set(USER.LAST_LOGIN, OffsetDateTime.now())
+        .where(USER.KEYCLOAKID.eq(keycloakId))
+        .execute();
+    return previousLastLogin == null;
   }
 
   /**

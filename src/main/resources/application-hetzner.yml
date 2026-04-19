@@ -1,3 +1,10 @@
 application:
   turnstile:
     secret-key: ${TURNSTILE_SECRET_KEY}
+  notification:
+    enabled: true
+
+management:
+  health:
+    mail:
+      enabled: true

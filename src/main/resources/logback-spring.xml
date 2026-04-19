@@ -34,6 +34,10 @@
 
   <!-- default fallback (applies when not hetzner) -->
   <springProfile name="!hetzner">
+    <logger name="org.jooq.tools.LoggerListener" level="DEBUG" additivity="false">
+      <appender-ref ref="CONSOLE"/>
+    </logger>
+
     <root level="INFO">
       <appender-ref ref="CONSOLE"/>
     </root>
