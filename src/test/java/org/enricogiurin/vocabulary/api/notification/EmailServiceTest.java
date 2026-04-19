@@ -55,6 +55,7 @@ class EmailServiceTest {
     registry.add("spring.mail.port", () -> ServerSetupTest.SMTP.getPort());
     registry.add("spring.mail.username", () -> "test@localhost");
     registry.add("spring.mail.password", () -> "password");
+    registry.add("application.notification.enabled", () -> "true");
     registry.add("application.notification.admin-email", () -> "admin@test.com");
     registry.add("application.notification.from-email", () -> "noreply@test.com");
   }

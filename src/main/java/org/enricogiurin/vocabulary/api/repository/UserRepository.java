@@ -24,6 +24,7 @@ package org.enricogiurin.vocabulary.api.repository;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.USER;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -89,6 +90,47 @@ public class UserRepository {
     userRecord.insert();
     return findById(userRecord.getId()).orElseThrow(
         () -> new DataExecutionException("failed to create user[username]: " + user.username()));
+  }
+
+  /**
+   * Returns the userId for the given keycloakId, inserting the user if not already present.
+   * Safe under concurrent requests: uses ON CONFLICT DO NOTHING on the insert.
+   */
+  @Transactional(readOnly = false)
+  public Integer findOrInsert(String keycloakId, String username) {
+    Optional<Integer> existing = findUserIdByKeycloakId(keycloakId);
+    if (existing.isPresent()) {
+      return existing.get();
+    }
+    int inserted = dsl.insertInto(USER)
+        .set(USER.KEYCLOAKID, keycloakId)
+        .set(USER.USERNAME, username)
+        .onConflict(USER.KEYCLOAKID)
+        .doNothing()
+        .execute();
+    if (inserted == 1) {
+      log.info("created new user having keycloakId: {}", keycloakId);
+    } else {
+      log.debug("concurrent insert detected, user already exists for keycloakId: {}", keycloakId);
+    }
+    return findUserIdByKeycloakId(keycloakId)
+        .orElseThrow(() -> new DataExecutionException("can't find user having keycloakId: " + keycloakId));
+  }
+
+  /**
+   * Sets last_login to now. Returns true if this is the first login (last_login was NULL).
+   */
+  @Transactional(readOnly = false)
+  public boolean updateLastLogin(String keycloakId) {
+    OffsetDateTime previousLastLogin = dsl.select(USER.LAST_LOGIN)
+        .from(USER)
+        .where(USER.KEYCLOAKID.eq(keycloakId))
+        .fetchOne(USER.LAST_LOGIN);
+    dsl.update(USER)
+        .set(USER.LAST_LOGIN, OffsetDateTime.now())
+        .where(USER.KEYCLOAKID.eq(keycloakId))
+        .execute();
+    return previousLastLogin == null;
   }
 
   /**

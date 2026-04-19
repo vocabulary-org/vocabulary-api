@@ -51,6 +51,7 @@ public class AnthropicTagSuggester {
 
   @PostConstruct
   void init() {
+    log.info("Initializing system prompt from tags");
     String tagList = tagRepository.findAll().stream()
         .map(t -> "- %s: %s".formatted(t.name(), t.description()))
         .collect(Collectors.joining("\n"));

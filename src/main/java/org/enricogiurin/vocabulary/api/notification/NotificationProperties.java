@@ -25,6 +25,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "application.notification")
 public record NotificationProperties(
+    boolean enabled,
     String adminEmail,
     String fromEmail
 ) {

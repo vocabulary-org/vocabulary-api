@@ -27,6 +27,7 @@ import org.enricogiurin.vocabulary.api.exception.DataNotFoundException;
 import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.model.UserLanguages;
+import org.enricogiurin.vocabulary.api.notification.EmailService;
 import org.enricogiurin.vocabulary.api.repository.UserLanguagesRepository;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
 import org.springframework.lang.Nullable;
@@ -41,6 +42,7 @@ public class UserService {
   private final UserLanguagesRepository userLanguagesRepository;
   private final UserRepository userRepository;
   private final KeycloakClientService keycloakClientService;
+  private final EmailService emailService;
 
   public Optional<UserLanguages> userLanguages(Integer userId) {
     return userLanguagesRepository.findByUserId(userId);
@@ -53,19 +55,15 @@ public class UserService {
   @Transactional
   public Integer findOrSaveUserIdByKeycloakId(String keycloakId,
       UserCreationAttributes userCreationAttributes) {
-    return userRepository.findUserIdByKeycloakId(keycloakId)
-        .orElseGet(() ->
-        {
-          userRepository.add(User.builder()
-              .keycloakId(keycloakId)
-              .username(userCreationAttributes.username())
-              .build());
-          log.info("created new user having keycloakId: {}", keycloakId);
-          return userRepository.findUserIdByKeycloakId(keycloakId)
-              .orElseThrow(
-                  () -> new DataNotFoundException(
-                      "can't find user having keycloakId: " + keycloakId));
-        });
+    Integer userId = userRepository.findOrInsert(keycloakId, userCreationAttributes.username());
+    boolean isFirstLogin = userRepository.updateLastLogin(keycloakId);
+    if (isFirstLogin) {
+      log.info("First login for keycloakId: {}", keycloakId);
+      emailService.notifyAdmin(
+          "New user: " + userCreationAttributes.username(),
+          "User '%s' logged in for the first time.".formatted(userCreationAttributes.username()));
+    }
+    return userId;
   }
 
   @Transactional

@@ -27,6 +27,7 @@ spring:
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
+
     properties:
       mail:
         smtp:
@@ -65,6 +66,7 @@ application:
     monthly-max-translations: 30000
 
   notification:
+    enabled: false
     admin-email: ${NOTIFICATION_ADMIN_EMAIL:enricogiurin@gmail.com}
     from-email: ${NOTIFICATION_FROM_EMAIL:noreply@myvocabulary.net}
 
@@ -83,6 +85,9 @@ management:
   endpoint:
     env:
       show-values: ALWAYS
+  health:
+    mail:
+      enabled: false # disabled locally since SMTP is not configured; re-enabled in hetzner profile
 
 azure:
   translator:

@@ -36,6 +36,10 @@ public class EmailService {
   private final NotificationProperties properties;
 
   public void send(String to, String subject, String body) {
+    if (!properties.enabled()) {
+      log.info("Email notification disabled — skipping email to: {} subject: {}", to, subject);
+      return;
+    }
     SimpleMailMessage message = new SimpleMailMessage();
     message.setFrom(properties.fromEmail());
     message.setTo(to);
