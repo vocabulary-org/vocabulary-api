@@ -1,6 +1,6 @@
 services:
   vocabulary-api:
-    image: 'egch/vocabulary-api:1.0.5'
+    image: 'egch/vocabulary-api:1.0.6'
     #restart: unless-stopped
     mem_limit: "1g"
     environment:
@@ -15,6 +15,7 @@ services:
       AZURE_TRANSLATOR_KEY: ${AZURE_TRANSLATOR_KEY}
       TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
     volumes:
       - ./config:/config:ro
