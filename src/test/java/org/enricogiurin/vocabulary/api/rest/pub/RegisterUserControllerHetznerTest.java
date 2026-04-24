@@ -26,8 +26,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
 import org.enricogiurin.vocabulary.api.service.TurnstileService;
-import org.enricogiurin.vocabulary.api.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,7 +56,7 @@ class RegisterUserControllerHetznerTest {
   String basePath;
 
   @MockitoBean
-  UserService userService;
+  KeycloakClientService keycloakClientService;
 
   @MockitoBean
   TurnstileService turnstileService;

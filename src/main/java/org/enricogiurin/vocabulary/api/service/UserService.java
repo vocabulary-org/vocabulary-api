@@ -24,13 +24,11 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataNotFoundException;
-import org.enricogiurin.vocabulary.api.model.KeycloakUser;
-import org.enricogiurin.vocabulary.api.model.User;
 import org.enricogiurin.vocabulary.api.model.UserLanguages;
 import org.enricogiurin.vocabulary.api.notification.EmailService;
 import org.enricogiurin.vocabulary.api.repository.UserLanguagesRepository;
 import org.enricogiurin.vocabulary.api.repository.UserRepository;
-import org.springframework.lang.Nullable;
+import org.enricogiurin.vocabulary.api.repository.UserRepository.InsertResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,33 +53,12 @@ public class UserService {
   @Transactional
   public Integer findOrSaveUserIdByKeycloakId(String keycloakId,
       UserCreationAttributes userCreationAttributes) {
-    Integer userId = userRepository.findOrInsert(keycloakId, userCreationAttributes.username());
-    boolean isFirstLogin = userRepository.updateLastLogin(keycloakId);
-    if (isFirstLogin) {
-      log.info("First login for keycloakId: {}", keycloakId);
-      emailService.notifyAdmin(
-          "New user: " + userCreationAttributes.username(),
-          "User '%s' logged in for the first time.".formatted(userCreationAttributes.username()));
+    InsertResult result = userRepository.findOrInsert(keycloakId, userCreationAttributes.username);
+    if (result.created()) {
+      emailService.notifyAdmin("New user registered",
+          "New user: " + userCreationAttributes.username);
     }
-    return userId;
-  }
-
-  @Transactional
-  public String createNewUser(KeycloakUser user) {
-    return createNewUser(user, null);
-  }
-
-  @Transactional
-  public String createNewUser(KeycloakUser user, @Nullable String origin) {
-    String keycloakId = keycloakClientService.createNewUser(user, origin);
-    User newUser = User.builder()
-        .email(user.email())
-        .username(user.username())
-        .keycloakId(keycloakId)
-        .build();
-    User added = userRepository.add(newUser);
-    log.info("Inserted user: {}", added);
-    return keycloakId;
+    return result.userId();
   }
 
   @Transactional
