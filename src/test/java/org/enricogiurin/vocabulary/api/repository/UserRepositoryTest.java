@@ -22,11 +22,19 @@ package org.enricogiurin.vocabulary.api.repository;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.model.User;
+import org.enricogiurin.vocabulary.api.repository.UserRepository.InsertResult;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,29 +67,6 @@ class UserRepositoryTest {
   }
 
 
-  @Test
-  void add() {
-    //given
-    User newUser = new User(null, "john", "john@gmail.com", "aaa");
-    //when
-    User result = userRepository.add(newUser);
-    //then
-    assertThat(result).isNotNull();
-    assertThat(result.uuid()).isNotNull();
-    assertThat(result.username()).isEqualTo("john");
-    assertThat(result.email()).isEqualTo("john@gmail.com");
-  }
-
-  @Test
-  void addAnExistingUser() {
-    //given
-    userRepository.findUserIdByKeycloakId(KEYCLOAK_ID).orElseThrow();
-    User user = new User(null, "john", "enrico@gmail.com", KEYCLOAK_ID);
-    //when-then
-    assertThatExceptionOfType(IllegalArgumentException.class)
-        .isThrownBy(() -> userRepository.add(user))
-        .withMessageContaining(KEYCLOAK_ID + " is already present in the User table");
-  }
 
   @Test
   void findUserIdByKeycloakId() {
@@ -96,5 +81,41 @@ class UserRepositoryTest {
     userRepository.findById(USER_ID).orElseThrow();
     boolean isDeleted = userRepository.delete(USER_ID);
     assertThat(isDeleted).isTrue();
+  }
+
+  @Test
+  void findOrInsert_existingUser() {
+    InsertResult result = userRepository.findOrInsert(KEYCLOAK_ID, "enrico");
+    assertThat(result.userId()).isEqualTo(USER_ID);
+    assertThat(result.created()).isFalse();
+  }
+
+  @Test
+  void findOrInsert_newUser() {
+    String newKeycloakId = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+    InsertResult result = userRepository.findOrInsert(newKeycloakId, "newuser");
+    assertThat(result.userId()).isNotNull();
+    assertThat(result.userId()).isNotEqualTo(USER_ID);
+    assertThat(result.created()).isTrue();
+    assertThat(userRepository.findUserIdByKeycloakId(newKeycloakId)).contains(result.userId());
+  }
+
+  @Test
+  void findOrInsert_noExceptionOnConcurrentInsertSameKeycloakId() {
+    String newKeycloakId = UUID.randomUUID().toString();
+    int threadCount = 3;
+    CyclicBarrier barrier = new CyclicBarrier(threadCount);
+    try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
+      List<Future<InsertResult>> futures = new ArrayList<>();
+      for (int i = 0; i < threadCount; i++) {
+        futures.add(executor.submit(() -> {
+          barrier.await();
+          return userRepository.findOrInsert(newKeycloakId, "concurrent-user");
+        }));
+      }
+      for (Future<InsertResult> future : futures) {
+        assertThatNoException().isThrownBy(() -> future.get(5, TimeUnit.SECONDS));
+      }
+    }
   }
 }

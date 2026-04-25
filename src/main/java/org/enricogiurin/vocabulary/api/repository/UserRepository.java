@@ -24,13 +24,11 @@ package org.enricogiurin.vocabulary.api.repository;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.USER;
 
 import com.yourrents.services.common.util.exception.DataNotFoundException;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
-import org.enricogiurin.vocabulary.api.jooq.vocabulary.tables.records.UserRecord;
 import org.enricogiurin.vocabulary.api.model.User;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -71,36 +69,16 @@ public class UserRepository {
         .fetchOptional(USER.ID);
   }
 
-  /**
-   * Create a new User.
-   *
-   * @return the new created User
-   * @throws DataExecutionException if something unexpected happens
-   */
-  @Transactional(readOnly = false)
-  public User add(User user) {
-    Optional<Integer> optionalUser = findUserIdByKeycloakId(user.keycloakId());
-    if (optionalUser.isPresent()) {
-      throw new IllegalArgumentException(user.keycloakId() + " is already present in the User table");
-    }
-    UserRecord userRecord = dsl.newRecord(USER);
-    userRecord.setUsername(user.username());
-    userRecord.setEmail(user.email());
-    userRecord.setKeycloakid(user.keycloakId());
-    userRecord.insert();
-    return findById(userRecord.getId()).orElseThrow(
-        () -> new DataExecutionException("failed to create user[username]: " + user.username()));
-  }
 
   /**
    * Returns the userId for the given keycloakId, inserting the user if not already present.
    * Safe under concurrent requests: uses ON CONFLICT DO NOTHING on the insert.
    */
   @Transactional(readOnly = false)
-  public Integer findOrInsert(String keycloakId, String username) {
+  public InsertResult findOrInsert(String keycloakId, String username) {
     Optional<Integer> existing = findUserIdByKeycloakId(keycloakId);
     if (existing.isPresent()) {
-      return existing.get();
+      return new InsertResult(existing.get(), false);
     }
     int inserted = dsl.insertInto(USER)
         .set(USER.KEYCLOAKID, keycloakId)
@@ -111,27 +89,17 @@ public class UserRepository {
     if (inserted == 1) {
       log.info("created new user having keycloakId: {}", keycloakId);
     } else {
-      log.debug("concurrent insert detected, user already exists for keycloakId: {}", keycloakId);
+      log.info("concurrent insert detected, user already exists for keycloakId: {}", keycloakId);
     }
-    return findUserIdByKeycloakId(keycloakId)
+    Integer userId = findUserIdByKeycloakId(keycloakId)
         .orElseThrow(() -> new DataExecutionException("can't find user having keycloakId: " + keycloakId));
+    return new InsertResult(userId, inserted == 1);
   }
 
-  /**
-   * Sets last_login to now. Returns true if this is the first login (last_login was NULL).
-   */
-  @Transactional(readOnly = false)
-  public boolean updateLastLogin(String keycloakId) {
-    OffsetDateTime previousLastLogin = dsl.select(USER.LAST_LOGIN)
-        .from(USER)
-        .where(USER.KEYCLOAKID.eq(keycloakId))
-        .fetchOne(USER.LAST_LOGIN);
-    dsl.update(USER)
-        .set(USER.LAST_LOGIN, OffsetDateTime.now())
-        .where(USER.KEYCLOAKID.eq(keycloakId))
-        .execute();
-    return previousLastLogin == null;
+  public record InsertResult(Integer userId, boolean created) {
+
   }
+
 
   /**
    * Delete the user

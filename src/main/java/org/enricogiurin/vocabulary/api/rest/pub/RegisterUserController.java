@@ -26,12 +26,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.model.KeycloakUser;
 import org.enricogiurin.vocabulary.api.rest.admin.KeycloakUserResponse;
+import org.enricogiurin.vocabulary.api.service.KeycloakClientService;
 import org.enricogiurin.vocabulary.api.service.TurnstileService;
-import org.enricogiurin.vocabulary.api.service.UserService;
 import org.enricogiurin.vocabulary.api.validation.ValidationGroups;
-import org.springframework.lang.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,7 +47,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 public class RegisterUserController {
 
-  private final UserService userService;
+  private final KeycloakClientService keycloakClientService;
   private final Optional<TurnstileService> turnstileService;
 
 
@@ -61,8 +61,8 @@ public class RegisterUserController {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "CAPTCHA verification failed");
       }
     });
-    log.info("Creating new user: {}", keycloakUser);
-    userService.createNewUser(keycloakUser, origin);
+    keycloakClientService.createNewUser(keycloakUser, origin);
+    log.info("Created new user on KC: {}", keycloakUser);
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(KeycloakUserResponse.builder()
