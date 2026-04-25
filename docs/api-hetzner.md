@@ -269,6 +269,24 @@ Once verified, `support@myvocabulary.net` is an allowed sender.
 
 Save and use **Test connection** to verify.
 
+### SPF Record (Email Deliverability)
+
+To prevent emails sent via Brevo from landing in spam, add an SPF TXT record in Cloudflare:
+
+In Cloudflare → `myvocabulary.net` → **DNS** → **Records**, make sure there is exactly **one** `v=spf1` TXT record on `@` (multiple SPF records cause a permerror). The merged record covering both Cloudflare Email Routing and Brevo is:
+
+```
+Type:    TXT
+Name:    @
+Content: v=spf1 include:_spf.mx.cloudflare.net include:spf.sendinblue.com ~all
+TTL:     Auto
+```
+
+Verify:
+```shell
+dig TXT myvocabulary.net +short
+```
+
 ---
 
 ## Cloudflare Email Routing (Incoming Mail)
