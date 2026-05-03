@@ -9,6 +9,13 @@ Effortlessly organize, learn, and reinforce new words with the added power of in
 - Java 21+
 - A Docker environment supported by Testcontainers: <https://www.testcontainers.org/supported_docker_environment/> (a recent local Docker installation is enough)
 
+## Java Version
+This project requires **Java 21**. If your `JAVA_HOME` points to a different version, switch it before building:
+
+```shell
+source use-jdk21.sh
+```
+
 ## Getting Started
 Clone the repository and run the following command to build the project:
 
