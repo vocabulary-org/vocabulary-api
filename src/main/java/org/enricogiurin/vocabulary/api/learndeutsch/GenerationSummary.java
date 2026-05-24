@@ -20,17 +20,6 @@ package org.enricogiurin.vocabulary.api.learndeutsch;
  * #L%
  */
 
-import java.util.List;
-import java.util.UUID;
-import org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.Article;
-
-public record NounView(
-    UUID uuid,
-    String wordDe,
-    Article article,
-    String pluralDe,
-    String[] pluralDistractors,
-    String translation,
-    List<ExampleView> examples) {
+public record GenerationSummary(int generated, int failed) {
 
 }

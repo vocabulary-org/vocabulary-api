@@ -1,4 +1,4 @@
-package org.enricogiurin.vocabulary.api.rest.pub;
+package org.enricogiurin.vocabulary.api.rest.admin;
 
 /*-
  * #%L
@@ -20,32 +20,31 @@ package org.enricogiurin.vocabulary.api.rest.pub;
  * #L%
  */
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.enricogiurin.vocabulary.api.learndeutsch.NounView;
-import org.enricogiurin.vocabulary.api.learndeutsch.PublicNounDeItRepository;
+import org.enricogiurin.vocabulary.api.learndeutsch.NounDeExampleService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${application.api.public-path}/nouns/de-it")
+@RequestMapping("${application.api.admin-path}/nouns/de")
 @RequiredArgsConstructor
 @Slf4j
-public class NounDeItController {
+public class NounDeAdminController {
 
-  private static final int DEFAULT_LIMIT = 10;
+  private static final String DEFAULT_LANG = "it";
 
-  private final PublicNounDeItRepository publicNounDeItRepository;
+  private final NounDeExampleService nounDeExampleService;
 
-  @GetMapping
-  public ResponseEntity<List<NounView>> getRandom(
-      @RequestParam(defaultValue = "" + DEFAULT_LIMIT) int limit) {
-    log.info("Request received to retrieve {} random DE/IT nouns.", limit);
-    List<NounView> nouns = publicNounDeItRepository.findRandom(limit);
-    return ResponseEntity.ok(nouns);
+  @PostMapping("/examples/generate")
+  public ResponseEntity<Void> generateExamples(
+      @RequestParam(defaultValue = DEFAULT_LANG) String lang,
+      @RequestParam(required = false) Integer limit) {
+    log.info("POST /nouns/de/examples/generate?lang={}&limit={} — starting async generation", lang, limit);
+    nounDeExampleService.generateMissingExamplesAsync(lang, limit);
+    return ResponseEntity.accepted().build();
   }
 }
