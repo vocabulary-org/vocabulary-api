@@ -23,6 +23,8 @@ package org.enricogiurin.vocabulary.api.learndeutsch;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.PUBLIC_NOUN_DE;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.PUBLIC_NOUN_DE_EXAMPLE;
 import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.PUBLIC_NOUN_DE_TRANSLATION;
+import static org.jooq.impl.DSL.notExists;
+import static org.jooq.impl.DSL.selectOne;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +61,35 @@ public class PublicNounDeRepository {
         r.get(PUBLIC_NOUN_DE.ARTICLE),
         r.get(PUBLIC_NOUN_DE.WORD_DE),
         r.get(PUBLIC_NOUN_DE_TRANSLATION.TRANSLATION)));
+  }
+
+  public List<NounForTranslation> findWithMissingTranslation(String lang, Integer limit) {
+    var query = dsl.select(
+            PUBLIC_NOUN_DE.ID,
+            PUBLIC_NOUN_DE.ARTICLE,
+            PUBLIC_NOUN_DE.WORD_DE)
+        .from(PUBLIC_NOUN_DE)
+        .where(notExists(
+            selectOne()
+                .from(PUBLIC_NOUN_DE_TRANSLATION)
+                .where(PUBLIC_NOUN_DE_TRANSLATION.NOUN_ID.eq(PUBLIC_NOUN_DE.ID)
+                    .and(PUBLIC_NOUN_DE_TRANSLATION.LANG.eq(lang)))));
+    return (limit != null ? query.limit(limit) : query).fetch(r -> new NounForTranslation(
+        r.get(PUBLIC_NOUN_DE.ID),
+        r.get(PUBLIC_NOUN_DE.ARTICLE),
+        r.get(PUBLIC_NOUN_DE.WORD_DE)));
+  }
+
+  @Transactional
+  public void saveTranslation(int nounId, String lang, String translation) {
+    dsl.insertInto(PUBLIC_NOUN_DE_TRANSLATION)
+        .columns(
+            PUBLIC_NOUN_DE_TRANSLATION.NOUN_ID,
+            PUBLIC_NOUN_DE_TRANSLATION.LANG,
+            PUBLIC_NOUN_DE_TRANSLATION.SORT_ORDER,
+            PUBLIC_NOUN_DE_TRANSLATION.TRANSLATION)
+        .values(nounId, lang, 1, translation)
+        .execute();
   }
 
   @Transactional

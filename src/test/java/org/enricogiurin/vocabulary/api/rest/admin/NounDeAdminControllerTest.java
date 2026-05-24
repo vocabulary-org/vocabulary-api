@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.learndeutsch.NounDeExampleService;
+import org.enricogiurin.vocabulary.api.learndeutsch.NounDeTranslationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +52,9 @@ class NounDeAdminControllerTest {
 
   @MockitoBean
   NounDeExampleService nounDeExampleService;
+
+  @MockitoBean
+  NounDeTranslationService nounDeTranslationService;
 
   @Test
   void generateExamples_defaultLang_returns202() throws Exception {
@@ -80,6 +84,26 @@ class NounDeAdminControllerTest {
         .andExpect(status().isAccepted());
 
     verify(nounDeExampleService).generateMissingExamplesAsync("es", null);
+  }
+
+  @Test
+  void generateTranslations_returns202() throws Exception {
+    doNothing().when(nounDeTranslationService).generateMissingTranslationsAsync("en", null);
+
+    mvc.perform(post(basePath + "/translations/generate").param("lang", "en"))
+        .andExpect(status().isAccepted());
+
+    verify(nounDeTranslationService).generateMissingTranslationsAsync("en", null);
+  }
+
+  @Test
+  void generateTranslations_withLimit_passesLimitToService() throws Exception {
+    doNothing().when(nounDeTranslationService).generateMissingTranslationsAsync("es", 20);
+
+    mvc.perform(post(basePath + "/translations/generate").param("lang", "es").param("limit", "20"))
+        .andExpect(status().isAccepted());
+
+    verify(nounDeTranslationService).generateMissingTranslationsAsync("es", 20);
   }
 
   @Test

@@ -23,6 +23,7 @@ package org.enricogiurin.vocabulary.api.rest.admin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.learndeutsch.NounDeExampleService;
+import org.enricogiurin.vocabulary.api.learndeutsch.NounDeTranslationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +39,16 @@ public class NounDeAdminController {
   private static final String DEFAULT_LANG = "it";
 
   private final NounDeExampleService nounDeExampleService;
+  private final NounDeTranslationService nounDeTranslationService;
+
+  @PostMapping("/translations/generate")
+  public ResponseEntity<Void> generateTranslations(
+      @RequestParam String lang,
+      @RequestParam(required = false) Integer limit) {
+    log.info("POST /nouns/de/translations/generate?lang={}&limit={} — starting async generation", lang, limit);
+    nounDeTranslationService.generateMissingTranslationsAsync(lang, limit);
+    return ResponseEntity.accepted().build();
+  }
 
   @PostMapping("/examples/generate")
   public ResponseEntity<Void> generateExamples(
