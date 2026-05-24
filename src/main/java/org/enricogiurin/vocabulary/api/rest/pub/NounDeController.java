@@ -24,7 +24,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.learndeutsch.NounView;
-import org.enricogiurin.vocabulary.api.learndeutsch.PublicNounDeItRepository;
+import org.enricogiurin.vocabulary.api.learndeutsch.PublicNounDeRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,20 +32,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${application.api.public-path}/nouns/de-it")
+@RequestMapping("${application.api.public-path}/nouns/de")
 @RequiredArgsConstructor
 @Slf4j
-public class NounDeItController {
+public class NounDeController {
 
   private static final int DEFAULT_LIMIT = 10;
+  private static final String DEFAULT_LANG = "it";
 
-  private final PublicNounDeItRepository publicNounDeItRepository;
+  private final PublicNounDeRepository publicNounDeRepository;
 
   @GetMapping
   public ResponseEntity<List<NounView>> getRandom(
-      @RequestParam(defaultValue = "" + DEFAULT_LIMIT) int limit) {
-    log.info("Request received to retrieve {} random DE/IT nouns.", limit);
-    List<NounView> nouns = publicNounDeItRepository.findRandom(limit);
+      @RequestParam(defaultValue = "" + DEFAULT_LIMIT) int limit,
+      @RequestParam(defaultValue = DEFAULT_LANG) String lang) {
+    log.info("Request received to retrieve {} random DE nouns, lang={}.", limit, lang);
+    List<NounView> nouns = publicNounDeRepository.findRandom(limit, lang);
     return ResponseEntity.ok(nouns);
   }
 }

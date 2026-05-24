@@ -37,31 +37,33 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Import(VocabularyTestConfiguration.class)
 @Transactional
-class PublicNounDeItRepositoryTest {
+class PublicNounDeRepositoryTest {
 
   @Autowired
-  PublicNounDeItRepository repository;
+  PublicNounDeRepository repository;
 
   @Test
   void findRandom_returnsRequestedNumberOfNouns() {
-    List<NounView> result = repository.findRandom(5);
+    List<NounView> result = repository.findRandom(5, "it");
     assertThat(result, hasSize(5));
   }
 
   @Test
   void findRandom_allFieldsPopulated() {
-    List<NounView> result = repository.findRandom(10);
+    List<NounView> result = repository.findRandom(10, "it");
     assertThat(result, everyItem(notNullValue()));
     result.forEach(n -> {
       assertThat(n.uuid(), notNullValue());
       assertThat(n.wordDe(), notNullValue());
       assertThat(n.article(), notNullValue());
+      assertThat(n.translation(), notNullValue());
+      assertThat(n.examples(), notNullValue());
     });
   }
 
   @Test
   void findRandom_articleIsValidEnum() {
-    List<NounView> result = repository.findRandom(20);
+    List<NounView> result = repository.findRandom(20, "it");
     result.forEach(n ->
         assertThat(Article.lookupLiteral(n.article().getLiteral()), notNullValue()));
   }

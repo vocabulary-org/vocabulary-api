@@ -32,8 +32,9 @@ import java.util.List;
 import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.Article;
+import org.enricogiurin.vocabulary.api.learndeutsch.ExampleView;
 import org.enricogiurin.vocabulary.api.learndeutsch.NounView;
-import org.enricogiurin.vocabulary.api.learndeutsch.PublicNounDeItRepository;
+import org.enricogiurin.vocabulary.api.learndeutsch.PublicNounDeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,42 +50,55 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(VocabularyTestConfiguration.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
-class NounDeItControllerTest {
+class NounDeControllerTest {
 
   @Autowired
   MockMvc mvc;
 
-  @Value("${application.api.public-path}/nouns/de-it")
+  @Value("${application.api.public-path}/nouns/de")
   String basePath;
 
   @MockitoBean
-  PublicNounDeItRepository publicNounDeItRepository;
+  PublicNounDeRepository publicNounDeRepository;
 
   @Test
   void getRandom_defaultLimit_returnsOk() throws Exception {
     List<NounView> nouns = List.of(
-        new NounView(UUID.randomUUID(), "Haus", Article.das, "Häuser", new String[]{"Hauser", "Hausser"}),
-        new NounView(UUID.randomUUID(), "Mann", Article.der, "Männer", new String[]{"Mannen", "Manne"})
+        new NounView(UUID.randomUUID(), "Haus", Article.das, "Häuser",
+            new String[]{"Hauser", "Hausser"}, "casa", List.of()),
+        new NounView(UUID.randomUUID(), "Mann", Article.der, "Männer",
+            new String[]{"Mannen", "Manne"}, "uomo", List.of(
+                new ExampleView("Der Mann ist groß.", "L'uomo è alto.")))
     );
-    when(publicNounDeItRepository.findRandom(10)).thenReturn(nouns);
+    when(publicNounDeRepository.findRandom(10, "it")).thenReturn(nouns);
 
     mvc.perform(get(basePath))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$", hasSize(2)));
 
-    verify(publicNounDeItRepository).findRandom(10);
+    verify(publicNounDeRepository).findRandom(10, "it");
   }
 
   @Test
   void getRandom_customLimit_passesLimitToRepository() throws Exception {
     int limit = 5;
-    when(publicNounDeItRepository.findRandom(limit)).thenReturn(List.of());
+    when(publicNounDeRepository.findRandom(limit, "it")).thenReturn(List.of());
 
     mvc.perform(get(basePath).param("limit", String.valueOf(limit)))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
-    verify(publicNounDeItRepository).findRandom(limit);
+    verify(publicNounDeRepository).findRandom(limit, "it");
+  }
+
+  @Test
+  void getRandom_customLang_passesLangToRepository() throws Exception {
+    when(publicNounDeRepository.findRandom(10, "es")).thenReturn(List.of());
+
+    mvc.perform(get(basePath).param("lang", "es"))
+        .andExpect(status().isOk());
+
+    verify(publicNounDeRepository).findRandom(10, "es");
   }
 }
