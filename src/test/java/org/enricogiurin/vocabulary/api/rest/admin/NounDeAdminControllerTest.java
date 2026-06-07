@@ -47,7 +47,7 @@ class NounDeAdminControllerTest {
   @Autowired
   MockMvc mvc;
 
-  @Value("${application.api.admin-path}/nouns/de")
+  @Value("${application.api.admin-path}/deutsch/nouns")
   String basePath;
 
   @MockitoBean

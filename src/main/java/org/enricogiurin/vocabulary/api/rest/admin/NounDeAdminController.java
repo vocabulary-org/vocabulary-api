@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${application.api.admin-path}/nouns/de")
+@RequestMapping("${application.api.admin-path}/deutsch/nouns")
 @RequiredArgsConstructor
 @Slf4j
 public class NounDeAdminController {
@@ -45,7 +45,7 @@ public class NounDeAdminController {
   public ResponseEntity<Void> generateTranslations(
       @RequestParam String lang,
       @RequestParam(required = false) Integer limit) {
-    log.info("POST /nouns/de/translations/generate?lang={}&limit={} — starting async generation", lang, limit);
+    log.info("POST /deutsch/nouns/translations/generate?lang={}&limit={} — starting async generation", lang, limit);
     nounDeTranslationService.generateMissingTranslationsAsync(lang, limit);
     return ResponseEntity.accepted().build();
   }
@@ -54,7 +54,7 @@ public class NounDeAdminController {
   public ResponseEntity<Void> generateExamples(
       @RequestParam(defaultValue = DEFAULT_LANG) String lang,
       @RequestParam(required = false) Integer limit) {
-    log.info("POST /nouns/de/examples/generate?lang={}&limit={} — starting async generation", lang, limit);
+    log.info("POST /deutsch/nouns/examples/generate?lang={}&limit={} — starting async generation", lang, limit);
     nounDeExampleService.generateMissingExamplesAsync(lang, limit);
     return ResponseEntity.accepted().build();
   }

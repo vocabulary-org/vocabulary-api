@@ -21,33 +21,37 @@ package org.enricogiurin.vocabulary.api.rest.pub;
  */
 
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.enricogiurin.vocabulary.api.learndeutsch.NounView;
-import org.enricogiurin.vocabulary.api.learndeutsch.PublicNounDeRepository;
+import org.enricogiurin.vocabulary.api.learndeutsch.PublicStoryDeRepository;
+import org.enricogiurin.vocabulary.api.learndeutsch.StorySummaryView;
+import org.enricogiurin.vocabulary.api.learndeutsch.StoryView;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("${application.api.public-path}/deutsch/nouns")
+@RequestMapping("${application.api.public-path}/deutsch/stories")
 @RequiredArgsConstructor
 @Slf4j
-public class NounDeController {
+public class StoryDeController {
 
-  private static final int DEFAULT_LIMIT = 10;
-  private static final String DEFAULT_LANG = "it";
-
-  private final PublicNounDeRepository publicNounDeRepository;
+  private final PublicStoryDeRepository publicStoryDeRepository;
 
   @GetMapping
-  public ResponseEntity<List<NounView>> getRandom(
-      @RequestParam(defaultValue = "" + DEFAULT_LIMIT) int limit,
-      @RequestParam(defaultValue = DEFAULT_LANG) String lang) {
-    log.info("Request received to retrieve {} random DE nouns, lang={}.", limit, lang);
-    List<NounView> nouns = publicNounDeRepository.findRandom(limit, lang);
-    return ResponseEntity.ok(nouns);
+  public ResponseEntity<List<StorySummaryView>> getStories() {
+    log.info("Request received to retrieve the list of DE stories.");
+    return ResponseEntity.ok(publicStoryDeRepository.findAll());
+  }
+
+  @GetMapping("/{uuid}")
+  public ResponseEntity<StoryView> getStory(@PathVariable UUID uuid) {
+    log.info("Request received to retrieve DE story {}.", uuid);
+    return publicStoryDeRepository.findByExternalId(uuid)
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.notFound().build());
   }
 }
