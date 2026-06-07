@@ -20,13 +20,18 @@ package org.enricogiurin.vocabulary.api.rest.pub;
  * #L%
  */
 
+import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.PUBLIC_STORY_DE;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.jooq.DSLContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,39 +46,63 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(VocabularyTestConfiguration.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
-class NounDeControllerTest {
+class StoryDeControllerTest {
 
   @Autowired
   MockMvc mvc;
 
-  @Value("${application.api.public-path}/deutsch/nouns")
+  @Autowired
+  DSLContext dsl;
+
+  @Value("${application.api.public-path}/deutsch/stories")
   String basePath;
 
+  private UUID externalIdOf(String title) {
+    return dsl.select(PUBLIC_STORY_DE.EXTERNAL_ID)
+        .from(PUBLIC_STORY_DE)
+        .where(PUBLIC_STORY_DE.TITLE.eq(title))
+        .fetchOne(PUBLIC_STORY_DE.EXTERNAL_ID);
+  }
+
   @Test
-  void getRandom_defaultLimit_returnsTenNouns() throws Exception {
+  void getStories_returnsSummaryListWithoutGaps() throws Exception {
     mvc.perform(get(basePath))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(10)))
+        .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].uuid").exists())
-        .andExpect(jsonPath("$[0].wordDe").exists())
-        .andExpect(jsonPath("$[0].article").exists());
+        .andExpect(jsonPath("$[0].title", is("Marias Einkauf")))
+        .andExpect(jsonPath("$[0].level", is("A2")))
+        .andExpect(jsonPath("$[0].topic", is("food")))
+        .andExpect(jsonPath("$[0].gaps").doesNotExist())
+        .andExpect(jsonPath("$[0].body").doesNotExist());
   }
 
   @Test
-  void getRandom_customLimit_returnsRequestedNumberOfNouns() throws Exception {
-    int limit = 5;
-    mvc.perform(get(basePath).param("limit", String.valueOf(limit)))
+  void getStory_existingId_returnsStoryWithGapsAndOptions() throws Exception {
+    UUID id = externalIdOf("Marias Einkauf");
+
+    mvc.perform(get(basePath + "/{id}", id))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(limit)));
+        .andExpect(jsonPath("$.uuid", is(id.toString())))
+        .andExpect(jsonPath("$.title", is("Marias Einkauf")))
+        .andExpect(jsonPath("$.level", is("A2")))
+        .andExpect(jsonPath("$.topic", is("food")))
+        .andExpect(jsonPath("$.body", containsString("{{1}}")))
+        .andExpect(jsonPath("$.gaps", hasSize(3)))
+        .andExpect(jsonPath("$.gaps[0].position", is(1)))
+        .andExpect(jsonPath("$.gaps[0].category", is("ARTICLE")))
+        .andExpect(jsonPath("$.gaps[0].grammaticalCase", is("AKKUSATIV")))
+        .andExpect(jsonPath("$.gaps[0].options", hasSize(4)))
+        .andExpect(jsonPath("$.gaps[0].options[1].text", is("den")))
+        .andExpect(jsonPath("$.gaps[0].options[1].correct", is(true)))
+        .andExpect(jsonPath("$.gaps[0].options[0].correct", is(false)));
   }
 
   @Test
-  void getRandom_customLang_returnsOk() throws Exception {
-    mvc.perform(get(basePath).param("lang", "es"))
-        .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$", hasSize(10)));
+  void getStory_unknownId_returnsNotFound() throws Exception {
+    mvc.perform(get(basePath + "/{id}", UUID.randomUUID()))
+        .andExpect(status().isNotFound());
   }
 }
