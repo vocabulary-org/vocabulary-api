@@ -23,6 +23,7 @@ package org.enricogiurin.vocabulary.api.learndeutsch;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -126,5 +127,75 @@ class StoryDeServiceTest {
   void validate_noGaps_throws() {
     GeneratedStory story = new GeneratedStory("t", "Kein Lücke hier.", List.of());
     assertThatThrownBy(() -> service.validate(story)).isInstanceOf(DataExecutionException.class);
+  }
+
+  @Test
+  void generateFromText_usesDetectedLevelAndCustomTopic_whenNotProvided() {
+    GeneratedStory generated = new GeneratedStory("Marias Tag",
+        "Maria geht in {{1}} Supermarkt.", List.of(gap(1, true)), DeutschLevel.B1);
+    UUID id = UUID.randomUUID();
+    StoryView saved = new StoryView(id, "Marias Tag", DeutschLevel.B1, "custom",
+        generated.body(), generated.gaps());
+    when(generator.generateFromText("Ein Text.", null)).thenReturn(generated);
+    when(repository.save(any(), eq(DeutschLevel.B1), eq("custom"))).thenReturn(id);
+    when(repository.findByExternalId(id)).thenReturn(Optional.of(saved));
+
+    StoryView result = service.generateFromText("Ein Text.", null, null, null);
+
+    assertThat(result).isEqualTo(saved);
+    verify(repository).save(any(), eq(DeutschLevel.B1), eq("custom"));
+  }
+
+  @Test
+  void generateFromText_usesRequestedLevelOverDetected() {
+    GeneratedStory generated = new GeneratedStory("T", "Hat {{1}}.",
+        List.of(gap(1, true)), DeutschLevel.B1);
+    UUID id = UUID.randomUUID();
+    when(generator.generateFromText("Ein Text.", DeutschLevel.A2)).thenReturn(generated);
+    when(repository.save(any(), eq(DeutschLevel.A2), eq("custom"))).thenReturn(id);
+    when(repository.findByExternalId(id)).thenReturn(Optional.of(
+        new StoryView(id, "T", DeutschLevel.A2, "custom", generated.body(), generated.gaps())));
+
+    service.generateFromText("Ein Text.", null, null, DeutschLevel.A2);
+
+    verify(repository).save(any(), eq(DeutschLevel.A2), eq("custom"));
+  }
+
+  @Test
+  void generateFromText_usesProvidedTitleAndTopic() {
+    GeneratedStory generated = new GeneratedStory("AutoTitle", "Hat {{1}}.",
+        List.of(gap(1, true)), DeutschLevel.B1);
+    UUID id = UUID.randomUUID();
+    when(generator.generateFromText("Ein Text.", null)).thenReturn(generated);
+    when(repository.save(any(), any(), any())).thenReturn(id);
+    when(repository.findByExternalId(id)).thenReturn(Optional.of(
+        new StoryView(id, "My Title", DeutschLevel.B1, "myTopic", generated.body(), generated.gaps())));
+
+    service.generateFromText("Ein Text.", "My Title", "myTopic", null);
+
+    verify(repository).save(
+        argThat(s -> "My Title".equals(s.title())), eq(DeutschLevel.B1), eq("myTopic"));
+  }
+
+  @Test
+  void delete_delegatesToRepository() {
+    UUID id = UUID.randomUUID();
+    when(repository.delete(id)).thenReturn(true);
+
+    assertThat(service.delete(id)).isTrue();
+
+    verify(repository).delete(id);
+  }
+
+  @Test
+  void generateFromText_levelUndeterminable_throwsAndDoesNotSave() {
+    GeneratedStory generated = new GeneratedStory("T", "Hat {{1}}.",
+        List.of(gap(1, true)), null);
+    when(generator.generateFromText("Ein Text.", null)).thenReturn(generated);
+
+    assertThatThrownBy(() -> service.generateFromText("Ein Text.", null, null, null))
+        .isInstanceOf(DataExecutionException.class);
+
+    verify(repository, never()).save(any(), any(), any());
   }
 }

@@ -72,6 +72,51 @@ public class AnthropicStoryGenerator {
             {"text":"dem","correct":false},{"text":"des","correct":false}]}]}
         """.formatted(length.sentences(), length.gaps(), level.getLiteral(), topic);
 
+    return call(userMessage, "level=" + level + ", topic=" + topic);
+  }
+
+  /**
+   * Builds a gap-fill story on top of an existing German text, keeping its wording and only
+   * blanking out words. When {@code requestedLevel} is null the generator detects the CEFR
+   * level and returns it in {@link GeneratedStory#level()}.
+   */
+  public GeneratedStory generateFromText(String text, DeutschLevel requestedLevel) {
+    String levelInstruction = requestedLevel != null
+        ? "The target CEFR level is %s; return it as \"level\".".formatted(requestedLevel.getLiteral())
+        : "Detect the CEFR level (A1, A2, B1, B2, C1 or C2) of the text and return it as \"level\".";
+    String userMessage = """
+        You are a German teacher creating a fill-in-the-gap grammar assessment from an existing text.
+        Use the SOURCE TEXT at the end. Keep its wording and meaning; do NOT rewrite it. Only turn
+        some words into gaps. Write ONLY in German. Do NOT include any translation.
+        %s
+
+        Rules for the gaps:
+        - Choose between 3 and 10 suitable words from the text to blank out, testing grammar.
+        - Replace each chosen word in the body with {{1}}, {{2}}, ... numbered sequentially from 1,
+          leaving the rest of the text unchanged.
+        - The gap numbers in the body MUST exactly match the "position" values, none missing or extra.
+        - Each gap tests ONE grammar point. "category" must be one of:
+          ARTICLE, ADJECTIVE_ENDING, PRONOUN, PREPOSITION, VERB_FORM.
+        - "grammaticalCase" must be one of NOMINATIV, AKKUSATIV, DATIV, GENITIV, or null
+          when it does not apply (e.g. for VERB_FORM).
+        - Provide EXACTLY 4 options per gap. All 4 options MUST be different inflected forms
+          of the SAME word; exactly ONE is correct in context, the other three are real German
+          forms that are wrong here.
+
+        Return ONLY valid JSON, with no markdown and no explanation, in EXACTLY this shape:
+        {"level":"B1","title":"...","body":"... {{1}} ... {{2}} ...","gaps":[
+          {"position":1,"category":"ARTICLE","grammaticalCase":"AKKUSATIV","options":[
+            {"text":"der","correct":false},{"text":"den","correct":true},
+            {"text":"dem","correct":false},{"text":"des","correct":false}]}]}
+
+        SOURCE TEXT:
+        %s
+        """.formatted(levelInstruction, text);
+
+    return call(userMessage, "fromText, requestedLevel=" + requestedLevel);
+  }
+
+  private GeneratedStory call(String userMessage, String logContext) {
     AnthropicRequest request = new AnthropicRequest(
         properties.model(),
         MAX_TOKENS,
@@ -86,7 +131,7 @@ public class AnthropicStoryGenerator {
 
     assert response != null;
     String json = response.content().getFirst().text();
-    log.debug("Claude story response for level={}, topic={}: {}", level, topic, json);
+    log.debug("Claude story response ({}): {}", logContext, json);
     return parseStory(json);
   }
 

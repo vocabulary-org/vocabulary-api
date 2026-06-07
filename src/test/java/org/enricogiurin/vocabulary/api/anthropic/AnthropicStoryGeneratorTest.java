@@ -104,6 +104,33 @@ class AnthropicStoryGeneratorTest {
   }
 
   @Test
+  void generateFromText_returnsStoryWithDetectedLevel() {
+    String storyWithLevel = "{\"level\":\"B1\"," + STORY_JSON.substring(1);
+    String claudeResponse = """
+        {
+          "content": [
+            {
+              "type": "text",
+              "text": "%s"
+            }
+          ]
+        }
+        """.formatted(storyWithLevel.replace("\"", "\\\""));
+
+    server.expect(requestTo(Matchers.endsWith("/v1/messages")))
+        .andExpect(method(HttpMethod.POST))
+        .andRespond(withSuccess(claudeResponse, MediaType.APPLICATION_JSON));
+
+    GeneratedStory result = instance.generateFromText("Maria geht in den Supermarkt.", null);
+
+    assertThat(result.title()).isEqualTo("Marias Tag");
+    assertThat(result.level()).isEqualTo(DeutschLevel.B1);
+    assertThat(result.gaps()).hasSize(1);
+
+    server.verify();
+  }
+
+  @Test
   void parseStory_plainJson() {
     GeneratedStory result = instance.parseStory(STORY_JSON);
 

@@ -50,9 +50,40 @@ public class StoryDeService {
     log.info("Generating DE story: level={}, topic={}, length={}", level, topic, length);
     GeneratedStory generated = generator.generate(level, topic, length);
     validate(generated);
+    return persistAndReload(generated, level, topic);
+  }
 
-    UUID externalId = repository.save(generated, level, topic);
-    log.info("Saved generated DE story '{}' with id {}", generated.title(), externalId);
+  /**
+   * Builds and saves a story from a pasted German text. The level is taken from the request
+   * when provided, otherwise the level detected by the generator. Title and topic fall back
+   * to the generated title and "custom" respectively when not supplied.
+   */
+  public StoryView generateFromText(String text, String title, String topic, DeutschLevel requestedLevel) {
+    log.info("Generating DE story from text: requestedLevel={}, topic={}, {} chars",
+        requestedLevel, topic, text == null ? 0 : text.length());
+    GeneratedStory generated = generator.generateFromText(text, requestedLevel);
+    validate(generated);
+
+    DeutschLevel level = requestedLevel != null ? requestedLevel : generated.level();
+    if (level == null) {
+      throw new DataExecutionException("Could not determine the level of the generated story");
+    }
+    String effectiveTitle = (title != null && !title.isBlank()) ? title : generated.title();
+    String effectiveTopic = (topic != null && !topic.isBlank()) ? topic : "custom";
+
+    GeneratedStory toSave = new GeneratedStory(effectiveTitle, generated.body(), generated.gaps(), level);
+    return persistAndReload(toSave, level, effectiveTopic);
+  }
+
+  /** Deletes a story (with its gaps and options) by external id; returns true if removed. */
+  public boolean delete(UUID externalId) {
+    log.info("Deleting DE story {}", externalId);
+    return repository.delete(externalId);
+  }
+
+  private StoryView persistAndReload(GeneratedStory story, DeutschLevel level, String topic) {
+    UUID externalId = repository.save(story, level, topic);
+    log.info("Saved generated DE story '{}' with id {}", story.title(), externalId);
     return repository.findByExternalId(externalId)
         .orElseThrow(() -> new DataExecutionException("Saved story could not be reloaded: " + externalId));
   }
@@ -64,6 +95,9 @@ public class StoryDeService {
   void validate(GeneratedStory story) {
     if (story == null || story.body() == null || story.body().isBlank()) {
       throw new DataExecutionException("Generated story has no body");
+    }
+    if (story.title() == null || story.title().isBlank()) {
+      throw new DataExecutionException("Generated story has no title");
     }
     if (story.gaps() == null || story.gaps().isEmpty()) {
       throw new DataExecutionException("Generated story has no gaps");

@@ -22,16 +22,26 @@ package org.enricogiurin.vocabulary.api.learndeutsch;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
+import org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.DeutschLevel;
 
 /**
  * A story produced by the generator before it is persisted. Reuses {@link StoryGapView}
  * and {@link StoryGapOptionView} for the gaps and options, so the generator output maps
- * directly onto the same shape served to clients (minus the persisted uuid/level/topic).
+ * directly onto the same shape served to clients (minus the persisted uuid/topic).
+ *
+ * <p>{@code level} is only populated when the generator detects it (e.g. generating a
+ * story from pasted source text); it is null for the parameter-based flow, where the
+ * level is supplied by the caller.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record GeneratedStory(
     String title,
     String body,
-    List<StoryGapView> gaps) {
+    List<StoryGapView> gaps,
+    DeutschLevel level) {
 
+  /** Convenience constructor for flows where the level is supplied separately. */
+  public GeneratedStory(String title, String body, List<StoryGapView> gaps) {
+    this(title, body, gaps, null);
+  }
 }
