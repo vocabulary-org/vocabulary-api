@@ -130,4 +130,36 @@ class PublicStoryDeRepositoryTest {
   void findByExternalId_unknownId_returnsEmpty() {
     assertThat(repository.findByExternalId(UUID.randomUUID())).isEmpty();
   }
+
+  @Test
+  void save_persistsStoryWithGapsAndOptions_andReloads() {
+    GeneratedStory generated = new GeneratedStory(
+        "Test Geschichte", "Ich sehe {{1}} Mann.",
+        List.of(new StoryGapView(1, GapCategory.ARTICLE, GrammaticalCase.AKKUSATIV, List.of(
+            new StoryGapOptionView("der", false),
+            new StoryGapOptionView("den", true),
+            new StoryGapOptionView("dem", false),
+            new StoryGapOptionView("des", false)))));
+
+    UUID externalId = repository.save(generated, DeutschLevel.B2, "test");
+
+    StoryView reloaded = repository.findByExternalId(externalId).orElseThrow();
+    assertThat(reloaded.title()).isEqualTo("Test Geschichte");
+    assertThat(reloaded.level()).isEqualTo(DeutschLevel.B2);
+    assertThat(reloaded.topic()).isEqualTo("test");
+    assertThat(reloaded.gaps()).hasSize(1);
+
+    StoryGapView gap = reloaded.gaps().getFirst();
+    assertThat(gap.position()).isEqualTo(1);
+    assertThat(gap.category()).isEqualTo(GapCategory.ARTICLE);
+    assertThat(gap.grammaticalCase()).isEqualTo(GrammaticalCase.AKKUSATIV);
+    assertThat(gap.options())
+        .extracting(StoryGapOptionView::text)
+        .containsExactly("der", "den", "dem", "des");
+    assertThat(gap.options())
+        .filteredOn(StoryGapOptionView::correct)
+        .singleElement()
+        .extracting(StoryGapOptionView::text)
+        .isEqualTo("den");
+  }
 }

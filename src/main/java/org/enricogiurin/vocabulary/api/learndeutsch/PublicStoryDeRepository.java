@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.DeutschLevel;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
@@ -39,6 +40,44 @@ import org.springframework.transaction.annotation.Transactional;
 public class PublicStoryDeRepository {
 
   private final DSLContext dsl;
+
+  /**
+   * Persists a generated story together with its gaps and options, and returns the new
+   * story's public external id. Option sort order follows the order in each gap's list.
+   */
+  @Transactional
+  public UUID save(GeneratedStory story, DeutschLevel level, String topic) {
+    var storyRecord = dsl.insertInto(PUBLIC_STORY_DE)
+        .set(PUBLIC_STORY_DE.TITLE, story.title())
+        .set(PUBLIC_STORY_DE.LEVEL, level)
+        .set(PUBLIC_STORY_DE.TOPIC, topic)
+        .set(PUBLIC_STORY_DE.BODY, story.body())
+        .returning(PUBLIC_STORY_DE.ID, PUBLIC_STORY_DE.EXTERNAL_ID)
+        .fetchOne();
+    int storyId = storyRecord.get(PUBLIC_STORY_DE.ID);
+
+    for (StoryGapView gap : story.gaps()) {
+      int gapId = dsl.insertInto(PUBLIC_STORY_DE_GAP)
+          .set(PUBLIC_STORY_DE_GAP.STORY_ID, storyId)
+          .set(PUBLIC_STORY_DE_GAP.POSITION, gap.position())
+          .set(PUBLIC_STORY_DE_GAP.CATEGORY, gap.category())
+          .set(PUBLIC_STORY_DE_GAP.GRAMMATICAL_CASE, gap.grammaticalCase())
+          .returning(PUBLIC_STORY_DE_GAP.ID)
+          .fetchOne()
+          .get(PUBLIC_STORY_DE_GAP.ID);
+
+      int sortOrder = 1;
+      for (StoryGapOptionView option : gap.options()) {
+        dsl.insertInto(PUBLIC_STORY_DE_GAP_OPTION)
+            .set(PUBLIC_STORY_DE_GAP_OPTION.GAP_ID, gapId)
+            .set(PUBLIC_STORY_DE_GAP_OPTION.TEXT, option.text())
+            .set(PUBLIC_STORY_DE_GAP_OPTION.IS_CORRECT, option.correct())
+            .set(PUBLIC_STORY_DE_GAP_OPTION.SORT_ORDER, sortOrder++)
+            .execute();
+      }
+    }
+    return storyRecord.get(PUBLIC_STORY_DE.EXTERNAL_ID);
+  }
 
   /**
    * Lists all stories as lightweight summaries (no gaps or options), ordered by level
