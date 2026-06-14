@@ -80,6 +80,17 @@ public class PublicStoryDeRepository {
   }
 
   /**
+   * Deletes a story by its public external id. Gaps and options are removed via the
+   * {@code ON DELETE CASCADE} foreign keys. Returns true if a story was deleted.
+   */
+  @Transactional
+  public boolean delete(UUID externalId) {
+    return dsl.deleteFrom(PUBLIC_STORY_DE)
+        .where(PUBLIC_STORY_DE.EXTERNAL_ID.eq(externalId))
+        .execute() > 0;
+  }
+
+  /**
    * Lists all stories as lightweight summaries (no gaps or options), ordered by level
    * and then title.
    */

@@ -21,13 +21,17 @@ package org.enricogiurin.vocabulary.api.rest.admin;
  */
 
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.learndeutsch.StoryDeService;
+import org.enricogiurin.vocabulary.api.learndeutsch.StoryFromTextRequest;
 import org.enricogiurin.vocabulary.api.learndeutsch.StoryGenerationRequest;
 import org.enricogiurin.vocabulary.api.learndeutsch.StoryView;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,5 +51,22 @@ public class StoryDeAdminController {
         request.level(), request.topic(), request.length());
     StoryView story = storyDeService.generateAndSave(request.level(), request.topic(), request.length());
     return ResponseEntity.status(HttpStatus.CREATED).body(story);
+  }
+
+  @PostMapping("/from-text")
+  public ResponseEntity<StoryView> generateFromText(@Valid @RequestBody StoryFromTextRequest request) {
+    log.info("POST /deutsch/stories/from-text level={}, topic={}, {} chars",
+        request.level(), request.topic(), request.text() == null ? 0 : request.text().length());
+    StoryView story = storyDeService.generateFromText(
+        request.text(), request.title(), request.topic(), request.level());
+    return ResponseEntity.status(HttpStatus.CREATED).body(story);
+  }
+
+  @DeleteMapping("/{uuid}")
+  public ResponseEntity<Void> delete(@PathVariable UUID uuid) {
+    log.info("DELETE /deutsch/stories/{}", uuid);
+    return storyDeService.delete(uuid)
+        ? ResponseEntity.noContent().build()
+        : ResponseEntity.notFound().build();
   }
 }

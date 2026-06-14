@@ -20,15 +20,19 @@ package org.enricogiurin.vocabulary.api.rest.admin;
  * #L%
  */
 
+import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.PUBLIC_STORY_DE;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.UUID;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.anthropic.AnthropicStoryGenerator;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.DeutschLevel;
@@ -38,6 +42,7 @@ import org.enricogiurin.vocabulary.api.learndeutsch.GeneratedStory;
 import org.enricogiurin.vocabulary.api.learndeutsch.StoryGapOptionView;
 import org.enricogiurin.vocabulary.api.learndeutsch.StoryGapView;
 import org.enricogiurin.vocabulary.api.learndeutsch.StoryLength;
+import org.jooq.DSLContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,6 +68,16 @@ class StoryDeAdminControllerTest {
 
   @MockitoBean
   AnthropicStoryGenerator generator;
+
+  @Autowired
+  DSLContext dsl;
+
+  private UUID externalIdOf(String title) {
+    return dsl.select(PUBLIC_STORY_DE.EXTERNAL_ID)
+        .from(PUBLIC_STORY_DE)
+        .where(PUBLIC_STORY_DE.TITLE.eq(title))
+        .fetchOne(PUBLIC_STORY_DE.EXTERNAL_ID);
+  }
 
   private static GeneratedStory validStory() {
     return new GeneratedStory("Marias Tag", "Maria geht in {{1}} Supermarkt.",
@@ -122,5 +137,67 @@ class StoryDeAdminControllerTest {
             .content("""
                 {"level":"B1","topic":"music","length":"MEDIUM"}"""))
         .andExpect(status().is5xxServerError());
+  }
+
+  private static GeneratedStory validStoryWithLevel(DeutschLevel level) {
+    return new GeneratedStory("Marias Tag", "Maria geht in {{1}} Supermarkt.",
+        validStory().gaps(), level);
+  }
+
+  @Test
+  void fromText_validRequest_persistsWithDetectedLevelAndCustomTopic() throws Exception {
+    when(generator.generateFromText(any(), any())).thenReturn(validStoryWithLevel(DeutschLevel.B1));
+
+    mvc.perform(post(basePath + "/from-text")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"text":"Maria geht in den Supermarkt."}"""))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.uuid").exists())
+        .andExpect(jsonPath("$.title", is("Marias Tag")))
+        .andExpect(jsonPath("$.level", is("B1")))
+        .andExpect(jsonPath("$.topic", is("custom")))
+        .andExpect(jsonPath("$.gaps", hasSize(1)))
+        .andExpect(jsonPath("$.gaps[0].options[1].correct", is(true)));
+  }
+
+  @Test
+  void fromText_usesProvidedLevelAndTopic() throws Exception {
+    when(generator.generateFromText(any(), eq(DeutschLevel.A2)))
+        .thenReturn(validStoryWithLevel(DeutschLevel.B1));
+
+    mvc.perform(post(basePath + "/from-text")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"text":"Maria geht in den Supermarkt.","topic":"daily","level":"A2"}"""))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.level", is("A2")))
+        .andExpect(jsonPath("$.topic", is("daily")));
+  }
+
+  @Test
+  void fromText_blankText_returnsBadRequest() throws Exception {
+    mvc.perform(post(basePath + "/from-text")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"text":""}"""))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void delete_existingStory_returnsNoContent() throws Exception {
+    UUID id = externalIdOf("Marias Einkauf");
+
+    mvc.perform(delete(basePath + "/{uuid}", id))
+        .andExpect(status().isNoContent());
+
+    mvc.perform(delete(basePath + "/{uuid}", id))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void delete_unknownStory_returnsNotFound() throws Exception {
+    mvc.perform(delete(basePath + "/{uuid}", UUID.randomUUID()))
+        .andExpect(status().isNotFound());
   }
 }

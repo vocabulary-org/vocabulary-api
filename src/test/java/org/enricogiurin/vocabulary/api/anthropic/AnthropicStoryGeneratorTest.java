@@ -26,6 +26,8 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
 import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.enricogiurin.vocabulary.api.jooq.vocabulary.enums.DeutschLevel;
@@ -64,6 +66,9 @@ class AnthropicStoryGeneratorTest {
   @Autowired
   MockRestServiceServer server;
 
+  @Autowired
+  ObjectMapper objectMapper;
+
   @BeforeEach
   void setUp() {
     server.reset();
@@ -75,12 +80,14 @@ class AnthropicStoryGeneratorTest {
         {
           "content": [
             {
-              "type": "text",
-              "text": "%s"
+              "type": "tool_use",
+              "id": "toolu_1",
+              "name": "save_story",
+              "input": %s
             }
           ]
         }
-        """.formatted(STORY_JSON.replace("\"", "\\\""));
+        """.formatted(STORY_JSON);
 
     server.expect(requestTo(Matchers.endsWith("/v1/messages")))
         .andExpect(method(HttpMethod.POST))
@@ -104,24 +111,47 @@ class AnthropicStoryGeneratorTest {
   }
 
   @Test
-  void parseStory_plainJson() {
-    GeneratedStory result = instance.parseStory(STORY_JSON);
+  void generateFromText_returnsStoryWithDetectedLevel() {
+    String storyWithLevel = "{\"level\":\"B1\"," + STORY_JSON.substring(1);
+    String claudeResponse = """
+        {
+          "content": [
+            {
+              "type": "tool_use",
+              "id": "toolu_1",
+              "name": "save_story",
+              "input": %s
+            }
+          ]
+        }
+        """.formatted(storyWithLevel);
+
+    server.expect(requestTo(Matchers.endsWith("/v1/messages")))
+        .andExpect(method(HttpMethod.POST))
+        .andRespond(withSuccess(claudeResponse, MediaType.APPLICATION_JSON));
+
+    GeneratedStory result = instance.generateFromText("Maria geht in den Supermarkt.", null);
+
+    assertThat(result.title()).isEqualTo("Marias Tag");
+    assertThat(result.level()).isEqualTo(DeutschLevel.B1);
+    assertThat(result.gaps()).hasSize(1);
+
+    server.verify();
+  }
+
+  @Test
+  void parseStory_fromToolInput() throws Exception {
+    GeneratedStory result = instance.parseStory(objectMapper.readTree(STORY_JSON));
 
     assertThat(result.title()).isEqualTo("Marias Tag");
     assertThat(result.gaps()).hasSize(1);
   }
 
   @Test
-  void parseStory_withCodeFences() {
-    GeneratedStory result = instance.parseStory("```json\n" + STORY_JSON + "\n```");
+  void parseStory_invalidInputThrows() throws Exception {
+    JsonNode notAnObject = objectMapper.readTree("[]");
 
-    assertThat(result.title()).isEqualTo("Marias Tag");
-    assertThat(result.gaps()).hasSize(1);
-  }
-
-  @Test
-  void parseStory_invalidJsonThrows() {
-    assertThatThrownBy(() -> instance.parseStory("not valid json"))
+    assertThatThrownBy(() -> instance.parseStory(notAnObject))
         .isInstanceOf(DataExecutionException.class);
   }
 

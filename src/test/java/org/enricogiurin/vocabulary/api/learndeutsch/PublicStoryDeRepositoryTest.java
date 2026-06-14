@@ -132,6 +132,22 @@ class PublicStoryDeRepositoryTest {
   }
 
   @Test
+  void delete_removesStoryAndReturnsTrue() {
+    UUID externalId = externalIdOf("Das Konzert");
+    assertThat(repository.findByExternalId(externalId)).isPresent();
+
+    boolean deleted = repository.delete(externalId);
+
+    assertThat(deleted).isTrue();
+    assertThat(repository.findByExternalId(externalId)).isEmpty();
+  }
+
+  @Test
+  void delete_unknownId_returnsFalse() {
+    assertThat(repository.delete(UUID.randomUUID())).isFalse();
+  }
+
+  @Test
   void save_persistsStoryWithGapsAndOptions_andReloads() {
     GeneratedStory generated = new GeneratedStory(
         "Test Geschichte", "Ich sehe {{1}} Mann.",
