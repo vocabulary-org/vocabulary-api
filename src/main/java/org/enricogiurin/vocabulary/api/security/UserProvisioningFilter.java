@@ -70,7 +70,7 @@ public class UserProvisioningFilter extends OncePerRequestFilter {
       FilterChain filterChain) throws ServletException, IOException {
 
     if (!principalAccessor.isValid()) {
-      log.info("Principal is not a JWT, skipping user provisioning for request: {}", request.getRequestURI());
+      log.debug("Principal is not a JWT, skipping user provisioning for request: {}", request.getRequestURI());
       filterChain.doFilter(request, response);
       return;
     }
