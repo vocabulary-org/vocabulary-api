@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.9</version>
+    <version>3.5.15</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.enricogiurin.vocabulary</groupId>
@@ -55,7 +55,7 @@
   </licenses>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <java.version>21</java.version>
+    <java.version>25</java.version>
     <your-rents.version>0.0.4</your-rents.version>
     <building.db.username>vocabulary</building.db.username>
     <building.db.password>vocabulary</building.db.password>
@@ -71,6 +71,13 @@
           <compilerArgs>
             <arg>-parameters</arg>
           </compilerArgs>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>
