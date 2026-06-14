@@ -20,6 +20,7 @@ package org.enricogiurin.vocabulary.api;
  * #L%
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -39,6 +40,11 @@ public class VocabularyTestConfiguration {
   @ServiceConnection
   PostgreSQLContainer<?> postgresContainer() {
     return new PostgreSQLContainer<>(DockerImageName.parse("postgres:15"));
+  }
+
+  @Bean
+  ObjectMapper objectMapper() {
+    return new ObjectMapper();
   }
 
 

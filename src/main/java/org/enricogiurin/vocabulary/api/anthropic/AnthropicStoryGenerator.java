@@ -20,9 +20,9 @@ package org.enricogiurin.vocabulary.api.anthropic;
  * #L%
  */
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -219,7 +219,7 @@ public class AnthropicStoryGenerator {
     if (storySchema == null) {
       try {
         storySchema = objectMapper.readTree(STORY_SCHEMA_JSON);
-      } catch (JsonProcessingException e) {
+      } catch (JacksonException e) {
         throw new IllegalStateException("Invalid story tool schema", e);
       }
     }

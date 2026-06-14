@@ -40,7 +40,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record8;
 import org.jooq.SelectOnConditionStep;
-import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
