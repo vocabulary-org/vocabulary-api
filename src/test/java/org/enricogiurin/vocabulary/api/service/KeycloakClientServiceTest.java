@@ -48,7 +48,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class KeycloakClientServiceTest {
 
   private static final String USER_EMAIL = "john.doe@example.com";
-  private static final String TEST_REALM_JSON = "keycloak/test-realm.json";
+  private static final String TEST_REALM_JSON = "keycloak/vocabulary-realm.json";
   private static final String REALM = "vocabulary";
   private static final String NEW_USERNAME = "john-doe";
 
