@@ -20,6 +20,7 @@ package org.enricogiurin.vocabulary.api.anthropic;
  * #L%
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -41,5 +42,10 @@ class AnthropicClientConfig {
         .defaultHeader(HEADER_ANTHROPIC_VERSION, ANTHROPIC_VERSION)
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .build();
+  }
+
+  @Bean
+  ObjectMapper objectMapper() {
+    return new ObjectMapper();
   }
 }

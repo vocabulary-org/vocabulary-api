@@ -22,7 +22,8 @@ package org.enricogiurin.vocabulary.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.enricogiurin.vocabulary.api.service.TurnstileService.VERIFY_URL;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.enricogiurin.vocabulary.api.service.TurnstileService.TurnstileResponse;

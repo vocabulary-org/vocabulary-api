@@ -27,8 +27,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.service.UserService;
-import org.slf4j.MDC;
 import org.enricogiurin.vocabulary.api.service.UserService.UserCreationAttributes;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -70,7 +70,7 @@ public class UserProvisioningFilter extends OncePerRequestFilter {
       FilterChain filterChain) throws ServletException, IOException {
 
     if (!principalAccessor.isValid()) {
-      log.info("Principal is not a JWT, skipping user provisioning for request: {}", request.getRequestURI());
+      log.debug("Principal is not a JWT, skipping user provisioning for request: {}", request.getRequestURI());
       filterChain.doFilter(request, response);
       return;
     }

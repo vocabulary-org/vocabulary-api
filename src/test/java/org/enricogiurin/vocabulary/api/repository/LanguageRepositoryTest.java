@@ -21,7 +21,6 @@ package org.enricogiurin.vocabulary.api.repository;
  */
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.iterableWithSize;
 
 import java.util.List;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
