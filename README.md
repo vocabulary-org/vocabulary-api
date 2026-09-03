@@ -111,8 +111,26 @@ echo $TOKEN | pbcopy
 ![Bearer](docs/images/swagger-token.png)
 
 ## Miscellaneous
-### Spring Actuator - env
-[actuator](http://localhost:9090/actuator/env/)
+### Spring Actuator
+Only `health` and `info` are exposed, and everything under `/actuator/**` beyond those requires the
+`ADMIN` role. Sensitive endpoints (`env`, `heapdump`, `configprops`) are deliberately off: they leak
+every secret the application holds, and on a public host they are actively scanned for.
+
+[health](http://localhost:9090/actuator/health)
+
+To inspect `env` while developing locally, enable it in `application-local.yml` (git-ignored) and run
+with the `local` profile — never in a committed profile:
+
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    env:
+      show-values: ALWAYS
+```
 
 ### Keycloak admin console
 [keycloak console](http://localhost:18081/admin/master/console/)

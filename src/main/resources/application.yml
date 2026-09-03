@@ -81,10 +81,8 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
-  endpoint:
-    env:
-      show-values: ALWAYS
+        # only non-sensitive endpoints; never expose env/heapdump/configprops (see issue #134)
+        include: "health,info"
   health:
     mail:
       enabled: false # disabled locally since SMTP is not configured; re-enabled in hetzner profile

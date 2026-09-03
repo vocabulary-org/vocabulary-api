@@ -66,7 +66,8 @@ class SecurityConfiguration {
     return http.csrf(csrf -> csrf.disable()).cors(Customizer.withDefaults())
         .authorizeHttpRequests(
             authorizeRequests -> authorizeRequests
-                .requestMatchers("/actuator/**").permitAll()  //spring actuator
+                .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()  //spring actuator: probes only
+                .requestMatchers("/actuator/**").hasRole("ADMIN")  //everything else is admin-only
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()  //swagger UI
                 .requestMatchers(pubUrl+"/**").permitAll()
                 .requestMatchers(userUrl+"/**").hasRole("USER")
