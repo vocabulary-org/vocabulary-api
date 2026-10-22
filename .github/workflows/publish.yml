@@ -1,7 +1,7 @@
 # Builds the Spring Boot jar and publishes it to GitHub Packages (Maven registry).
 #
 # Versions published (base = pom version without -SNAPSHOT, e.g. 0.0.1):
-#   push to main       -> <base>-SNAPSHOT
+#   push to dev        -> <base>-SNAPSHOT
 #   push of tag v1.2.3 -> 1.2.3
 #   pull request #42   -> <base>-pr-42-SNAPSHOT
 
@@ -9,10 +9,10 @@ name: Publish jar
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
     tags: [ "v*.*.*" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "dev" ]
   workflow_dispatch:
 
 jobs:
