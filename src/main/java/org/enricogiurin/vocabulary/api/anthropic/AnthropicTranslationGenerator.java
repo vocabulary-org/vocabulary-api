@@ -22,8 +22,10 @@ package org.enricogiurin.vocabulary.api.anthropic;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -33,6 +35,7 @@ import org.springframework.web.client.RestClient;
 public class AnthropicTranslationGenerator {
 
   private static final String MESSAGES_PATH = "/v1/messages";
+  private static final int MAX_TOKENS = 100;
 
   private static final Map<String, String> LANG_NAMES = Map.of(
       "it", "Italian",
@@ -52,8 +55,9 @@ public class AnthropicTranslationGenerator {
 
     AnthropicRequest request = new AnthropicRequest(
         properties.model(),
-        50,
-        List.of(new AnthropicMessage("user", userMessage))
+        MAX_TOKENS,
+        List.of(new AnthropicMessage("user", userMessage)),
+        AnthropicThinking.DISABLED
     );
 
     AnthropicResponse response = anthropicRestClient.post()
@@ -62,13 +66,26 @@ public class AnthropicTranslationGenerator {
         .retrieve()
         .body(AnthropicResponse.class);
 
-    assert response != null;
-    String translation = response.content().getFirst().text().strip();
+    String translation = firstText(response)
+        .orElseThrow(() -> new DataExecutionException(
+            "No text in Claude response for '%s %s' -> %s".formatted(article, wordDe, lang)))
+        .strip();
     log.debug("Claude translation for '{} {}' -> {}: {}", article, wordDe, lang, translation);
     return translation;
   }
 
-  record AnthropicRequest(String model, int max_tokens, List<AnthropicMessage> messages) {
+  private static Optional<String> firstText(AnthropicResponse response) {
+    if (response == null || response.content() == null) {
+      return Optional.empty();
+    }
+    return response.content().stream()
+        .filter(c -> "text".equals(c.type()))
+        .map(AnthropicContent::text)
+        .findFirst();
+  }
+
+  record AnthropicRequest(String model, int max_tokens, List<AnthropicMessage> messages,
+                          AnthropicThinking thinking) {
   }
 
   record AnthropicMessage(String role, String content) {

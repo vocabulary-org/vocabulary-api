@@ -40,6 +40,7 @@ import org.springframework.web.client.RestClient;
 public class AnthropicTagSuggester {
 
   private static final String MESSAGES_PATH = "/v1/messages";
+  private static final int MAX_TOKENS = 500;
 
   private final RestClient anthropicRestClient;
   private final AnthropicProperties properties;
@@ -79,9 +80,10 @@ public class AnthropicTagSuggester {
 
     AnthropicRequest request = new AnthropicRequest(
         properties.model(),
-        300,
+        MAX_TOKENS,
         List.of(new AnthropicSystemContent("text", this.systemPrompt, new CacheControl("ephemeral"))),
-        List.of(new AnthropicMessage("user", userMessage))
+        List.of(new AnthropicMessage("user", userMessage)),
+        AnthropicThinking.DISABLED
     );
 
     AnthropicResponse response = anthropicRestClient.post()
@@ -90,8 +92,7 @@ public class AnthropicTagSuggester {
         .retrieve()
         .body(AnthropicResponse.class);
 
-    assert response != null;
-    String json = response.content().getFirst().text();
+    String json = firstText(response);
     log.info("Claude tag suggestion response: {}", json);
     return parseTagSuggestions(json);
   }
@@ -109,8 +110,20 @@ public class AnthropicTagSuggester {
     }
   }
 
+  /** Text of the first text block, or "" (parsed as no suggestions) if there is none. */
+  private static String firstText(AnthropicResponse response) {
+    if (response == null || response.content() == null) {
+      return "";
+    }
+    return response.content().stream()
+        .filter(c -> "text".equals(c.type()))
+        .map(AnthropicContent::text)
+        .findFirst()
+        .orElse("");
+  }
+
   record AnthropicRequest(String model, int max_tokens, List<AnthropicSystemContent> system,
-      List<AnthropicMessage> messages) {
+      List<AnthropicMessage> messages, AnthropicThinking thinking) {
   }
 
   record AnthropicSystemContent(String type, String text, CacheControl cache_control) {

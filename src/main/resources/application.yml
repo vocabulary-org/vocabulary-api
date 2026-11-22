@@ -63,6 +63,9 @@ application:
     public-path: ${application.api.base-path}/public
 
   translation:
+    # which Translator implementation serves /me/translate: claude | azure
+    provider: claude
+    # global monthly quota, counted in units (one unit per target language)
     monthly-max-translations: 30000
 
   notification:
@@ -89,11 +92,11 @@ management:
 
 azure:
   translator:
-    key: ${AZURE_TRANSLATOR_KEY}
+    key: ${AZURE_TRANSLATOR_KEY:} # only needed when application.translation.provider=azure
     region: switzerlandnorth
     url: https://api.cognitive.microsofttranslator.com/translate
 
 anthropic:
   api-key: ${ANTHROPIC_API_KEY}
-  model: claude-haiku-4-5-20251001
+  model: claude-haiku-5-5
   url: https://api.anthropic.com

@@ -25,7 +25,7 @@ import static org.enricogiurin.vocabulary.api.jooq.vocabulary.Tables.TRANSLATION
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -39,20 +39,33 @@ import org.springframework.transaction.annotation.Transactional;
 public class TranslationUsageRepository {
   private final DSLContext dsl;
 
+  /**
+   * Atomically adds {@code units} to the counter of {@code yearMonth}, but only if the new total
+   * stays within {@code max}. The check and the increment are a single statement, so concurrent
+   * requests can't overshoot the limit, and a rejected request leaves the counter untouched.
+   *
+   * @return the new count, or empty if adding {@code units} would exceed {@code max}
+   */
   @Transactional(readOnly = false)
-  public long incrementMonthlyCounter(YearMonth yearMonth) {
+  public Optional<Long> incrementMonthlyCounterIfWithin(YearMonth yearMonth, long units,
+      long max) {
+    if (units > max) {
+      return Optional.empty();
+    }
     LocalDate month = yearMonth.atDay(1);
-    Long newCnt = Objects.requireNonNull(dsl.insertInto(TRANSLATION_USAGE)
-            .set(TRANSLATION_USAGE.MONTH, month)
-            .set(TRANSLATION_USAGE.CNT, 1L)
-            .onConflict(TRANSLATION_USAGE.MONTH)
-            .doUpdate()
-            .set(TRANSLATION_USAGE.CNT, TRANSLATION_USAGE.CNT.plus(1))
-            .returning(TRANSLATION_USAGE.CNT)
-            .fetchOne())
-        .getCnt();
-    log.info("new count for yearMonth: {} is {}", yearMonth, newCnt);
-    return newCnt != null ? newCnt : 0L;
+    Optional<Long> newCnt = dsl.insertInto(TRANSLATION_USAGE)
+        .set(TRANSLATION_USAGE.MONTH, month)
+        .set(TRANSLATION_USAGE.CNT, units)
+        .onConflict(TRANSLATION_USAGE.MONTH)
+        .doUpdate()
+        .set(TRANSLATION_USAGE.CNT, TRANSLATION_USAGE.CNT.plus(units))
+        .where(TRANSLATION_USAGE.CNT.plus(units).le(max))
+        .returning(TRANSLATION_USAGE.CNT)
+        .fetchOptional()
+        .map(r -> r.getCnt());
+    log.info("translation usage for {} (+{}, max {}): {}", yearMonth, units, max,
+        newCnt.map(String::valueOf).orElse("rejected"));
+    return newCnt;
   }
 
   @Transactional(readOnly = false)

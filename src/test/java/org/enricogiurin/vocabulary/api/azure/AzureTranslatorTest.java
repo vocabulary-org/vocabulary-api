@@ -23,6 +23,7 @@ package org.enricogiurin.vocabulary.api.azure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.enricogiurin.vocabulary.api.azure.AzureTranslator.API_VERSION;
 import static org.enricogiurin.vocabulary.api.azure.AzureTranslator.API_VERSION_PARAM;
 import static org.enricogiurin.vocabulary.api.azure.AzureTranslator.FROM_PARAM;
@@ -38,6 +39,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import java.util.List;
 import org.enricogiurin.vocabulary.api.exception.TranslationFailedException;
 import org.enricogiurin.vocabulary.api.model.TranslateRequest;
+import org.enricogiurin.vocabulary.api.model.TranslateResponse;
+import org.enricogiurin.vocabulary.api.model.TranslateResponse.Translation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
@@ -95,17 +98,14 @@ class AzureTranslatorTest {
         .andRespond(withSuccess(azureJsonResponse, MediaType.APPLICATION_JSON));
 
     // when
-    List<AzureTranslator.AzureTranslateResponseItem> result = instance.translate(req);
+    TranslateResponse result = instance.translate(req);
 
     // then
-    assertThat(result).hasSize(1);
-    assertThat(result.getFirst().translations()).hasSize(2);
-
-    assertThat(result.getFirst().translations().getFirst().to()).isEqualTo("it");
-    assertThat(result.getFirst().translations().getFirst().text()).isEqualTo("Ciao sono Enrico");
-
-    assertThat(result.getFirst().translations().get(1).to()).isEqualTo("es");
-    assertThat(result.getFirst().translations().get(1).text()).isEqualTo("Hola soy Enrico");
+    assertThat(result.translations())
+        .extracting(Translation::to, Translation::text)
+        .containsExactly(
+            tuple("it", "Ciao sono Enrico"),
+            tuple("es", "Hola soy Enrico"));
 
     server.verify();
   }

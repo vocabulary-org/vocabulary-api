@@ -21,9 +21,7 @@ package org.enricogiurin.vocabulary.api.service;
  */
 
 import java.time.YearMonth;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.enricogiurin.vocabulary.api.azure.AzureTranslator;
 import org.enricogiurin.vocabulary.api.exception.QuotaExceededException;
 import org.enricogiurin.vocabulary.api.model.TranslateRequest;
 import org.enricogiurin.vocabulary.api.model.TranslateResponse;
@@ -31,39 +29,41 @@ import org.enricogiurin.vocabulary.api.repository.TranslationUsageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Applies the translation quota and delegates the actual translation to the active
+ * {@link Translator}.
+ *
+ * <p>Usage is counted in units: one unit per target language, since each language is a separate
+ * translation for the provider. A request that would exceed the monthly quota is rejected before
+ * the provider is called and is not counted.
+ */
 @Service
 @Slf4j
 public class TranslateService {
 
-  private final AzureTranslator azureTranslator;
+  private final Translator translator;
   private final TranslationUsageRepository translationUsageRepository;
   private final long monthlyMaxTranslations;
 
   public TranslateService(
-      AzureTranslator azureTranslator,
+      Translator translator,
       TranslationUsageRepository translationUsageRepository,
       @Value("${application.translation.monthly-max-translations}") long monthlyMaxTranslations
   ) {
-    this.azureTranslator = azureTranslator;
+    this.translator = translator;
     this.translationUsageRepository = translationUsageRepository;
     this.monthlyMaxTranslations = monthlyMaxTranslations;
+    log.info("Active translator: {}", translator.getClass().getSimpleName());
   }
 
   public TranslateResponse translate(TranslateRequest request) {
     YearMonth now = YearMonth.now();
-    long cnt = translationUsageRepository.incrementMonthlyCounter(now);
-    log.info("translation usage for {} is equal to {}", now, cnt);
-    if (cnt > monthlyMaxTranslations) {
-      throw new QuotaExceededException(
-          "Reached the translation usage limit for the current month!");
-    }
-    List<AzureTranslator.AzureTranslateResponseItem> azure = azureTranslator.translate(request);
-
-    List<TranslateResponse.Translation> translations = azure.stream()
-        .flatMap(item -> item.translations().stream())
-        .map(t -> new TranslateResponse.Translation(t.text(), t.to()))
-        .toList();
-    return new TranslateResponse(translations);
+    long units = request.to().size();
+    translationUsageRepository
+        .incrementMonthlyCounterIfWithin(now, units, monthlyMaxTranslations)
+        .orElseThrow(() -> new QuotaExceededException(
+            "Reached the translation usage limit for the current month!"));
+    return translator.translate(request);
   }
 
   /**
@@ -75,6 +75,4 @@ public class TranslateService {
     YearMonth now = YearMonth.now();
     return translationUsageRepository.getCurrentMonthCount(now) >= monthlyMaxTranslations;
   }
-
-
 }

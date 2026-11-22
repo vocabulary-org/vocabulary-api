@@ -25,16 +25,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.enricogiurin.vocabulary.api.exception.TranslationFailedException;
 import org.enricogiurin.vocabulary.api.model.TranslateRequest;
+import org.enricogiurin.vocabulary.api.model.TranslateResponse;
+import org.enricogiurin.vocabulary.api.service.Translator;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
+/**
+ * {@link Translator} backed by Azure AI Translator. Active only when
+ * {@code application.translation.provider=azure}.
+ */
 @Component
+@ConditionalOnProperty(name = "application.translation.provider", havingValue = "azure")
 @RequiredArgsConstructor
 @Slf4j
-public class AzureTranslator {
+public class AzureTranslator implements Translator {
 
   static final String API_VERSION_PARAM = "api-version";
   static final String API_VERSION = "3.0";
@@ -43,7 +51,17 @@ public class AzureTranslator {
 
   private final RestClient translatorRestClient;
 
-  public List<AzureTranslator.AzureTranslateResponseItem> translate(TranslateRequest request) {
+  @Override
+  public TranslateResponse translate(TranslateRequest request) {
+    List<AzureTranslateResponseItem> items = callAzure(request);
+    List<TranslateResponse.Translation> translations = items == null ? List.of() : items.stream()
+        .flatMap(item -> item.translations().stream())
+        .map(t -> new TranslateResponse.Translation(t.text(), t.to()))
+        .toList();
+    return new TranslateResponse(translations);
+  }
+
+  private List<AzureTranslateResponseItem> callAzure(TranslateRequest request) {
     try {
       return translatorRestClient.post()
           .uri(builder -> {
@@ -59,7 +77,6 @@ public class AzureTranslator {
           .body(new ParameterizedTypeReference<>() {
           });
     } catch (RestClientResponseException ex) {
-      // Optional: wrap into your own exception type
       throw new TranslationFailedException(
           "Azure Translator call failed: " + ex.getStatusCode() + " - "
               + ex.getResponseBodyAsString(),
