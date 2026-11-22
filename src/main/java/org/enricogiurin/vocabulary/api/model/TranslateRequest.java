@@ -32,8 +32,11 @@ public record TranslateRequest(
     @NotBlank
     String from,
     @NotEmpty
+    @Size(max = MAX_TARGET_LANGUAGES, message = TO_CONSTRAINT)
     List<@NotBlank String> to
 ) {
 
   public static final String TEXT_CONSTRAINT = "text must be between 2  and 100 characters";
+  public static final int MAX_TARGET_LANGUAGES = 5;
+  public static final String TO_CONSTRAINT = "at most 5 target languages are allowed";
 }

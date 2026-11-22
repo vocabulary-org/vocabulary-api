@@ -35,9 +35,11 @@ The application requires the following external API keys when running locally.
 Add them as JVM arguments in your IntelliJ run configuration (**Run → Edit Configurations → VM options**):
 
 ```
--DAZURE_TRANSLATOR_KEY=<your-azure-translator-key>
 -DANTHROPIC_API_KEY=<your-anthropic-api-key>
 ```
+
+Translations (`/me/translate`) use Claude by default. To switch back to Azure AI Translator, set
+`application.translation.provider=azure` and also pass `-DAZURE_TRANSLATOR_KEY=<your-azure-translator-key>`.
 
 ## Starting the application locally
 

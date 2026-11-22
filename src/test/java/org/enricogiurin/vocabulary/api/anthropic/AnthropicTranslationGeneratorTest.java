@@ -21,11 +21,14 @@ package org.enricogiurin.vocabulary.api.anthropic;
  */
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
+import org.enricogiurin.vocabulary.api.exception.DataExecutionException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,6 +110,43 @@ class AnthropicTranslationGeneratorTest {
 
     assertThat(result).isEqualTo("perro");
     server.verify();
+  }
+
+  @Test
+  void generate_skipsThinkingBlockAndSendsThinkingDisabled() {
+    String claudeResponse = """
+        {
+          "content": [
+            {"type": "thinking", "thinking": "", "signature": "sig"},
+            {"type": "text", "text": "castle"}
+          ]
+        }
+        """;
+    server.expect(requestTo(Matchers.endsWith("/v1/messages")))
+        .andExpect(method(HttpMethod.POST))
+        .andExpect(jsonPath("$.thinking.type").value("disabled"))
+        .andRespond(withSuccess(claudeResponse, MediaType.APPLICATION_JSON));
+
+    String result = instance.generate("das", "Schloss", "en");
+
+    assertThat(result).isEqualTo("castle");
+    server.verify();
+  }
+
+  @Test
+  void generate_noTextBlock_throws() {
+    String claudeResponse = """
+        {
+          "content": [{"type": "thinking", "thinking": "", "signature": "sig"}],
+          "stop_reason": "max_tokens"
+        }
+        """;
+    server.expect(requestTo(Matchers.endsWith("/v1/messages")))
+        .andRespond(withSuccess(claudeResponse, MediaType.APPLICATION_JSON));
+
+    assertThatThrownBy(() -> instance.generate("der", "Hund", "en"))
+        .isInstanceOf(DataExecutionException.class)
+        .hasMessageContaining("No text in Claude response");
   }
 
   @TestConfiguration

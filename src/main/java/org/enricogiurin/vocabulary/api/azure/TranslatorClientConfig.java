@@ -20,6 +20,7 @@ package org.enricogiurin.vocabulary.api.azure;
  * #L%
  */
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
 @Configuration
+@ConditionalOnProperty(name = "application.translation.provider", havingValue = "azure")
 class TranslatorClientConfig {
   private static final String HEADER_SUBSCRIPTION_KEY =
       "Ocp-Apim-Subscription-Key";

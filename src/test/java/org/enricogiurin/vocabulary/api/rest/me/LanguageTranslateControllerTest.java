@@ -25,6 +25,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,10 +36,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import org.enricogiurin.vocabulary.api.VocabularyTestConfiguration;
-import org.enricogiurin.vocabulary.api.azure.AzureTranslator;
-import org.enricogiurin.vocabulary.api.azure.AzureTranslator.AzureTranslateResponseItem;
-import org.enricogiurin.vocabulary.api.azure.AzureTranslator.AzureTranslateResponseItem.AzureTranslation;
 import org.enricogiurin.vocabulary.api.model.TranslateRequest;
+import org.enricogiurin.vocabulary.api.model.TranslateResponse;
+import org.enricogiurin.vocabulary.api.model.TranslateResponse.Translation;
+import org.enricogiurin.vocabulary.api.service.Translator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,17 +66,15 @@ class LanguageTranslateControllerTest {
   String basePath;
 
   @MockitoBean
-  AzureTranslator azureTranslator;
+  Translator translator;
 
 
   @Test
   void translate() throws Exception {
-    when(azureTranslator.translate(any()))
-        .thenReturn(List.of(
-            new AzureTranslateResponseItem(List.of(
-                new AzureTranslation("ciao", "it"),
-                new AzureTranslation("hola", "es"))
-            )));
+    when(translator.translate(any()))
+        .thenReturn(new TranslateResponse(List.of(
+            new Translation("ciao", "it"),
+            new Translation("hola", "es"))));
     final String body =
         """
             {
@@ -120,6 +120,24 @@ class LanguageTranslateControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message", containsString(TranslateRequest.TEXT_CONSTRAINT)))
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+  }
+
+  @Test
+  void translate_tooManyTargetLanguages() throws Exception {
+    final String body =
+        """
+            {
+              "text": "Hello",
+              "from": "en",
+              "to": ["it", "es", "de", "fr", "pt", "nl"]
+            }""";
+    mvc.perform(post(basePath)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message", containsString(TranslateRequest.TO_CONSTRAINT)))
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+    verify(translator, never()).translate(any());
   }
 
   @Test

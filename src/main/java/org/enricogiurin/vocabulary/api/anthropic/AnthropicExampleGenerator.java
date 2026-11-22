@@ -37,6 +37,7 @@ public class AnthropicExampleGenerator {
 
   private static final String MESSAGES_PATH = "/v1/messages";
   private static final int NUM_EXAMPLES = 2;
+  private static final int MAX_TOKENS = 800;
 
   private static final Map<String, String> LANG_NAMES = Map.of(
       "it", "Italian",
@@ -60,8 +61,9 @@ public class AnthropicExampleGenerator {
 
     AnthropicRequest request = new AnthropicRequest(
         properties.model(),
-        500,
-        List.of(new AnthropicMessage("user", userMessage))
+        MAX_TOKENS,
+        List.of(new AnthropicMessage("user", userMessage)),
+        AnthropicThinking.DISABLED
     );
 
     AnthropicResponse response = anthropicRestClient.post()
@@ -70,8 +72,7 @@ public class AnthropicExampleGenerator {
         .retrieve()
         .body(AnthropicResponse.class);
 
-    assert response != null;
-    String json = response.content().getFirst().text();
+    String json = firstText(response);
     log.debug("Claude example response for '{} {}': {}", article, wordDe, json);
     return parseExamples(json);
   }
@@ -89,7 +90,20 @@ public class AnthropicExampleGenerator {
     }
   }
 
-  record AnthropicRequest(String model, int max_tokens, List<AnthropicMessage> messages) {
+  /** Text of the first text block, or "" (parsed as no examples) if there is none. */
+  private static String firstText(AnthropicResponse response) {
+    if (response == null || response.content() == null) {
+      return "";
+    }
+    return response.content().stream()
+        .filter(c -> "text".equals(c.type()))
+        .map(AnthropicContent::text)
+        .findFirst()
+        .orElse("");
+  }
+
+  record AnthropicRequest(String model, int max_tokens, List<AnthropicMessage> messages,
+                          AnthropicThinking thinking) {
   }
 
   record AnthropicMessage(String role, String content) {
